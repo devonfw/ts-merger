@@ -1,5 +1,5 @@
 {
-  "name": "merger",
+  "name": "tsm",
   "version": "1.0.0",
   "description": "TypeScript CobiGen Merger",
   "main": "index.ts",
