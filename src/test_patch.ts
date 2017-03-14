@@ -44,12 +44,10 @@ export class BusinessOperations{
     surname: null,
     newField: null
   };
-  constructor() {
-    let patata;
-  }
+  
 
   login(){
-    return this.other1 + 'login';
+    return this.other1 + 'patata';
   }
 
   logout(){
@@ -72,4 +70,17 @@ export class BusinessOperations{
     return this.other1 + 'sampledatamanagement/v1/sampledata/';
   }
 
+  newMethod(){
+    return "patata";
+  }
+
+  ngDoCheck() {
+        if (this.language !== this.translate.currentLang) {
+            this.language = this.translate.currentLang;
+            this.columns = [
+              {name: 'name', label: this.getTranslation('sampledatamanagementDataGrid.columns.name')},
+              {name: 'newField', label: this.getTranslation('sampledatamanagementDataGrid.columns.newField')}    
+            ];
+        }
+  }
 }

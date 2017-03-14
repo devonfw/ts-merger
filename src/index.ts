@@ -8,6 +8,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     let sourceFile = ts.createSourceFile(fileBase, readFileSync(fileBase).toString(), ts.ScriptTarget.ES2016, false);
     let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2015, true, (<any>ts).SyntaxKind[256]);
     let result: string = "";
+    let columnsInfo: string;
     sourceFile.getChildAt(0).getChildren().forEach(child => {
         switch(child.kind){
             case ts.SyntaxKind.ImportDeclaration:
@@ -93,6 +94,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                 }
                                 if(columnsPatch){
                                     if(patchOverrides){
+                                        columnsInfo = columnsPatch.initializer.getFullText(sourceFilePatch) + ";";
                                         result = result + columnsPatch.getFullText(sourceFilePatch);
                                     }else{
                                         let resultArray: string = "";
@@ -115,6 +117,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                 resultArray = resultArray + ",    " + element.getFullText(sourceFilePatch);
                                             }
                                         })
+                                        columnsInfo = "[" +resultArray + "\n];\n";
                                         result = result + resultArray + "\n  ];\n";
                                     }
                                 }else{
@@ -216,18 +219,136 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                         }
                     }else if(member.kind == ts.SyntaxKind.Constructor){
                         if(patchOverrides){
+                            let hasConstructor = false;
                             for(let memberPatch of classDeclPatch.members){
                                 if(memberPatch.kind == ts.SyntaxKind.Constructor){
                                     result = result + memberPatch.getFullText(sourceFilePatch);
+                                    hasConstructor = true;
                                     break;
                                 }
+                            }
+                            if(!hasConstructor){
+                                result = result + member.getFullText(sourceFile);
                             }
                         }else{
                             result = result + member.getFullText(sourceFile);
                         }
                         
                     }else if(ts.SyntaxKind.MethodDeclaration){
+                        //get patch methods unexistent at base fileBase
 
+                        if(patchOverrides){
+                            let hasMethod = false;
+                            let identifier: string = (<ts.Identifier>(<ts.MethodDeclaration>member).name).text;
+                            for(let memberPatch of classDeclPatch.members){
+                                if(memberPatch.kind == ts.SyntaxKind.MethodDeclaration){
+                                    if((<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text == identifier){
+                                        result = result + memberPatch.getFullText(sourceFilePatch);
+                                        hasMethod = true;
+                                    }
+                                }
+                            }
+                            if(!hasMethod){
+                                result = result + member.getFullText(sourceFile);
+                            }
+                        }else{
+                            let identifier: string = (<ts.Identifier>(<ts.MethodDeclaration>member).name).text;
+                            let exists: boolean = true;
+                            for(let memberPatch of classDeclPatch.members){
+                                if(memberPatch.kind == ts.SyntaxKind.MethodDeclaration){
+                                    if(identifier == (<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text){
+                                        exists = true;
+                                        switch(identifier){
+                                            case "getData":
+                                                
+                                            break;
+                                            case "saveData":
+                                            break;
+                                            case "ngDoCheck":
+                                                result = result + "\n\n";
+                                                let methodBase = <ts.MethodDeclaration>member;
+                                                if(methodBase.decorators){
+                                                    methodBase.decorators.forEach(decorator => {
+                                                        result = result + decorator.getFullText(sourceFile);
+                                                    })
+                                                }
+                                                if(methodBase.modifiers){
+                                                    methodBase.modifiers.forEach(modifier => {
+                                                        result = result + modifier.getFullText(sourceFile);
+                                                    })
+                                                }
+                                                
+                                                result = result + identifier + "(";
+                                                if(methodBase.parameters){
+                                                    methodBase.parameters.forEach(parameter => {
+                                                        result = result + parameter.getFullText(sourceFile);
+                                                    })
+                                                }
+                                                result = result + ")";
+                                                if(methodBase.type){
+                                                    result = result + ":" + methodBase.type.getFullText(sourceFile) ;
+                                                }
+                                                result = result + "{\n";
+                                                if(methodBase.body){
+                                                    if(methodBase.body.statements){
+                                                        methodBase.body.statements.forEach(statement => {
+                                                            if(statement.kind == ts.SyntaxKind.IfStatement){
+                                                                let ifStmnt = <ts.IfStatement>statement;
+                                                                if(ifStmnt.expression.getFullText(sourceFile).indexOf("this.language !== this.translate.currentLang") >= 0){
+                                                                    result = result + "    if(" + ifStmnt.expression.getFullText(sourceFile) + ") {\n";
+                                                                    let stmnt = <ts.Block>(<ts.IfStatement>statement).thenStatement;
+                                                                    if(stmnt.statements){
+                                                                        stmnt.statements.forEach(stat => {
+                                                                            if(stat.kind == ts.SyntaxKind.ExpressionStatement){
+                                                                                let exprStmnt = <ts.ExpressionStatement>stat;
+                                                                                if(exprStmnt.expression.kind == ts.SyntaxKind.BinaryExpression){
+                                                                                    let binaryExpr = <ts.BinaryExpression>exprStmnt.expression;
+                                                                                    if(binaryExpr.left.kind == ts.SyntaxKind.PropertyAccessExpression){
+                                                                                        let propExpr = <ts.PropertyAccessExpression>binaryExpr.left;
+                                                                                        if(propExpr.name.text == "columns"){
+                                                                                            result = result + binaryExpr.left.getFullText(sourceFile) + binaryExpr.operatorToken.getFullText(sourceFile) + " " + columnsInfo;
+                                                                                        }else{
+                                                                                            result = result + binaryExpr.getFullText(sourceFile) + ";";
+                                                                                        }
+                                                                                    }
+                                                                                }else{
+                                                                                    result = result + exprStmnt.getFullText(sourceFile) + ";";
+                                                                                }                 
+                                                                            }else{
+                                                                                result = result + stat.getFullText(sourceFile) + ";";
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                    result = result + "    }";
+                                                                }else{
+                                                                    result = result + ifStmnt.getFullText(sourceFile);
+                                                                }
+                                                            }else{
+                                                                result = result + statement.getFullText(sourceFile);
+                                                            }
+                                                        })
+                                                    }
+                                                    
+                                                }
+                                                result = result + "\n}"
+                                                //console.log(result);
+                                            break;
+                                            // default:
+                                            //     // result = result + member.getFullText(sourceFile);
+                                            //     // exists = true;
+                                            // break;
+                                        }
+                                        
+                                    }else{
+                                        exists = false;
+                                    }
+                                }
+                            }
+                            if(!exists){
+                                result = result + member.getFullText(sourceFile);
+                                exists = true;
+                            }
+                        }
                     }
                 })
             }

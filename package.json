@@ -4,7 +4,8 @@
   "description": "TypeScript CobiGen Merger",
   "main": "index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/testSuite.ts"
+    "test": "mocha -r ts-node/register test/**/testSuite.ts",
+    "init": "ts-node src/index.ts"
   },
   "keywords": [
     "CobiGen",
