@@ -1,29 +1,27 @@
-import { readFileSync } from 'fs';
+import { readFileSync, createWriteStream } from 'fs';
 import * as ts from "typescript";
 
-merge(true, './src/test.ts', './src/test_patch.ts');
+merge(false, './src/test.ts', './src/test_patch.ts');
 
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string): string{
 
     let sourceFile = ts.createSourceFile(fileBase, readFileSync(fileBase).toString(), ts.ScriptTarget.ES2016, false);
-    let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2015, true, (<any>ts).SyntaxKind[256]);
-    let result: string = "";
-    let columnsInfo: string;
+    let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2016, true, (<any>ts).SyntaxKind[256]);
+    let result: string[] = [];
+    let columnsInfo: string = String();
     sourceFile.getChildAt(0).getChildren().forEach(child => {
         switch(child.kind){
             case ts.SyntaxKind.ImportDeclaration:
-                result = result + (<ts.ImportDeclaration>child).getFullText(sourceFile);
-
+                result.push((<ts.ImportDeclaration>child).getFullText(sourceFile));
             break;
             default:
-
         }
     })
     sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
         switch(childPatch.kind){
             case ts.SyntaxKind.ImportDeclaration:
-                if(result.indexOf((<ts.ImportDeclaration>childPatch).getFullText(sourceFilePatch)) == -1){
-                     result = result + childPatch.getFullText(sourceFilePatch);
+                if(result.indexOf((<ts.ImportDeclaration>childPatch).getFullText(sourceFilePatch)) < 0){
+                     result.push(childPatch.getFullText(sourceFilePatch));
                 }
             break;
         }
@@ -41,41 +39,40 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                 //merge decorators if decorator is @NgModule ----TODO
                 if(classDeclPatch.decorators){
                     classDeclPatch.decorators.forEach(decorator => {
-                        result = result + decorator.getFullText(sourceFilePatch);
+                        result.push(decorator.getFullText(sourceFilePatch));
                     })
                 }
                 if(classDeclPatch.modifiers){
                     classDeclPatch.modifiers.forEach(modifier => {
-                        result = result + modifier.getFullText(sourceFilePatch);   
+                        result.push(modifier.getFullText(sourceFilePatch));   
                     })
-            
                 }
-                result = result + " class " + classDeclPatch.name.text;
+                result.push(classDeclPatch.name.text);
                 if(classDeclPatch.heritageClauses){
                     classDeclPatch.heritageClauses.forEach(heritage => {
-                        result = result + heritage.getFullText(sourceFilePatch);
+                        result.push(heritage.getFullText(sourceFilePatch));
                     })
                 }
-                result = result + " {\n";
+                result.push(" {\n");
             }else{
                 if(classDecl.decorators){
                     classDecl.decorators.forEach(decorator => {
-                        result = result + decorator.getFullText(sourceFile);
+                        result.push(decorator.getFullText(sourceFile));
                     })
                 }
                 if(classDecl.modifiers){
                     classDecl.modifiers.forEach(modifier => {
-                        result = result + modifier.getFullText(sourceFile);   
+                        result.push(modifier.getFullText(sourceFile));   
                     })
                     
                 }
-                result = result + " class " + classDecl.name.text;
+                result.push(" class ", classDecl.name.text);
                 if(classDecl.heritageClauses){
                     classDecl.heritageClauses.forEach(heritage => {
-                        result = result + heritage.getFullText(sourceFile);
+                        result.push(heritage.getFullText(sourceFile));
                     })
                 }
-                result = result + " {\n";
+                result.push(" {\n");
             }
             if(classDecl.members){
                 classDecl.members.forEach(member => {
@@ -95,15 +92,15 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                 if(columnsPatch){
                                     if(patchOverrides){
                                         columnsInfo = columnsPatch.initializer.getFullText(sourceFilePatch) + ";";
-                                        result = result + columnsPatch.getFullText(sourceFilePatch);
+                                        result.push(columnsPatch.getFullText(sourceFilePatch));
                                     }else{
                                         let resultArray: string = "";
                                         let arrayPatch: ts.ArrayLiteralExpression = <ts.ArrayLiteralExpression>columnsPatch.initializer;
                                         let arrayBase: ts.ArrayLiteralExpression = <ts.ArrayLiteralExpression>(<ts.PropertyDeclaration>member).initializer;
                                         if( (<ts.PropertyDeclaration>member).type){
-                                            result = result + "\n  " + propIdentifier + ":"+ (<ts.PropertyDeclaration>member).type.getFullText(sourceFile) + " = [";
+                                            result.push("\n  ", propIdentifier ,":", (<ts.PropertyDeclaration>member).type.getFullText(sourceFile), " = [");
                                         }else{
-                                            result = result + "\n  "+ propIdentifier + " = [";
+                                            result.push("\n  ", propIdentifier, " = [");
                                         }
                                         
                                         arrayBase.elements.forEach(element => {
@@ -117,11 +114,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                 resultArray = resultArray + ",    " + element.getFullText(sourceFilePatch);
                                             }
                                         })
-                                        columnsInfo = "[" +resultArray + "\n];\n";
-                                        result = result + resultArray + "\n  ];\n";
+                                        columnsInfo = columnsInfo + "[" + resultArray + "\n];\n";
+                                        result.push(resultArray, "\n  ];\n");
                                     }
                                 }else{
-                                    result = result + member.getFullText(sourceFile);
+                                    result.push(member.getFullText(sourceFile));
                                 }
                             break;
                             case "searchTerms":
@@ -135,15 +132,15 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                     }
                                 }
                                 if(patchOverrides){
-                                    result = result + itemTermPatch.getFullText(sourceFilePatch);
+                                    result.push(itemTermPatch.getFullText(sourceFilePatch));
                                 }else{
                                     let resultObject: string = "";
                                     let objectPatch: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>itemTermPatch.initializer; 
                                     let objectBase: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>(<ts.PropertyDeclaration>member).initializer;
                                     if( (<ts.PropertyDeclaration>member).type){
-                                        result = result + "\n  " + propIdentifier + ":"+ (<ts.PropertyDeclaration>member).type.getFullText(sourceFile) + " = {";
+                                        result.push("\n  ", propIdentifier, ":", (<ts.PropertyDeclaration>member).type.getFullText(sourceFile), " = {");
                                     }else{
-                                        result = result + "\n  "+ propIdentifier + " = {";
+                                        result.push("\n  ", propIdentifier, " = {");
                                     }
                                     objectBase.properties.forEach(property =>{
                                         resultObject = resultObject + property.getFullText(sourceFile);
@@ -156,7 +153,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                             resultObject = resultObject + "," + propertyPatch.getFullText(sourceFilePatch);
                                         }
                                     })
-                                    result = result + resultObject + "\n  };\n";
+                                    result.push(resultObject, "\n  };\n");
                                 }
                             break;
                             case "item":
@@ -170,15 +167,15 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                     }
                                 }
                                 if(patchOverrides){
-                                    result = result + itemObjectPatch.getFullText(sourceFilePatch);
+                                    result.push(itemObjectPatch.getFullText(sourceFilePatch));
                                 }else{
                                     let resultObject: string = "";
                                     let objectPatch: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>itemObjectPatch.initializer; 
                                     let objectBase: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>(<ts.PropertyDeclaration>member).initializer;
                                     if( (<ts.PropertyDeclaration>member).type){
-                                        result = result + "\n  " + propIdentifier + ":"+ (<ts.PropertyDeclaration>member).type.getFullText(sourceFile) + " = {";
+                                        result.push("\n  ", propIdentifier, ":", (<ts.PropertyDeclaration>member).type.getFullText(sourceFile), " = {");
                                     }else{
-                                        result = result + "\n  "+ propIdentifier + " = {";
+                                        result.push("\n  ", propIdentifier, " = {");
                                     }
                                     objectBase.properties.forEach(property =>{
                                         resultObject = resultObject + property.getFullText(sourceFile);
@@ -191,7 +188,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                             resultObject = resultObject + "," + propertyPatch.getFullText(sourceFilePatch);
                                         }
                                     })
-                                    result = result + resultObject + "\n  };\n";
+                                    result.push(resultObject, "\n  };\n");
                                 }
                             break;
                             default:
@@ -200,11 +197,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                 for(let propertyPatch of classDeclPatch.members){
                                     if(propertyPatch.kind == ts.SyntaxKind.PropertyDeclaration){
                                         if(identifier == (<ts.Identifier>(<ts.PropertyDeclaration>propertyPatch).name).text && patchOverrides){
-                                            result = result + propertyPatch.getFullText(sourceFilePatch);
+                                            result.push(propertyPatch.getFullText(sourceFilePatch));
                                             exists = true;
                                             break;
                                         }else if(identifier == (<ts.Identifier>(<ts.PropertyDeclaration>propertyPatch).name).text && !patchOverrides){
-                                            result = result + member.getFullText(sourceFile);            
+                                            result.push(member.getFullText(sourceFile));
                                             exists = true;
                                             break;
                                         }else{
@@ -213,7 +210,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                     }
                                 }
                                 if(!exists){
-                                    result = result + member.getFullText(sourceFile);
+                                    result.push(member.getFullText(sourceFile));
                                     exists = true;
                                 }
                         }
@@ -222,16 +219,16 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                             let hasConstructor = false;
                             for(let memberPatch of classDeclPatch.members){
                                 if(memberPatch.kind == ts.SyntaxKind.Constructor){
-                                    result = result + memberPatch.getFullText(sourceFilePatch);
+                                    result.push(memberPatch.getFullText(sourceFilePatch));
                                     hasConstructor = true;
                                     break;
                                 }
                             }
                             if(!hasConstructor){
-                                result = result + member.getFullText(sourceFile);
+                                result.push(member.getFullText(sourceFile));
                             }
                         }else{
-                            result = result + member.getFullText(sourceFile);
+                            result.push(member.getFullText(sourceFile));
                         }
                         
                     }else if(ts.SyntaxKind.MethodDeclaration){
@@ -243,13 +240,13 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                             for(let memberPatch of classDeclPatch.members){
                                 if(memberPatch.kind == ts.SyntaxKind.MethodDeclaration){
                                     if((<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text == identifier){
-                                        result = result + memberPatch.getFullText(sourceFilePatch);
+                                        result.push(memberPatch.getFullText(sourceFilePatch));
                                         hasMethod = true;
                                     }
                                 }
                             }
                             if(!hasMethod){
-                                result = result + member.getFullText(sourceFile);
+                                result.push(member.getFullText(sourceFile));
                             }
                         }else{
                             let identifier: string = (<ts.Identifier>(<ts.MethodDeclaration>member).name).text;
@@ -257,45 +254,96 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                             for(let memberPatch of classDeclPatch.members){
                                 if(memberPatch.kind == ts.SyntaxKind.MethodDeclaration){
                                     if(identifier == (<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text){
+                                        let methodPatch = <ts.MethodDeclaration>memberPatch;
+                                        let methodBase = <ts.MethodDeclaration>member;
                                         exists = true;
                                         switch(identifier){
                                             case "getData":
-                                                
-                                            break;
-                                            case "saveData":
-                                            break;
-                                            case "ngDoCheck":
-                                                result = result + "\n\n";
-                                                let methodBase = <ts.MethodDeclaration>member;
+                                                let properties: string[] = [];
+                                                result.push("\n\n");
                                                 if(methodBase.decorators){
                                                     methodBase.decorators.forEach(decorator => {
-                                                        result = result + decorator.getFullText(sourceFile);
+                                                        result.push(decorator.getFullText(sourceFile));
                                                     })
                                                 }
                                                 if(methodBase.modifiers){
                                                     methodBase.modifiers.forEach(modifier => {
-                                                        result = result + modifier.getFullText(sourceFile);
+                                                        result.push(modifier.getFullText(sourceFile));
+                                                    })
+                                                }
+                                                result.push(identifier, "(");
+                                                if(methodBase.parameters){
+                                                    methodBase.parameters.forEach(parameter => {
+                                                        result.push(parameter.getFullText(sourceFile));
+                                                    })
+                                                }
+                                                result.push(")");
+                                                if(methodBase.type){
+                                                    result.push(":", methodBase.type.getFullText(sourceFile));
+                                                }
+                                                result.push("{\n");
+                                                if(methodBase.body){
+                                                    if(methodBase.body.statements){
+                                                        methodBase.body.statements.forEach(statement => {
+                                                            if(statement.kind == ts.SyntaxKind.VariableStatement){
+                                                                let identifier: string = (<ts.Identifier>(<ts.VariableStatement>statement).declarationList.declarations[0].name).text;
+                                                                if(identifier == "pageData"){
+                                                                    if((<ts.VariableStatement>statement).declarationList.declarations[0].initializer){
+                                                                        let initializer = (<ts.VariableStatement>statement).declarationList.declarations[0].initializer;
+                                                                        if(initializer.kind == ts.SyntaxKind.ObjectLiteralExpression){
+                                                                            if((<ts.ObjectLiteralExpression>initializer).properties){
+                                                                                result.push("let ", identifier, " = {");
+                                                                                (<ts.ObjectLiteralExpression>initializer).properties.forEach(prop => {
+                                                                                    properties.push(prop.getFullText(sourceFile));
+                                                                                    result.push(prop.getFullText(sourceFile));
+                                                                                })
+                                                                            }
+                                                                            if(methodPatch.body.statements){
+                                                                                
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                            //console.log(syntaxKindToName(statement.kind));
+                                                        })
+                                                    }
+                                                }
+                                            break;
+                                            case "saveData":
+
+                                            break;
+                                            case "ngDoCheck":
+                                                result.push("\n\n");
+                                                if(methodBase.decorators){
+                                                    methodBase.decorators.forEach(decorator => {
+                                                        result.push(decorator.getFullText(sourceFile));
+                                                    })
+                                                }
+                                                if(methodBase.modifiers){
+                                                    methodBase.modifiers.forEach(modifier => {
+                                                        result.push(modifier.getFullText(sourceFile));
                                                     })
                                                 }
                                                 
-                                                result = result + identifier + "(";
+                                                result.push(identifier, "(");
                                                 if(methodBase.parameters){
                                                     methodBase.parameters.forEach(parameter => {
-                                                        result = result + parameter.getFullText(sourceFile);
+                                                        result.push(parameter.getFullText(sourceFile));
                                                     })
                                                 }
-                                                result = result + ")";
+                                                result.push(")");
                                                 if(methodBase.type){
-                                                    result = result + ":" + methodBase.type.getFullText(sourceFile) ;
+                                                    result.push(":", methodBase.type.getFullText(sourceFile));
                                                 }
-                                                result = result + "{\n";
+                                                result.push("{\n");
                                                 if(methodBase.body){
                                                     if(methodBase.body.statements){
                                                         methodBase.body.statements.forEach(statement => {
                                                             if(statement.kind == ts.SyntaxKind.IfStatement){
                                                                 let ifStmnt = <ts.IfStatement>statement;
                                                                 if(ifStmnt.expression.getFullText(sourceFile).indexOf("this.language !== this.translate.currentLang") >= 0){
-                                                                    result = result + "    if(" + ifStmnt.expression.getFullText(sourceFile) + ") {\n";
+                                                                    result.push("    if(", ifStmnt.expression.getFullText(sourceFile), ") {\n");
                                                                     let stmnt = <ts.Block>(<ts.IfStatement>statement).thenStatement;
                                                                     if(stmnt.statements){
                                                                         stmnt.statements.forEach(stat => {
@@ -306,57 +354,54 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                                     if(binaryExpr.left.kind == ts.SyntaxKind.PropertyAccessExpression){
                                                                                         let propExpr = <ts.PropertyAccessExpression>binaryExpr.left;
                                                                                         if(propExpr.name.text == "columns"){
-                                                                                            result = result + binaryExpr.left.getFullText(sourceFile) + binaryExpr.operatorToken.getFullText(sourceFile) + " " + columnsInfo;
+                                                                                            result.push(binaryExpr.left.getFullText(sourceFile), binaryExpr.operatorToken.getFullText(sourceFile), " ", columnsInfo);
                                                                                         }else{
-                                                                                            result = result + binaryExpr.getFullText(sourceFile) + ";";
+                                                                                            result.push(binaryExpr.getFullText(sourceFile), ";");
                                                                                         }
                                                                                     }
                                                                                 }else{
-                                                                                    result = result + exprStmnt.getFullText(sourceFile) + ";";
+                                                                                    result.push(exprStmnt.getFullText(sourceFile), ";");
                                                                                 }                 
                                                                             }else{
-                                                                                result = result + stat.getFullText(sourceFile) + ";";
+                                                                                result.push(stat.getFullText(sourceFile), ";");
                                                                             }
                                                                         })
                                                                     }
-                                                                    result = result + "    }";
+                                                                    result.push("    }");
                                                                 }else{
-                                                                    result = result + ifStmnt.getFullText(sourceFile);
+                                                                    result.push(ifStmnt.getFullText(sourceFile));
                                                                 }
                                                             }else{
-                                                                result = result + statement.getFullText(sourceFile);
+                                                                result.push(statement.getFullText(sourceFile));
                                                             }
                                                         })
                                                     }
-                                                    
                                                 }
-                                                result = result + "\n}"
-                                                //console.log(result);
+                                                result.push("\n}");
                                             break;
                                             // default:
                                             //     // result = result + member.getFullText(sourceFile);
                                             //     // exists = true;
                                             // break;
-                                        }
-                                        
+                                        }    
                                     }else{
                                         exists = false;
                                     }
                                 }
                             }
                             if(!exists){
-                                result = result + member.getFullText(sourceFile);
+                                result.push(member.getFullText(sourceFile));
                                 exists = true;
                             }
                         }
                     }
                 })
             }
-            result = result + "\n}";
+            result.push("\n}");
         }
     })
-    console.log(result);
-    return result;
+    console.log(result.join(""));
+    return result.join("");
 }
 
 function syntaxKindToName(kind: ts.SyntaxKind) {
