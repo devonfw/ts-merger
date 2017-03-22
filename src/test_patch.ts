@@ -8,7 +8,7 @@ import { Patata } from 'patata/Rx';
   selector: 'app-root',
   templateUrl: './app.component.html'
 })
-export class BusinessOperations{
+export class BusinessOperations extends patata{
 
   public serverPath = url;
   public servicesPath = this.serverPath;
@@ -45,7 +45,19 @@ export class BusinessOperations{
     newField: null
   };
   
-
+  saveData(data) {
+    let obj = {
+      id: data.id,
+      name: data.name,
+      surname: data.surname,
+      age: data.age,
+      mail: data.mail,
+      newField: data.newField
+    };
+  
+    return this.http.post(this.BO.postSampleData(),  obj )
+                    .map(res => res.json());
+  }
   login(){
     return this.other1 + 'patata';
   }
@@ -57,6 +69,26 @@ export class BusinessOperations{
   getCsrf(){
     return this.other1 + 'security/v1/csrftoken';
   }
+
+   getData(size:number, page: number, searchTerms, sort: any[]) {
+      
+      let pageData = {
+        pagination: {
+          size: size,
+          page: page,
+          total: 1
+        },
+        name: searchTerms.name,
+        surname: searchTerms.surname,
+        age: searchTerms.age,
+        mail: searchTerms.mail,
+        newField: searchTerms.newField,
+        sort: sort
+      }
+      return this.http.post(this.BO.postSampleDataSearch(), pageData)
+                      .map(res => res.json());
+    }
+}
 
   postSampleData(){
     return this.other1 + 'sampledatamanagement/v1/sampledata/';
@@ -83,21 +115,4 @@ export class BusinessOperations{
             ];
         }
   }
-  getData(size:number, page: number, searchTerms, sort: any[]) {
-      
-      let pageData = {
-        pagination: {
-          size: size,
-          page: page,
-          total: 1
-        },
-        name: searchTerms.name,
-        surname: searchTerms.surname,
-        age: searchTerms.age,
-        mail: searchTerms.mail,
-        sort: sort
-      }
-      return this.http.post(this.BO.postSampleDataSearch(), pageData)
-                      .map(res => res.json());
-    }
-}
+ 

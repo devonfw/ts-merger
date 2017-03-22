@@ -90,38 +90,6 @@ export class BusinessOperations {
         return value;
     }
 
-    getData(size:number, page: number, searchTerms, sort: any[]) {
-      
-      let pageData = {
-        pagination: {
-          size: size,
-          page: page,
-          total: 1
-        },
-        name: searchTerms.name,
-        surname: searchTerms.surname,
-        age: searchTerms.age,
-        mail: searchTerms.mail,
-        sort: sort
-      }
-      return this.http.post(this.BO.postSampleDataSearch(), pageData)
-                      .map(res => res.json());
-    }
-
-    getData(): void {
-       let me = this;
-       this.dataGridService.getData(this.pageSize, this.currentPage, this.searchTerms, this.sorting)
-                           .subscribe((res) => {
-                               me.data = res.result;
-                               me.dataTotal = res.pagination.total;
-                           }, (error) =>{
-                                this._dialogService.openConfirm({
-                                    message: JSON.parse(error.text()).message,
-                                    title: this.getTranslation('sampledatamanagementDataGrid.alert.title')
-                                })
-                           });
-    }
-
   deleteSampleData(){
     return this.other1 + 'sampledatamanagement/v1/sampledata/';
   }
