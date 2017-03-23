@@ -252,11 +252,10 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                 result.push(member.getText(sourceFile));
                             }
                         }else{
-                            console.log(identifier);
                             let exists: boolean;
-                            
                             for(let memberPatch of classDeclPatch.members){
                                 if(memberPatch.kind == ts.SyntaxKind.MethodDeclaration){
+                                    let identifierPatch: string = (<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text;
                                     if(identifier == (<ts.Identifier>(<ts.MethodDeclaration>memberPatch).name).text){
                                         if(parameters == (<ts.SignatureDeclaration>(<ts.MethodDeclaration>memberPatch)).parameters.toString()){
                                             let methodPatch = <ts.MethodDeclaration>memberPatch;
@@ -423,7 +422,6 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                     result.push("\n}");
                                                 break;
                                                 case "ngDoCheck":
-                                                    console.log("entra aki")
                                                     result.push("\n\n");
                                                     if(methodBase.decorators){
                                                         methodBase.decorators.forEach(decorator => {
@@ -464,10 +462,8 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                                         if(binaryExpr.left.kind == ts.SyntaxKind.PropertyAccessExpression){
                                                                                             let propExpr = <ts.PropertyAccessExpression>binaryExpr.left;
                                                                                             if(propExpr.name.text == "columns"){
-                                                                                                console.log("entra aki columns")
                                                                                                 result.push(binaryExpr.left.getFullText(sourceFile), binaryExpr.operatorToken.getFullText(sourceFile), " ", columnsInfo);
                                                                                             }else{
-                                                                                                console.log("entra aki no coilumns")
                                                                                                 result.push(binaryExpr.getText(sourceFile), ";");
                                                                                             }
                                                                                         }
@@ -515,7 +511,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
             result.push("\n}");
         }
     })
-    //console.log(result.join(""));
+    console.log(result.join(""));
     return result.join("");
 }
 

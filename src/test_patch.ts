@@ -88,7 +88,7 @@ export class BusinessOperations extends patata{
       return this.http.post(this.BO.postSampleDataSearch(), pageData)
                       .map(res => res.json());
     }
-}
+
 
   postSampleData(){
     return this.other1 + 'sampledatamanagement/v1/sampledata/';
@@ -115,4 +115,4 @@ export class BusinessOperations extends patata{
             ];
         }
   }
- 
+}
