@@ -46,6 +46,36 @@ export class BusinessOperations {
     return this.other1 + 'login';
   }
 
+  saveData(data) {
+    let obj = {
+      id: data.id,
+      name: data.name,
+      surname: data.surname,
+      age: data.age,
+      mail: data.mail
+    };
+    return this.http.post(this.BO.postSampleData(),  obj )
+                    .map(res => res.json());
+  }
+
+  getData(size:number, page: number, searchTerms, sort: any[]) {
+      
+      let pageData = {
+        pagination: {
+          size: size,
+          page: page,
+          total: 1
+        },
+        name: searchTerms.name,
+        surname: searchTerms.surname,
+        age: searchTerms.age,
+        mail: searchTerms.mail,
+        sort: sort
+      }
+      return this.http.post(this.BO.postSampleDataSearch(), pageData)
+                      .map(res => res.json());
+    }
+
   logout(test: string){
     return this.other1 + 'logout';
   }
@@ -80,6 +110,9 @@ export class BusinessOperations {
 
   postSampleDataSearch(){
     return this.other1 + 'sampledatamanagement/v1/sampledata/search';
+  }
+  newMethod(){
+    return "patata";
   }
 
    getTranslation(text: string): string {

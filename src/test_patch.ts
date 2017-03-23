@@ -49,9 +49,6 @@ export class BusinessOperations extends patata{
     let obj = {
       id: data.id,
       name: data.name,
-      surname: data.surname,
-      age: data.age,
-      mail: data.mail,
       newField: data.newField
     };
   
@@ -79,9 +76,6 @@ export class BusinessOperations extends patata{
           total: 1
         },
         name: searchTerms.name,
-        surname: searchTerms.surname,
-        age: searchTerms.age,
-        mail: searchTerms.mail,
         newField: searchTerms.newField,
         sort: sort
       }
