@@ -1,7 +1,7 @@
 import { readFileSync, createWriteStream } from 'fs';
 import * as ts from "typescript";
 
-merge(false, './src/test.ts', './src/test_patch.ts');
+merge(true, './src/constTest.ts', './src/test_patch.ts');
 
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string): string {
 
@@ -14,7 +14,6 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
             case ts.SyntaxKind.ImportDeclaration:
                 result.push((<ts.ImportDeclaration>child).getFullText(sourceFile));
                 break;
-            default:
         }
     })
     sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
@@ -167,7 +166,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                     }
                                 }
                                 if (patchOverrides) {
-                                    result.push(itemObjectPatch.getText(sourceFilePatch));
+                                    result.push(itemObjectPatch.getFullText(sourceFilePatch));
                                 } else {
                                     let resultObject: string = "";
                                     let objectPatch: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>itemObjectPatch.initializer;
@@ -502,9 +501,38 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                 })
             }
             result.push("\n}");
+        }else if(child.kind == ts.SyntaxKind.VariableStatement){
+            let variableBase: ts.VariableStatement = <ts.VariableStatement>child;
+            if((<ts.Identifier>variableBase.declarationList.declarations[0].name).text == "appRoutes"){
+                let variablePatch: ts.VariableStatement;
+                let routesInitPatch: ts.ArrayLiteralExpression;
+                for(let childPatch of sourceFilePatch.getChildAt(0).getChildren()){
+                    if(childPatch.kind == ts.SyntaxKind.VariableStatement){
+                        variablePatch = <ts.VariableStatement>childPatch;
+                        let identifierPatch = (<ts.Identifier>variablePatch.declarationList.declarations[0].name).text;
+                        if(identifierPatch == "appRoutes"){
+                            routesInitPatch = <ts.ArrayLiteralExpression>variablePatch.declarationList.declarations[0].initializer;
+                            break;
+                        }
+                    }
+                }
+                if(routesInitPatch){
+                    if(patchOverrides){
+                        result.push(variablePatch.getFullText(sourceFilePatch));
+                    }else{
+                        let routes: ts.ArrayLiteralExpression = <ts.ArrayLiteralExpression>variableBase.declarationList.declarations[0].initializer;
+
+                    }
+                }
+                
+                    
+                    console.log(syntaxKindToName(variableBase.declarationList.declarations[0].initializer.kind));
+                }else{
+                    result.push(variableBase.getFullText(sourceFile));
+                }
         }
     })
-    console.log(result.join(""));
+    //console.log(result.join(""));
     return result.join("");
 }
 

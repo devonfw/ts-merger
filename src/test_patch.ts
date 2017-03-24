@@ -41,7 +41,6 @@ export class BusinessOperations extends patata{
 
   searchTerms: any = {
     name: null,
-    surname: null,
     newField: null
   };
   
