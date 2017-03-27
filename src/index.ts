@@ -1,7 +1,7 @@
 import { readFileSync, createWriteStream } from 'fs';
 import * as ts from "typescript";
 
-merge(true, './src/constTest.ts', './src/test_patch.ts');
+merge(false, './src/constTest.ts', './src/constTest_patch.ts');
 
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string): string {
 
@@ -501,38 +501,68 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                 })
             }
             result.push("\n}");
-        }else if(child.kind == ts.SyntaxKind.VariableStatement){
+        } else if (child.kind == ts.SyntaxKind.VariableStatement) {
             let variableBase: ts.VariableStatement = <ts.VariableStatement>child;
-            if((<ts.Identifier>variableBase.declarationList.declarations[0].name).text == "appRoutes"){
+            if ((<ts.Identifier>variableBase.declarationList.declarations[0].name).text == "appRoutes") {
                 let variablePatch: ts.VariableStatement;
                 let routesInitPatch: ts.ArrayLiteralExpression;
-                for(let childPatch of sourceFilePatch.getChildAt(0).getChildren()){
-                    if(childPatch.kind == ts.SyntaxKind.VariableStatement){
+                for (let childPatch of sourceFilePatch.getChildAt(0).getChildren()) {
+                    if (childPatch.kind == ts.SyntaxKind.VariableStatement) {
                         variablePatch = <ts.VariableStatement>childPatch;
                         let identifierPatch = (<ts.Identifier>variablePatch.declarationList.declarations[0].name).text;
-                        if(identifierPatch == "appRoutes"){
+                        if (identifierPatch == "appRoutes") {
                             routesInitPatch = <ts.ArrayLiteralExpression>variablePatch.declarationList.declarations[0].initializer;
                             break;
                         }
                     }
                 }
-                if(routesInitPatch){
-                    if(patchOverrides){
+                if (routesInitPatch) {
+                    if (patchOverrides) {
                         result.push(variablePatch.getFullText(sourceFilePatch));
-                    }else{
+                    } else {
                         let routes: ts.ArrayLiteralExpression = <ts.ArrayLiteralExpression>variableBase.declarationList.declarations[0].initializer;
-
+                        if (variableBase.decorators) {
+                            variableBase.decorators.forEach(decorator => {
+                                result.push(decorator.getFullText(sourceFile));
+                            });
+                        }
+                        if (variableBase.modifiers) {
+                            variableBase.modifiers.forEach(modifier => {
+                                result.push(modifier.getFullText(sourceFile));
+                            });
+                        }
+                        result.push("\n\nconst appRoutes: Routes = [");
+                        let components: string[] = [];
+                        routes.elements.forEach(element => {
+                            let object: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>element;
+                            object.properties.forEach(property => {
+                                let assigment: ts.PropertyAssignment = <ts.PropertyAssignment>property;
+                                components.push((<ts.Identifier>assigment.initializer).text);
+                            });
+                            result.push(element.getFullText(sourceFile));
+                            if(routes.elements.indexOf(element) != routes.elements.length - 1){
+                                result.push(",");
+                            }
+                        });
+                        routesInitPatch.elements.forEach(elementPatch => {
+                            let object: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>elementPatch;
+                            object.properties.forEach(property => {
+                                let assigment: ts.PropertyAssignment = <ts.PropertyAssignment>property;
+                                if(components.indexOf((<ts.Identifier>assigment.initializer).text) < 0){
+                                    result.push("," + elementPatch.getFullText(sourceFilePatch));
+                                }  
+                            });
+                        });
+                        result.push("\n]");
                     }
                 }
-                
-                    
-                    console.log(syntaxKindToName(variableBase.declarationList.declarations[0].initializer.kind));
-                }else{
-                    result.push(variableBase.getFullText(sourceFile));
-                }
+
+            } else {
+                result.push(variableBase.getFullText(sourceFile));
+            }
         }
     })
-    //console.log(result.join(""));
+    console.log(result.join(""));
     return result.join("");
 }
 
