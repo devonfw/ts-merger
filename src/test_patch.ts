@@ -8,6 +8,41 @@ import { Patata } from 'patata/Rx';
   selector: 'app-root',
   templateUrl: './app.component.html'
 })
+@NgModule({
+  imports: [
+    BrowserModule,
+    CovalentCoreModule.forRoot(),
+    FormsModule,
+    HttpModule,
+    routing,
+    MaterialModule.forRoot(),
+    TranslateModule.forRoot({
+      provide: TranslateLoader,
+      useFactory: translateFactory,
+      deps: [Http]
+    })
+  ],
+  declarations: [
+    Material2AppAppComponent,
+    HeaderComponent,
+    LoginComponent,
+    HomeComponent,
+    MoredatamanagementDataGridComponent,
+    MoredatamanagementAddDialogComponent
+  ],
+  entryComponents: [
+    MoredatamanagementAddDialogComponent
+  ],
+  bootstrap: [
+    AppComponent
+  ],
+  providers: [
+    MoredatamanagementDataGridService,
+    SecurityService,
+    HttpClient,
+    BusinessOperations
+  ],
+})
 export class BusinessOperations extends patata{
 
   public serverPath = url;

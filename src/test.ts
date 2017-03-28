@@ -2,7 +2,41 @@ import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import * as ts from 'typescript';
 
-@Injectable()
+@NgModule({
+  imports: [
+    BrowserModule,
+    CovalentCoreModule.forRoot(),
+    FormsModule,
+    HttpModule,
+    routing,
+    MaterialModule.forRoot(),
+    TranslateModule.forRoot({
+      provide: TranslateLoader,
+      useFactory: translateFactory,
+      deps: [Http]
+    })
+  ],
+  declarations: [
+    Material2AppAppComponent,
+    HeaderComponent,
+    LoginComponent,
+    HomeComponent,
+    SampledatamanagementDataGridComponent,
+    SampledatamanagementAddDialogComponent
+  ],
+  entryComponents: [
+    SampledatamanagementAddDialogComponent
+  ],
+  bootstrap: [
+    AppComponent
+  ],
+  providers: [
+    SampledatamanagementDataGridService,
+    SecurityService,
+    HttpClient,
+    BusinessOperations
+  ],
+})
 export class BusinessOperations {
 
   @ViewChild('dataTable') dataTable;
@@ -113,9 +147,7 @@ export class BusinessOperations {
   postSampleDataSearch(){
     return this.other1 + 'sampledatamanagement/v1/sampledata/search';
   }
-  newMethod(){
-    return "patata";
-  }
+
 
    getTranslation(text: string): string {
         let value: string;
