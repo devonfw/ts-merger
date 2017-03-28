@@ -1,4 +1,4 @@
-import { readFileSync, createWriteStream } from 'fs';
+import { readFileSync } from 'fs';
 import * as ts from "typescript";
 
 merge(false, './src/test.ts', './src/test_patch.ts');
