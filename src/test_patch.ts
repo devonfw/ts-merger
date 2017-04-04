@@ -131,6 +131,7 @@ export class BusinessOperations extends patata{
   }
 
   newMethod(){
+    let eselpatch;
     return "patata";
   }
 
