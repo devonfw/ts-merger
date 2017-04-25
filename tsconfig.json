@@ -4,9 +4,11 @@
         "target": "es5",
         "noImplicitAny": false,
         "sourceMap": true,
-        "watch": true
+        "watch": true,
+        "outDir": "src"
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "test"
     ]
 }

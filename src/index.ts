@@ -1,28 +1,81 @@
 import { readFileSync } from 'fs';
 import * as ts from "typescript";
+import { ImportsMerge } from '../src/components/ImportsMerge';
 
-merge(true, './src/test.ts', './src/test_patch.ts');
+
+let strategy= process.argv[2];
+let base = process.argv[3];
+let patch = process.argv[4];
+
+if(strategy == "true"){
+    merge(true, base, patch);
+}else{
+    merge(false, base, patch);
+}
 
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string): string {
 
     let sourceFile = ts.createSourceFile(fileBase, readFileSync(fileBase).toString(), ts.ScriptTarget.ES2016, false);
     let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2016, true, (<any>ts).SyntaxKind[256]);
-    let result: string[] = [];
+    let result: String[] = [];
     let columnsInfo: string = String();
+    let imports: ImportsMerge[] = [];
     sourceFile.getChildAt(0).getChildren().forEach(child => {
         switch (child.kind) {
             case ts.SyntaxKind.ImportDeclaration:
-                result.push((<ts.ImportDeclaration>child).getFullText(sourceFile));
-                break;
+                let importElement: ImportsMerge = new ImportsMerge();
+                importElement.setModule((<ts.Identifier>(<ts.ImportDeclaration>child).moduleSpecifier).text);
+                if((<ts.ImportDeclaration>child).importClause){
+                    if((<ts.ImportDeclaration>child).importClause.namedBindings){
+                        if((<ts.ImportDeclaration>child).importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
+                            (<ts.NamedImports>(<ts.ImportDeclaration>child).importClause.namedBindings).elements.forEach(named => {
+                                importElement.addNamed((<String>named.name.text));
+                            })
+                        }else {
+                            importElement.setNamespace((<ts.NamespaceImport>(<ts.ImportDeclaration>child).importClause.namedBindings).name.text);
+                        }
+                    }
+                }else {
+                    importElement.setSpaceBinding(false);
+                }
+                imports.push(importElement);
+            break;
         }
     })
     sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
+        let exists: boolean = false;
         switch (childPatch.kind) {
             case ts.SyntaxKind.ImportDeclaration:
-                if (result.indexOf((<ts.ImportDeclaration>childPatch).getFullText(sourceFilePatch)) < 0) {
-                    result.push(childPatch.getFullText(sourceFilePatch));
+            imports.forEach(importElement => {
+                if((<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text == importElement.getModule()){
+                    exists = true;
+                    if(importElement.getNameSpace() != "" && importElement.getNamed().length > 0){
+                        (<ts.NamedImports>(<ts.ImportDeclaration>childPatch).importClause.namedBindings).elements.forEach(clause => {
+                            if(!importElement.contains((<String>clause.name.text))){
+                                importElement.addNamed((<String>clause.name.text));
+                            }
+                        })
+                    }
                 }
-                break;
+            })
+            break;
+        }
+    })
+    imports.forEach(importElement => {
+        result.push(importElement.toString());
+    })
+    sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
+        if(childPatch.kind == ts.SyntaxKind.ImportDeclaration){
+            let exists: boolean = false;
+            for(let element of imports){
+                if(element.getModule() == (<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text){
+                    exists = true;
+                    break;
+                }
+            }
+            if(!exists){
+                result.push(childPatch.getFullText(sourceFilePatch));
+            }
         }
     })
     sourceFile.getChildAt(0).getChildren().forEach(child => {
@@ -68,8 +121,6 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                         if (decoratorPatch.getFullText(sourceFilePatch).indexOf("NgModule") >= 0) {
                                             if ((<ts.CallExpression>decoratorPatch.expression).arguments) {
                                                 if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties) {
-                                                    // properties = ["", []];
-
                                                     (<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties.forEach(propertyPatch => {
                                                         let elements: string[] = [];
                                                         if ((<ts.PropertyAssignment>propertyPatch).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
@@ -94,16 +145,19 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                             let elements: string[] = [];
                                             if ((<ts.PropertyAssignment>property).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
                                                 let arrayBase: string[] = [];
-                                                (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements.forEach(elem => {
+                                                let elements = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements;
+                                                elements.forEach(elem => {
                                                     arrayBase.push(elem.getFullText(sourceFile));
-                                                    result.push(elem.getFullText(sourceFile) + ",");
+                                                    result.push(elem.getFullText(sourceFile), ",");
                                                 });
-
                                                 arrayProperties.forEach(prop => {
                                                     if (prop.key == (<ts.Identifier>property.name).text) {
                                                         prop.values.forEach(proPatch => {
                                                             if (arrayBase.indexOf(proPatch) < 0) {
-                                                                result.push(proPatch + ",");
+                                                                result.push(proPatch);
+                                                                if(arrayBase.indexOf(proPatch) < arrayBase.length - 1){
+                                                                    result.push(",");
+                                                                }
                                                             }
                                                         });
                                                     }
@@ -113,10 +167,10 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                         });
                                     }
                                 }
-                                result.push("})")
+                                result.push("})\n")
 
                             } else {
-                                result.push(decorator.getFullText(sourceFile));
+                                result.push(decorator.getFullText(sourceFile) + "\n");
                             }
                         })
                     }
@@ -160,11 +214,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                             if (member.kind == ts.SyntaxKind.PropertyDeclaration) {
                                 let propIdentifier: string = (<ts.Identifier>(<ts.PropertyDeclaration>member).name).text;
                                 switch (propIdentifier) {
-                                    case "columns":
+                                    case "cobigen_columns":
                                         let columnsPatch: ts.PropertyDeclaration;
                                         for (let memberPatch of classDeclPatch.members) {
                                             if (memberPatch.kind == ts.SyntaxKind.PropertyDeclaration) {
-                                                if ((<ts.Identifier>memberPatch.name).text == "columns") {
+                                                if ((<ts.Identifier>memberPatch.name).text == "cobigen_columns") {
                                                     columnsPatch = (<ts.PropertyDeclaration>memberPatch);
                                                     break;
                                                 }
@@ -202,11 +256,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                             result.push(member.getText(sourceFile));
                                         }
                                         break;
-                                    case "searchTerms":
+                                    case "cobigen_searchTerms":
                                         let itemTermPatch: ts.PropertyDeclaration;
                                         for (let memberPatch of classDeclPatch.members) {
                                             if (memberPatch.kind == ts.SyntaxKind.PropertyDeclaration) {
-                                                if ((<ts.Identifier>memberPatch.name).text == "searchTerms") {
+                                                if ((<ts.Identifier>memberPatch.name).text == "cobigen_searchTerms") {
                                                     itemTermPatch = (<ts.PropertyDeclaration>memberPatch);
                                                     break;
                                                 }
@@ -237,11 +291,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                             result.push(resultObject, "\n  };\n");
                                         }
                                         break;
-                                    case "item":
+                                    case "cobigen_item":
                                         let itemObjectPatch: ts.PropertyDeclaration;
                                         for (let memberPatch of classDeclPatch.members) {
                                             if (memberPatch.kind == ts.SyntaxKind.PropertyDeclaration) {
-                                                if ((<ts.Identifier>memberPatch.name).text == "item") {
+                                                if ((<ts.Identifier>memberPatch.name).text == "cobigen_item") {
                                                     itemObjectPatch = (<ts.PropertyDeclaration>memberPatch);
                                                     break;
                                                 }
@@ -368,7 +422,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                 methodBase.body.statements.forEach(statement => {
                                                                     if (statement.kind == ts.SyntaxKind.VariableStatement) {
                                                                         let identifier: string = (<ts.Identifier>(<ts.VariableStatement>statement).declarationList.declarations[0].name).text;
-                                                                        if (identifier == "pageData") {
+                                                                        if (identifier == "cobigen_pageData") {
                                                                             if ((<ts.VariableStatement>statement).declarationList.declarations[0].initializer) {
                                                                                 let initializer = (<ts.VariableStatement>statement).declarationList.declarations[0].initializer;
                                                                                 if (initializer.kind == ts.SyntaxKind.ObjectLiteralExpression) {
@@ -387,7 +441,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                                         methodPatch.body.statements.forEach(stmntPatch => {
                                                                                             if (stmntPatch.kind == ts.SyntaxKind.VariableStatement) {
                                                                                                 let identifierPatch: string = (<ts.Identifier>(<ts.VariableStatement>stmntPatch).declarationList.declarations[0].name).text;
-                                                                                                if (identifierPatch == "pageData") {
+                                                                                                if (identifierPatch == "cobigen_pageData") {
                                                                                                     if ((<ts.VariableStatement>statement).declarationList.declarations[0].initializer) {
                                                                                                         let initializerPatch = (<ts.VariableStatement>stmntPatch).declarationList.declarations[0].initializer;
                                                                                                         if (initializerPatch.kind == ts.SyntaxKind.ObjectLiteralExpression) {
@@ -448,7 +502,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                 methodBase.body.statements.forEach(statement => {
                                                                     if (statement.kind == ts.SyntaxKind.VariableStatement) {
                                                                         let identifier: string = (<ts.Identifier>(<ts.VariableStatement>statement).declarationList.declarations[0].name).text;
-                                                                        if (identifier == "obj") {
+                                                                        if (identifier == "cobigen_obj") {
                                                                             if ((<ts.VariableStatement>statement).declarationList.declarations[0].initializer) {
                                                                                 let initializer = (<ts.VariableStatement>statement).declarationList.declarations[0].initializer;
                                                                                 if (initializer.kind == ts.SyntaxKind.ObjectLiteralExpression) {
@@ -467,7 +521,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                                         methodPatch.body.statements.forEach(stmntPatch => {
                                                                                             if (stmntPatch.kind == ts.SyntaxKind.VariableStatement) {
                                                                                                 let identifierPatch: string = (<ts.Identifier>(<ts.VariableStatement>stmntPatch).declarationList.declarations[0].name).text;
-                                                                                                if (identifierPatch == "obj") {
+                                                                                                if (identifierPatch == "cobigen_obj") {
                                                                                                     if ((<ts.VariableStatement>statement).declarationList.declarations[0].initializer) {
                                                                                                         let initializerPatch = (<ts.VariableStatement>stmntPatch).declarationList.declarations[0].initializer;
                                                                                                         if (initializerPatch.kind == ts.SyntaxKind.ObjectLiteralExpression) {
@@ -538,7 +592,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                                                             let binaryExpr = <ts.BinaryExpression>exprStmnt.expression;
                                                                                             if (binaryExpr.left.kind == ts.SyntaxKind.PropertyAccessExpression) {
                                                                                                 let propExpr = <ts.PropertyAccessExpression>binaryExpr.left;
-                                                                                                if (propExpr.name.text == "columns") {
+                                                                                                if (propExpr.name.text == "cobigen_columns") {
                                                                                                     result.push(binaryExpr.left.getFullText(sourceFile), binaryExpr.operatorToken.getFullText(sourceFile), " ", columnsInfo);
                                                                                                 } else {
                                                                                                     result.push(binaryExpr.getFullText(sourceFile), ";");
@@ -631,12 +685,10 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                         });
                         routesInitPatch.elements.forEach(elementPatch => {
                             let object: ts.ObjectLiteralExpression = <ts.ObjectLiteralExpression>elementPatch;
-                            object.properties.forEach(property => {
-                                let assigment: ts.PropertyAssignment = <ts.PropertyAssignment>property;
-                                if (components.indexOf((<ts.Identifier>assigment.initializer).text) < 0) {
-                                    result.push("," + elementPatch.getFullText(sourceFilePatch));
-                                }
-                            });
+                            if(components.indexOf((<ts.Identifier>(<ts.PropertyAssignment>object.properties[0]).initializer).text) < 0){
+                                result.push("," + elementPatch.getFullText(sourceFilePatch));
+                                components.push((<ts.Identifier>(<ts.PropertyAssignment>object.properties[0]).initializer).text);
+                            }
                         });
                         result.push("\n]");
                     }
@@ -653,8 +705,8 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     return result.join("");
 }
 
-function syntaxKindToName(kind: ts.SyntaxKind) {
-    return (<any>ts).SyntaxKind[kind];
-}
+// function syntaxKindToName(kind: ts.SyntaxKind) {
+//     return (<any>ts).SyntaxKind[kind];
+// }
 
 export default merge;
