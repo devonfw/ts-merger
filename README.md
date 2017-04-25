@@ -1,2 +1,2 @@
-# mercy
-TypeScript AST Printer
+# mTSM
+TypeScript Merger for Angular-Cli
