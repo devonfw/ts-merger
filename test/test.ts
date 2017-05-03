@@ -53,9 +53,9 @@ export class BusinessOperations {
   data: any = [];
   selectedRow: any;
   other: number = 3;
-  other1: string ="potato";
+  other1: string = "one string";
   other2: boolean = true;
-  other3: [number, string] = [2, "numero2"];
+  other3: [number, string] = [2, "number2"];
   other5: number[] = [2, 3, 4, 5];
 
   item = {
@@ -106,8 +106,8 @@ export class BusinessOperations {
         mail: searchTerms.mail,
         sort: sort
       }
-      let iaia = 2 + 2;
-      let iaio = http(iaia);
+      let aux = 2 + 2;
+      let aux2 = http(iaia);
       return this.http.post(this.BO.postSampleDataSearch(), pageData)
                       .map(res => res.json());
     }
@@ -133,11 +133,11 @@ export class BusinessOperations {
             {name: 'mail', label: this.getTranslation('sampledatamanagementDataGrid.columns.mail')}
       ];
     }
-    let patata = 2 + 2;
+    let aux = 2 + 2;
     for(let i = 0; i< 10; i++){
       console.log(i);
     }
-    return "patata";
+    return aux;
   }
 
   postSampleData(){
@@ -162,9 +162,4 @@ export class BusinessOperations {
   }
 
   
-}
-
-@decoratordeprueba()
-export class patata{
-
 }

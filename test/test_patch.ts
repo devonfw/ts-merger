@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs/Rx';
 import { Injectable } from '@angular/core';
 import * as ts from 'typescript';
-import { Patata } from 'patata/Rx';
 
 @DecoratorTest()
 @Component({
@@ -48,7 +47,7 @@ export class BusinessOperations extends patata{
   public serverPath = url;
   public servicesPath = this.serverPath;
 
-  columns: patata = [
+  columns: any = [
     {name: 'name', label: this.getTranslation('sampledatamanagementDataGrid.columns.name')},
     {name: 'newField', label: this.getTranslation('sampledatamanagementDataGrid.columns.newField')}
   ];  
@@ -61,11 +60,11 @@ export class BusinessOperations extends patata{
 
   other: number = 2;
 
-  other1: string ="patata";
+  other1: string = "one string";
 
   other2: boolean = false;
 
-  other3: [number, string] = [2, "numero2"];
+  other3: [number, string] = [2, "number2"];
 
   other5: number[] = [2, 3, 4, 5];
 
@@ -90,7 +89,7 @@ export class BusinessOperations extends patata{
                     .map(res => res.json());
   }
   login(){
-    return this.other1 + 'patata';
+    return this.other1 + 'login';
   }
 
   logout(){
@@ -131,8 +130,8 @@ export class BusinessOperations extends patata{
   }
 
   newMethod(){
-    let eselpatch;
-    return "patata";
+    let patchvariable;
+    return patchVariable;
   }
 
   ngDoCheck() {
