@@ -2,6 +2,7 @@ import { readFileSync } from 'fs';
 import * as ts from "typescript";
 import { ImportClause } from './components/ImportClause';
 import { ImportMerge } from './utils/ImportMerge';
+import { ClassDeclaration } from './components/classDeclaration/ClassDeclaration';
 
 
 let strategy= process.argv[2];
@@ -46,11 +47,13 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                     classDeclPatch = <ts.ClassDeclaration>childPatch;
                 }
             })
+            let classToPrint: ClassDeclaration = new ClassDeclaration();
             if (classDecl.name.text == classDeclPatch.name.text) {
+                classToPrint.setName(classDecl.name.text);
                 if (patchOverrides) {
-
+                    classToPrint.addDecorators(getDecorators(classDeclPatch, sourceFilePatch));
                     //get decorators, modifiers and heritages of class from patch file
-                    getDecorators(classDeclPatch, sourceFilePatch, result);
+                    //getDecorators(classDeclPatch, sourceFilePatch, result);
                     getModifiers(classDeclPatch, sourceFilePatch, result);
                     result.push(" class ", classDeclPatch.name.text);
                     getHeritages(classDeclPatch, sourceFilePatch, result);
@@ -279,7 +282,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                 switch (identifier) {
                                                     case "getData":
                                                         result.push("\n\n");
-                                                        getDecorators(methodBase, sourceFile, result);
+                                                        result.push(getDecorators(methodBase, sourceFile).join(""));
                                                         // if (methodBase.decorators) {
                                                         //     methodBase.decorators.forEach(decorator => {
                                                         //         result.push(decorator.getText(sourceFile));
@@ -591,12 +594,14 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
 }
 
 
-function getDecorators(node: ts.Node, source: ts.SourceFile, result: String []){
+function getDecorators(node: ts.Node, source: ts.SourceFile){
+    let decorators: String[] = []
     if (node.decorators) {
         node.decorators.forEach(decorator => {
-            result.push(decorator.getFullText(source));
+            decorators.push(decorator.getFullText(source));
         })
-    }  
+    }
+    return decorators;
 }
 
 function getModifiers(node: ts.Node, source: ts.SourceFile, result: String []){
