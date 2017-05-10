@@ -41,21 +41,27 @@ function merge(patchOverrides, fileBase, filePatch) {
             });
             if (classDecl.name.text == classDeclPatch_1.name.text) {
                 if (patchOverrides) {
+                    //get decorators, modifiers and heritages of class from patch file
                     getDecorators(classDeclPatch_1, sourceFilePatch, result);
                     getModifiers(classDeclPatch_1, sourceFilePatch, result);
                     result.push(" class ", classDeclPatch_1.name.text);
                     getHeritages(classDeclPatch_1, sourceFilePatch, result);
                     result.push(" {\n");
+                    //TODO -- finish classMerge with patchOverrides = true
                 }
                 else {
+                    //get decorators of base file testing if it anyone is NgModule decorator merging it if it is
                     getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch_1, sourceFile, sourceFilePatch, result);
+                    //get modifiers and heritages of class from base file
                     getModifiers(classDecl, sourceFile, result);
                     result.push(" class ", classDecl.name.text);
                     getHeritages(classDecl, sourceFile, result);
                     result.push(" {\n");
+                    //merge methods and properties of classes
                     var methodsBase_1 = [];
                     var propertiesBase = [];
                     var methodsToAdd_1 = [];
+                    //check which patch methods are nonexistents at base methods
                     if (classDecl.members) {
                         classDecl.members.forEach(function (member) {
                             if (member.kind == ts.SyntaxKind.MethodDeclaration) {
@@ -65,7 +71,7 @@ function merge(patchOverrides, fileBase, filePatch) {
                         if (classDeclPatch_1.members) {
                             classDeclPatch_1.members.forEach(function (memberPatch) {
                                 if (memberPatch.kind == ts.SyntaxKind.MethodDeclaration) {
-                                    if (methodsBase_1.indexOf(memberPatch.name.text) < 0) {
+                                    if (methodsBase_1.indexOf(memberPatch.name.text) < 0 || patchOverrides) {
                                         methodsToAdd_1.push(memberPatch.getFullText(sourceFilePatch));
                                     }
                                     else if (patchOverrides) {
