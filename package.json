@@ -1,18 +1,15 @@
 {
   "name": "tsm",
   "version": "1.0.0",
-  "description": "TypeScript CobiGen Merger",
+  "description": "2-way TypeScript Merger",
   "main": "index.ts",
   "scripts": {
     "test": "mocha -r ts-node/register test/**/testSuite.ts",
     "init": "ts-node src/index.ts"
   },
   "keywords": [
-    "CobiGen",
     "TypeScript",
-    "devon",
-    "devonfw",
-    "capgemini"
+    "2-way-merge"
   ],
   "license": "UNLICENSED",
   "devDependencies": {
