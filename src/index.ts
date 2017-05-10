@@ -1,6 +1,7 @@
 import { readFileSync } from 'fs';
 import * as ts from "typescript";
 import { ImportClause } from './components/ImportClause';
+import { ImportMerge } from './utils/ImportMerge';
 
 
 let strategy= process.argv[2];
@@ -13,71 +14,29 @@ if(strategy == "true"){
     merge(false, base, patch);
 }
 
+/**
+ * Performs a merge of a patch and base file depending on the merge strategy
+ * 
+ * @export
+ * @param {boolean} patchOverrides 
+ * @param {string} fileBase 
+ * @param {string} filePatch 
+ * @returns {string} the result of the merge
+ */
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string): string {
 
-    let sourceFile = ts.createSourceFile(fileBase, readFileSync(fileBase).toString(), ts.ScriptTarget.ES2016, false);
-    let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2016, true, (<any>ts).SyntaxKind[256]);
+    let sourceFile: ts.SourceFile = ts.createSourceFile(fileBase, readFileSync(fileBase).toString(), ts.ScriptTarget.ES2016, false);
+    let sourceFilePatch: ts.SourceFile = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2016, true, (<any>ts).SyntaxKind[256]);
     let result: String[] = [];
     let columnsInfo: string = String();
-    let imports: ImportClause[] = [];
-    sourceFile.getChildAt(0).getChildren().forEach(child => {
-        switch (child.kind) {
-            case ts.SyntaxKind.ImportDeclaration:
-                let importElement: ImportClause = new ImportClause();
-                importElement.setModule((<ts.Identifier>(<ts.ImportDeclaration>child).moduleSpecifier).text);
-                if((<ts.ImportDeclaration>child).importClause){
-                    if((<ts.ImportDeclaration>child).importClause.namedBindings){
-                        if((<ts.ImportDeclaration>child).importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
-                            (<ts.NamedImports>(<ts.ImportDeclaration>child).importClause.namedBindings).elements.forEach(named => {
-                                importElement.addNamed((<String>named.name.text));
-                            })
-                        }else {
-                            importElement.setNamespace((<ts.NamespaceImport>(<ts.ImportDeclaration>child).importClause.namedBindings).name.text);
-                        }
-                    }
-                }else {
-                    importElement.setSpaceBinding(false);
-                }
-                imports.push(importElement);
-            break;
-        }
-    })
-    sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
-        let exists: boolean = false;
-        switch (childPatch.kind) {
-            case ts.SyntaxKind.ImportDeclaration:
-            imports.forEach(importElement => {
-                if((<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text == importElement.getModule()){
-                    exists = true;
-                    if(importElement.getNameSpace() != "" && importElement.getNamed().length > 0){
-                        (<ts.NamedImports>(<ts.ImportDeclaration>childPatch).importClause.namedBindings).elements.forEach(clause => {
-                            if(!importElement.contains((<String>clause.name.text))){
-                                importElement.addNamed((<String>clause.name.text));
-                            }
-                        })
-                    }
-                }
-            })
-            break;
-        }
-    })
-    imports.forEach(importElement => {
-        result.push(importElement.toString());
-    })
-    sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
-        if(childPatch.kind == ts.SyntaxKind.ImportDeclaration){
-            let exists: boolean = false;
-            for(let element of imports){
-                if(element.getModule() == (<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text){
-                    exists = true;
-                    break;
-                }
-            }
-            if(!exists){
-                result.push(childPatch.getFullText(sourceFilePatch));
-            }
-        }
-    })
+    
+    let importMerge: ImportMerge = new ImportMerge(sourceFile, sourceFilePatch);
+
+    //Merge imports
+    importMerge.merge();
+    result.push(importMerge.addPatchImports());
+    
+
     sourceFile.getChildAt(0).getChildren().forEach(child => {
         if (child.kind == ts.SyntaxKind.ClassDeclaration) {
             let classDecl = <ts.ClassDeclaration>child;
@@ -704,9 +663,5 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     console.log(result.join(""));
     return result.join("");
 }
-
-// function syntaxKindToName(kind: ts.SyntaxKind) {
-//     return (<any>ts).SyntaxKind[kind];
-// }
 
 export default merge;
