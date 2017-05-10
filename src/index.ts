@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import * as ts from "typescript";
-import { ImportsMerge } from '../src/components/ImportsMerge';
+import { ImportClause } from './components/ImportClause';
 
 
 let strategy= process.argv[2];
@@ -19,11 +19,11 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     let sourceFilePatch = ts.createSourceFile(filePatch, readFileSync(filePatch).toString(), ts.ScriptTarget.ES2016, true, (<any>ts).SyntaxKind[256]);
     let result: String[] = [];
     let columnsInfo: string = String();
-    let imports: ImportsMerge[] = [];
+    let imports: ImportClause[] = [];
     sourceFile.getChildAt(0).getChildren().forEach(child => {
         switch (child.kind) {
             case ts.SyntaxKind.ImportDeclaration:
-                let importElement: ImportsMerge = new ImportsMerge();
+                let importElement: ImportClause = new ImportClause();
                 importElement.setModule((<ts.Identifier>(<ts.ImportDeclaration>child).moduleSpecifier).text);
                 if((<ts.ImportDeclaration>child).importClause){
                     if((<ts.ImportDeclaration>child).importClause.namedBindings){

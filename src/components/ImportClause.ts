@@ -1,4 +1,4 @@
-export class ImportsMerge{
+export class ImportClause{
     private module: String = "";
     private named: String[] = [];
     private nameSpace: String = "";

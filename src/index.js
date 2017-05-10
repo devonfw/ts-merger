@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var fs_1 = require("fs");
 var ts = require("typescript");
-var ImportsMerge_1 = require("../src/components/ImportsMerge");
+var ImportClause_1 = require("./components/ImportClause");
 var strategy = process.argv[2];
 var base = process.argv[3];
 var patch = process.argv[4];
@@ -21,7 +21,7 @@ function merge(patchOverrides, fileBase, filePatch) {
     sourceFile.getChildAt(0).getChildren().forEach(function (child) {
         switch (child.kind) {
             case ts.SyntaxKind.ImportDeclaration:
-                var importElement_1 = new ImportsMerge_1.ImportsMerge();
+                var importElement_1 = new ImportClause_1.ImportClause();
                 importElement_1.setModule(child.moduleSpecifier.text);
                 if (child.importClause) {
                     if (child.importClause.namedBindings) {

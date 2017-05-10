@@ -1,22 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var ImportsMerge = (function () {
-    function ImportsMerge() {
+var ImportClause = (function () {
+    function ImportClause() {
         this.module = "";
         this.named = [];
         this.nameSpace = "";
         this.spaceBinding = true;
     }
-    ImportsMerge.prototype.addNamed = function (named) {
+    ImportClause.prototype.addNamed = function (named) {
         this.named.push(named);
     };
-    ImportsMerge.prototype.setModule = function (module) {
+    ImportClause.prototype.setModule = function (module) {
         this.module = module;
     };
-    ImportsMerge.prototype.setNamespace = function (nameSpace) {
+    ImportClause.prototype.setNamespace = function (nameSpace) {
         this.nameSpace = nameSpace;
     };
-    ImportsMerge.prototype.contains = function (named) {
+    ImportClause.prototype.contains = function (named) {
         if (this.named.indexOf(named) >= 0) {
             return true;
         }
@@ -24,19 +24,19 @@ var ImportsMerge = (function () {
             return false;
         }
     };
-    ImportsMerge.prototype.setSpaceBinding = function (flag) {
+    ImportClause.prototype.setSpaceBinding = function (flag) {
         this.spaceBinding = flag;
     };
-    ImportsMerge.prototype.getNameSpace = function () {
+    ImportClause.prototype.getNameSpace = function () {
         return this.nameSpace;
     };
-    ImportsMerge.prototype.getNamed = function () {
+    ImportClause.prototype.getNamed = function () {
         return this.named;
     };
-    ImportsMerge.prototype.getModule = function () {
+    ImportClause.prototype.getModule = function () {
         return this.module;
     };
-    ImportsMerge.prototype.toString = function () {
+    ImportClause.prototype.toString = function () {
         var _this = this;
         var clause = [];
         if (!this.spaceBinding) {
@@ -60,7 +60,7 @@ var ImportsMerge = (function () {
         }
         return clause.join("");
     };
-    return ImportsMerge;
+    return ImportClause;
 }());
-exports.ImportsMerge = ImportsMerge;
-//# sourceMappingURL=ImportsMerge.js.map
+exports.ImportClause = ImportClause;
+//# sourceMappingURL=ImportClause.js.map
