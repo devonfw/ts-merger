@@ -4,7 +4,7 @@
   "description": "2-way TypeScript Merger",
   "main": "index.ts",
   "scripts": {
-    "test": "mocha -r ts-node/register test/**/testSuite.ts",
+    "test": "mocha -r node_modules/ts-node/register.js ./test/**/*_test.ts",
     "init": "ts-node src/index.ts"
   },
   "keywords": [
@@ -22,5 +22,16 @@
     "typescript-formatter": "^5.1.3"
   },
   "dependencies": {},
-  "author": ""
+  "author": "",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/themetalone/tsm.git"
+  },
+  "bugs": {
+    "url": "https://github.com/themetalone/tsm/issues"
+  },
+  "homepage": "https://github.com/themetalone/tsm#readme"
 }
