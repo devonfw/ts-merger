@@ -41,100 +41,17 @@ function merge(patchOverrides, fileBase, filePatch) {
             });
             if (classDecl.name.text == classDeclPatch_1.name.text) {
                 if (patchOverrides) {
-                    if (classDeclPatch_1.decorators) {
-                        classDeclPatch_1.decorators.forEach(function (decorator) {
-                            result.push(decorator.getFullText(sourceFilePatch));
-                        });
-                    }
-                    if (classDeclPatch_1.modifiers) {
-                        classDeclPatch_1.modifiers.forEach(function (modifier) {
-                            result.push(modifier.getFullText(sourceFilePatch));
-                        });
-                    }
+                    getDecorators(classDeclPatch_1, sourceFilePatch, result);
+                    getModifiers(classDeclPatch_1, sourceFilePatch, result);
                     result.push(" class ", classDeclPatch_1.name.text);
-                    if (classDeclPatch_1.heritageClauses) {
-                        classDeclPatch_1.heritageClauses.forEach(function (heritage) {
-                            result.push(heritage.getFullText(sourceFilePatch));
-                        });
-                    }
+                    getHeritages(classDeclPatch_1, sourceFilePatch, result);
                     result.push(" {\n");
                 }
                 else {
-                    if (classDecl.decorators) {
-                        classDecl.decorators.forEach(function (decorator) {
-                            if (decorator.getFullText(sourceFile).indexOf("NgModule") >= 0) {
-                                result.push("\n@NgModule({\n");
-                                ;
-                                var arrayProperties_1 = [];
-                                if (classDeclPatch_1.decorators) {
-                                    for (var _i = 0, _a = classDeclPatch_1.decorators; _i < _a.length; _i++) {
-                                        var decoratorPatch = _a[_i];
-                                        if (decoratorPatch.getFullText(sourceFilePatch).indexOf("NgModule") >= 0) {
-                                            if (decoratorPatch.expression.arguments) {
-                                                if (decoratorPatch.expression.arguments[0].properties) {
-                                                    decoratorPatch.expression.arguments[0].properties.forEach(function (propertyPatch) {
-                                                        var elements = [];
-                                                        if (propertyPatch.initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
-                                                            var array = propertyPatch.initializer;
-                                                            array.elements.forEach(function (element) {
-                                                                elements.push(element.getFullText(sourceFilePatch));
-                                                            });
-                                                            arrayProperties_1.push({ key: propertyPatch.name.text, values: elements });
-                                                        }
-                                                    });
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (decorator.expression.arguments) {
-                                    if (decorator.expression.arguments[0].properties) {
-                                        decorator.expression.arguments[0].properties.forEach(function (property) {
-                                            result.push(property.name.text + ": [");
-                                            var elements = [];
-                                            if (property.initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
-                                                var arrayBase_1 = [];
-                                                var elements_1 = property.initializer.elements;
-                                                elements_1.forEach(function (elem) {
-                                                    arrayBase_1.push(elem.getFullText(sourceFile));
-                                                    result.push(elem.getFullText(sourceFile), ",");
-                                                });
-                                                arrayProperties_1.forEach(function (prop) {
-                                                    if (prop.key == property.name.text) {
-                                                        prop.values.forEach(function (proPatch) {
-                                                            if (arrayBase_1.indexOf(proPatch) < 0) {
-                                                                result.push(proPatch);
-                                                                if (arrayBase_1.indexOf(proPatch) < arrayBase_1.length - 1) {
-                                                                    result.push(",");
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                                result.push("\n],\n");
-                                            }
-                                        });
-                                    }
-                                }
-                                result.push("})\n");
-                            }
-                            else {
-                                result.push(decorator.getFullText(sourceFile) + "\n");
-                            }
-                        });
-                    }
-                    if (classDecl.modifiers) {
-                        classDecl.modifiers.forEach(function (modifier) {
-                            result.push(modifier.getFullText(sourceFile));
-                        });
-                    }
+                    getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch_1, sourceFile, sourceFilePatch, result);
+                    getModifiers(classDecl, sourceFile, result);
                     result.push(" class ", classDecl.name.text);
-                    if (classDecl.heritageClauses) {
-                        classDecl.heritageClauses.forEach(function (heritage) {
-                            result.push(heritage.getFullText(sourceFile));
-                        });
-                    }
+                    getHeritages(classDecl, sourceFile, result);
                     result.push(" {\n");
                     var methodsBase_1 = [];
                     var propertiesBase = [];
@@ -182,16 +99,16 @@ function merge(patchOverrides, fileBase, filePatch) {
                                             else {
                                                 var resultArray_1 = "";
                                                 var arrayPatch = columnsPatch.initializer;
-                                                var arrayBase_2 = member.initializer;
+                                                var arrayBase_1 = member.initializer;
                                                 if (member.type) {
                                                     result.push("\n  ", propIdentifier, ":", member.type.getFullText(sourceFile), " = [");
                                                 }
                                                 else {
                                                     result.push("\n  ", propIdentifier, " = [");
                                                 }
-                                                arrayBase_2.elements.forEach(function (element) {
+                                                arrayBase_1.elements.forEach(function (element) {
                                                     resultArray_1 = resultArray_1 + "    " + element.getText(sourceFile);
-                                                    if (arrayBase_2.elements.indexOf(element) != arrayBase_2.elements.length - 1) {
+                                                    if (arrayBase_1.elements.indexOf(element) != arrayBase_1.elements.length - 1) {
                                                         resultArray_1 = resultArray_1 + ",";
                                                     }
                                                 });
@@ -361,16 +278,18 @@ function merge(patchOverrides, fileBase, filePatch) {
                                                 switch (identifier) {
                                                     case "getData":
                                                         result.push("\n\n");
-                                                        if (methodBase.decorators) {
-                                                            methodBase.decorators.forEach(function (decorator) {
-                                                                result.push(decorator.getText(sourceFile));
-                                                            });
-                                                        }
-                                                        if (methodBase.modifiers) {
-                                                            methodBase.modifiers.forEach(function (modifier) {
-                                                                result.push(modifier.getText(sourceFile));
-                                                            });
-                                                        }
+                                                        getDecorators(methodBase, sourceFile, result);
+                                                        // if (methodBase.decorators) {
+                                                        //     methodBase.decorators.forEach(decorator => {
+                                                        //         result.push(decorator.getText(sourceFile));
+                                                        //     })
+                                                        // }
+                                                        getModifiers(methodBase, sourceFile, result);
+                                                        // if (methodBase.modifiers) {
+                                                        //     methodBase.modifiers.forEach(modifier => {
+                                                        //         result.push(modifier.getText(sourceFile));
+                                                        //     })
+                                                        // }
                                                         result.push(identifier, "(");
                                                         if (methodBase.parameters) {
                                                             methodBase.parameters.forEach(function (parameter) {
@@ -685,5 +604,92 @@ function merge(patchOverrides, fileBase, filePatch) {
     return result.join("");
 }
 exports.merge = merge;
+function getDecorators(node, source, result) {
+    if (node.decorators) {
+        node.decorators.forEach(function (decorator) {
+            result.push(decorator.getFullText(source));
+        });
+    }
+}
+function getModifiers(node, source, result) {
+    if (node.modifiers) {
+        node.modifiers.forEach(function (modifier) {
+            result.push(modifier.getFullText(source));
+        });
+    }
+}
+function getHeritages(node, source, result) {
+    if (node.heritageClauses) {
+        node.heritageClauses.forEach(function (heritage) {
+            result.push(heritage.getFullText(source));
+        });
+    }
+}
+function getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch, sourceFile, sourceFilePatch, result) {
+    if (classDecl.decorators) {
+        classDecl.decorators.forEach(function (decorator) {
+            if (decorator.getFullText(sourceFile).indexOf("NgModule") >= 0) {
+                result.push("\n@NgModule({\n");
+                ;
+                var arrayProperties_1 = [];
+                if (classDeclPatch.decorators) {
+                    for (var _i = 0, _a = classDeclPatch.decorators; _i < _a.length; _i++) {
+                        var decoratorPatch = _a[_i];
+                        if (decoratorPatch.getFullText(sourceFilePatch).indexOf("NgModule") >= 0) {
+                            if (decoratorPatch.expression.arguments) {
+                                if (decoratorPatch.expression.arguments[0].properties) {
+                                    decoratorPatch.expression.arguments[0].properties.forEach(function (propertyPatch) {
+                                        var elements = [];
+                                        if (propertyPatch.initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
+                                            var array = propertyPatch.initializer;
+                                            array.elements.forEach(function (element) {
+                                                elements.push(element.getFullText(sourceFilePatch));
+                                            });
+                                            arrayProperties_1.push({ key: propertyPatch.name.text, values: elements });
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (decorator.expression.arguments) {
+                    if (decorator.expression.arguments[0].properties) {
+                        decorator.expression.arguments[0].properties.forEach(function (property) {
+                            result.push(property.name.text + ": [");
+                            var elements = [];
+                            if (property.initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
+                                var arrayBase_2 = [];
+                                var elements_1 = property.initializer.elements;
+                                elements_1.forEach(function (elem) {
+                                    arrayBase_2.push(elem.getFullText(sourceFile));
+                                    result.push(elem.getFullText(sourceFile), ",");
+                                });
+                                arrayProperties_1.forEach(function (prop) {
+                                    if (prop.key == property.name.text) {
+                                        prop.values.forEach(function (proPatch) {
+                                            if (arrayBase_2.indexOf(proPatch) < 0) {
+                                                result.push(proPatch);
+                                                if (arrayBase_2.indexOf(proPatch) < arrayBase_2.length - 1) {
+                                                    result.push(",");
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                result.push("\n],\n");
+                            }
+                        });
+                    }
+                }
+                result.push("})\n");
+            }
+            else {
+                result.push(decorator.getFullText(sourceFile) + "\n");
+            }
+        });
+    }
+}
 exports.default = merge;
 //# sourceMappingURL=index.js.map

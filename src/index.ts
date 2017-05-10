@@ -48,104 +48,18 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
             })
             if (classDecl.name.text == classDeclPatch.name.text) {
                 if (patchOverrides) {
-                    if (classDeclPatch.decorators) {
-                        classDeclPatch.decorators.forEach(decorator => {
-                            result.push(decorator.getFullText(sourceFilePatch));
-                        })
-                    }
-                    if (classDeclPatch.modifiers) {
-                        classDeclPatch.modifiers.forEach(modifier => {
-                            result.push(modifier.getFullText(sourceFilePatch));
-                        })
-                    }
+                    getDecorators(classDeclPatch, sourceFilePatch, result);
+                    getModifiers(classDeclPatch, sourceFilePatch, result);
                     result.push(" class ", classDeclPatch.name.text);
-                    if (classDeclPatch.heritageClauses) {
-                        classDeclPatch.heritageClauses.forEach(heritage => {
-                            result.push(heritage.getFullText(sourceFilePatch));
-                        })
-                    }
+                    getHeritages(classDeclPatch, sourceFilePatch, result);
                     result.push(" {\n");
                 } else {
-                    if (classDecl.decorators) {
-                        classDecl.decorators.forEach(decorator => {
-                            if (decorator.getFullText(sourceFile).indexOf("NgModule") >= 0) {
-                                result.push("\n@NgModule({\n");
-                                interface properties {
-                                    key: string,
-                                    values: string[]
-                                };
-                                let arrayProperties: properties[] = [];
-                                if (classDeclPatch.decorators) {
-                                    for (let decoratorPatch of classDeclPatch.decorators) {
-                                        if (decoratorPatch.getFullText(sourceFilePatch).indexOf("NgModule") >= 0) {
-                                            if ((<ts.CallExpression>decoratorPatch.expression).arguments) {
-                                                if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties) {
-                                                    (<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties.forEach(propertyPatch => {
-                                                        let elements: string[] = [];
-                                                        if ((<ts.PropertyAssignment>propertyPatch).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
-                                                            let array: ts.ArrayLiteralExpression = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>propertyPatch).initializer);
-                                                            array.elements.forEach(element => {
-                                                                elements.push(element.getFullText(sourceFilePatch));
-                                                            });
-                                                            arrayProperties.push({ key: (<ts.Identifier>propertyPatch.name).text, values: elements });
-                                                        }
-
-                                                    });
-                                                }
-                                            }
-                                            break;
-                                        }
-                                    }
-                                }
-                                if ((<ts.CallExpression>decorator.expression).arguments) {
-                                    if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties) {
-                                        (<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties.forEach(property => {
-                                            result.push((<ts.Identifier>property.name).text + ": [");
-                                            let elements: string[] = [];
-                                            if ((<ts.PropertyAssignment>property).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
-                                                let arrayBase: string[] = [];
-                                                let elements = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements;
-                                                elements.forEach(elem => {
-                                                    arrayBase.push(elem.getFullText(sourceFile));
-                                                    result.push(elem.getFullText(sourceFile), ",");
-                                                });
-                                                arrayProperties.forEach(prop => {
-                                                    if (prop.key == (<ts.Identifier>property.name).text) {
-                                                        prop.values.forEach(proPatch => {
-                                                            if (arrayBase.indexOf(proPatch) < 0) {
-                                                                result.push(proPatch);
-                                                                if(arrayBase.indexOf(proPatch) < arrayBase.length - 1){
-                                                                    result.push(",");
-                                                                }
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                                result.push("\n],\n");
-                                            }
-                                        });
-                                    }
-                                }
-                                result.push("})\n")
-
-                            } else {
-                                result.push(decorator.getFullText(sourceFile) + "\n");
-                            }
-                        })
-                    }
-                    if (classDecl.modifiers) {
-                        classDecl.modifiers.forEach(modifier => {
-                            result.push(modifier.getFullText(sourceFile));
-                        })
-
-                    }
+                    getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch, sourceFile, sourceFilePatch, result);
+                    getModifiers(classDecl, sourceFile, result);
                     result.push(" class ", classDecl.name.text);
-                    if (classDecl.heritageClauses) {
-                        classDecl.heritageClauses.forEach(heritage => {
-                            result.push(heritage.getFullText(sourceFile));
-                        })
-                    }
+                    getHeritages(classDecl, sourceFile, result);
                     result.push(" {\n");
+
                     let methodsBase: string[] = [];
                     let propertiesBase: string[] = [];
                     let methodsToAdd: string[] = [];
@@ -355,16 +269,18 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                 switch (identifier) {
                                                     case "getData":
                                                         result.push("\n\n");
-                                                        if (methodBase.decorators) {
-                                                            methodBase.decorators.forEach(decorator => {
-                                                                result.push(decorator.getText(sourceFile));
-                                                            })
-                                                        }
-                                                        if (methodBase.modifiers) {
-                                                            methodBase.modifiers.forEach(modifier => {
-                                                                result.push(modifier.getText(sourceFile));
-                                                            })
-                                                        }
+                                                        getDecorators(methodBase, sourceFile, result);
+                                                        // if (methodBase.decorators) {
+                                                        //     methodBase.decorators.forEach(decorator => {
+                                                        //         result.push(decorator.getText(sourceFile));
+                                                        //     })
+                                                        // }
+                                                        getModifiers(methodBase, sourceFile, result);
+                                                        // if (methodBase.modifiers) {
+                                                        //     methodBase.modifiers.forEach(modifier => {
+                                                        //         result.push(modifier.getText(sourceFile));
+                                                        //     })
+                                                        // }
                                                         result.push(identifier, "(");
                                                         if (methodBase.parameters) {
                                                             methodBase.parameters.forEach(parameter => {
@@ -662,6 +578,101 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     })
     console.log(result.join(""));
     return result.join("");
+}
+
+
+function getDecorators(node: ts.Node, source: ts.SourceFile, result: String []){
+    if (node.decorators) {
+        node.decorators.forEach(decorator => {
+            result.push(decorator.getFullText(source));
+        })
+    }  
+}
+
+function getModifiers(node: ts.Node, source: ts.SourceFile, result: String []){
+    if (node.modifiers) {
+        node.modifiers.forEach(modifier => {
+            result.push(modifier.getFullText(source));
+        })
+    }
+}
+
+function getHeritages(node: ts.ClassDeclaration, source: ts.SourceFile, result: String []){
+    if (node.heritageClauses) {
+        node.heritageClauses.forEach(heritage => {
+            result.push(heritage.getFullText(source));
+        })
+    }
+}
+
+function getClassDecoratorWithNgModuleCase(classDecl: ts.ClassDeclaration, classDeclPatch: ts.ClassDeclaration, sourceFile: ts.SourceFile, sourceFilePatch: ts.SourceFile, result: String[]){
+    if (classDecl.decorators) {
+        classDecl.decorators.forEach(decorator => {
+            if (decorator.getFullText(sourceFile).indexOf("NgModule") >= 0) {
+                result.push("\n@NgModule({\n");
+                interface properties {
+                    key: string,
+                    values: string[]
+                };
+                let arrayProperties: properties[] = [];
+                if (classDeclPatch.decorators) {
+                    for (let decoratorPatch of classDeclPatch.decorators) {
+                        if (decoratorPatch.getFullText(sourceFilePatch).indexOf("NgModule") >= 0) {
+                            if ((<ts.CallExpression>decoratorPatch.expression).arguments) {
+                                if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties) {
+                                    (<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties.forEach(propertyPatch => {
+                                        let elements: string[] = [];
+                                        if ((<ts.PropertyAssignment>propertyPatch).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
+                                            let array: ts.ArrayLiteralExpression = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>propertyPatch).initializer);
+                                            array.elements.forEach(element => {
+                                                elements.push(element.getFullText(sourceFilePatch));
+                                            });
+                                            arrayProperties.push({ key: (<ts.Identifier>propertyPatch.name).text, values: elements });
+                                        }
+
+                                    });
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
+                if ((<ts.CallExpression>decorator.expression).arguments) {
+                    if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties) {
+                        (<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties.forEach(property => {
+                            result.push((<ts.Identifier>property.name).text + ": [");
+                            let elements: string[] = [];
+                            if ((<ts.PropertyAssignment>property).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
+                                let arrayBase: string[] = [];
+                                let elements = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements;
+                                elements.forEach(elem => {
+                                    arrayBase.push(elem.getFullText(sourceFile));
+                                    result.push(elem.getFullText(sourceFile), ",");
+                                });
+                                arrayProperties.forEach(prop => {
+                                    if (prop.key == (<ts.Identifier>property.name).text) {
+                                        prop.values.forEach(proPatch => {
+                                            if (arrayBase.indexOf(proPatch) < 0) {
+                                                result.push(proPatch);
+                                                if(arrayBase.indexOf(proPatch) < arrayBase.length - 1){
+                                                    result.push(",");
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                result.push("\n],\n");
+                            }
+                        });
+                    }
+                }
+                result.push("})\n")
+
+            } else {
+                result.push(decorator.getFullText(sourceFile) + "\n");
+            }
+        })
+    }
 }
 
 export default merge;
