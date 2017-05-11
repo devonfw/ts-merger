@@ -44,7 +44,7 @@ describe('Merge imports with merge()', () => {
      */
     const result : String[] = merge(false, baseTestResources + 'imports_2.ts', patchTestResources + 'imports_2.ts').split('\n');
     expect(result.length, "to contain unique imports").to.equal(3);
-    expect(result.filter(value => value == "import { a } from 'b';").map(val => 1).reduce((a, b) => a + b, 0)).to.equal(1);
+    expect(result.filter(value => value == "import { a } from 'b';").length).to.equal(1);
   });
   it('should acucmulate imports from overlapping import sets with patchOverride. Shouldn\'t make any difference. (resources/{base|patch}/imports_2.ts)', () => {
     /**
@@ -52,12 +52,19 @@ describe('Merge imports with merge()', () => {
      */
     const result : String[] = merge(true, baseTestResources + 'imports_2.ts', patchTestResources + 'imports_2.ts').split('\n');
     expect(result.length, "to contain unique imports").to.equal(3);
-    expect(result.filter(value => value == "import { a } from 'b';").map(val => 1).reduce((a, b) => a + b, 0)).to.equal(1);
+    expect(result.filter(value => value == "import { a } from 'b';").length).to.equal(1);
   });
   it('should accumulate imports from the same source in a single import statement (resources/{base|patch}/imports_3.ts)', () => {
-    const result : String[] = merge(false, baseTestResources + 'imports_3.ts', patchTestResources + 'imports_3.ts').split('\n');
+    const result : String[] = merge(false, baseTestResources + 'imports_3.ts', patchTestResources + 'imports_3.ts').split('\n').filter(value => value != "");
     expect(result.length, "to contain only one import statement").to.equal(1);
-
+    let importRegex = new RegExp(".*\{ [a,b], [a,b] \}.*");
+    expect(importRegex.test(result[0].toString())).to.be.true;
+  });
+  it('should accumulate imports from the same source in a single import statement with patchOverride. Shouldn\'t make any difference.  (resources/{base|patch}/imports_3.ts)', () => {
+    const result : String[] = merge(true, baseTestResources + 'imports_3.ts', patchTestResources + 'imports_3.ts').split('\n').filter(value => value != "");
+    expect(result.length, "to contain only one import statement").to.equal(1);
+    let importRegex = new RegExp(".*\{ [a,b], [a,b] \}.*");
+    expect(importRegex.test(result[0].toString())).to.be.true;
   });
 
 });

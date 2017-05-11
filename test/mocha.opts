@@ -1,2 +1,0 @@
--r node_modules/ts-node/register.js
-test/import_test.ts
