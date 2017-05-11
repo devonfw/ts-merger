@@ -1,5 +1,5 @@
 {
-  "name": "tsm",
+  "name": "ts-merger",
   "version": "1.0.0",
   "description": "2-way TypeScript Merger",
   "main": "index.ts",
@@ -28,10 +28,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/themetalone/tsm.git"
+    "url": "git+https://github.com/EastWindShak/ts-merger.git"
   },
   "bugs": {
-    "url": "https://github.com/themetalone/tsm/issues"
+    "url": "https://github.com/EastWindShak/ts-merger/issues"
   },
-  "homepage": "https://github.com/themetalone/tsm#readme"
+  "homepage": "https://github.com/EastWindShak/ts-merger#readme"
 }

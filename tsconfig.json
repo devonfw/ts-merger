@@ -5,7 +5,7 @@
         "noImplicitAny": false,
         "sourceMap": true,
         "watch": true,
-        "outDir": "src"
+        "outDir": "build"
     },
     "exclude": [
         "node_modules",
