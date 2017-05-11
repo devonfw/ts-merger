@@ -183,4 +183,156 @@ describe('Merge classes with merge()', () => {
             .filter(value => value != "");
         expect(result.indexOf('@deca(false)')).to.be.greaterThan(0, 'decoration should have value from patch');
     });
+    it('should merge the NgModule decorator properties (./test/resources/class/{base|patch}/class_9.ts)', () => {
+        /**
+         * fails if the result doesn't use the values from the base and patch
+         */
+        const fullResult:String = merge(false, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
+        const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
+        let ngModuleRegex=new RegExp("@NgModule\\(\{.*");
+        let ngModuleFullRegex=new RegExp("@NgModule(\{.*,.*\}).*");
+        let providerRegex=new RegExp(".*providers: \[a, b\].*");
+        let idRegex = new RegExp(".*id: '1'.*");
+        expect(result.filter(value => ngModuleRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one @NgModule decorator');
+        expect(result.filter(value => providerRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
+        expect(result.filter(value => idRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one id property in the NgModule');
+        expect(ngModuleFullRegex.test(fullResult.toString())).to.be.true('The @NgModule decorator should be valid TypeScript');
+    });
+    it('should merge the NgModule decorator properties with patchOverride (./test/resources/class/{base|patch}/class_9.ts)', () => {
+        /**
+         * fails if the result doesn't use the values from the base and patch
+         */
+        const fullResult:String = merge(true, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
+        const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
+        let ngModuleRegex=new RegExp("@NgModule\\(\\{.*");
+        let ngModuleFullRegex=new RegExp("@NgModule\\(\\{[^]*,[^]*\\}\\)[^]*");
+        let providerRegex=new RegExp(".*providers: \\[a, b\\].*");
+        let idRegex = new RegExp(".*id: '1'.*");
+        expect(result.filter(value => ngModuleRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one @NgModule decorator');
+        expect(result.filter(value => providerRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
+        expect(result.filter(value => idRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one id property in the NgModule');
+        expect(ngModuleFullRegex.test(fullResult.toString())).to.be.true('The @NgModule decorator should be valid TypeScript');
+    });
+    it('should use the value from the base if NgModule property is present in base and patch. (./test/resources/class/{base|patch}/class_10.ts)', () => {
+        /**
+         * fails if the result doesn't use the value from the base
+         */
+        const result:String[] = merge(false, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /[^]*id: '1'[^]*/.test(value.toString())).length).to.be.equal(1, 'id should have value from base');
+    });
+    it('should use the value from the patch if ngModule property is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_10.ts)', () => {
+        /**
+         * fails if the result doesn't use the value from the patch
+         */
+        const result:String[] = merge(true, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /[^]*id: '2'[^]*/.test(value.toString())).length).to.be.equal(1, 'id should have value from patch');
+    });
+
+    // ---- Inheritances ---- //
+    it('should use the patch extension (resources/class/{base|patch}/class_11.ts)', () => {
+        /**
+         * fails if the extension from the patch isn't applied 
+         */
+        const result:String[] = merge(false, baseTestResources + "class_11.ts", patchTestResources + "class_11.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch should be applied');
+    });
+    it('should use the patch extension with patchOverride (resources/class/{base|patch}/class_11.ts)', () => {
+        /**
+         * fails if the extension from the patch isn't applied
+         */
+        const result:String[] = merge(true, baseTestResources + "class_11.ts", patchTestResources + "class_11.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch should be applied');
+    });
+    it('should keep the base extension (resources/class/{base|patch}/class_11.ts, base and patch switched)', () => {
+        /**
+         * fails if the patch overrides the base extension declaration. This tests also uses class_11.ts, but the file in base directory is used as patch and vice versa!
+         */
+        const result:String[] = merge(false, patchTestResources + "class_11.ts", baseTestResources + "class_11.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base should be kept');
+    });
+    it('should keep the base extension with patchOverride (resources/class/{base|patch}/class_11.ts, base and patch switched)', () => {
+        /**
+         * fails if the patch override the base extension declaration. This tests also uses class_11.ts, but the file in base directory is used as patch and vice versa!
+         */
+        const result:String[] = merge(true, patchTestResources + "class_11.ts", baseTestResources + "class_11.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base should be kept');
+    });
+    it('should use the patch implementations (resources/class/{base|patch}/class_12.ts)', () => {
+        /**
+         * fails if the implementation from the patch isn't applied 
+         */
+        const result:String[] = merge(false, baseTestResources + "class_12.ts", patchTestResources + "class_12.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch should be applied');
+    });
+    it('should use the patch implementation with patchOverride (resources/class/{base|patch}/class_12.ts)', () => {
+        /**
+         * fails if the implementation from the patch isn't applied
+         */
+        const result:String[] = merge(true, baseTestResources + "class_12.ts", patchTestResources + "class_12.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch should be applied');
+    });
+    it('should keep the base implementation (resources/class/{base|patch}/class_11.ts, base and patch switched)', () => {
+        /**
+         * fails if the patch overrides the base implementation declaration. This tests also uses class_12.ts, but the file in base directory is used as patch and vice versa!
+         */
+        const result:String[] = merge(false, patchTestResources + "class_12.ts", baseTestResources + "class_12.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base should be kept');
+    });
+    it('should keep the base implementation with patchOverride (resources/class/{base|patch}/class_12.ts, base and patch switched)', () => {
+        /**
+         * fails if the patch override the base implementation declaration. This tests also uses class_12.ts, but the file in base directory is used as patch and vice versa!
+         */
+        const result:String[] = merge(true, patchTestResources + "class_12.ts", baseTestResources + "class_12.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base should be kept');
+    });
+    it('should merge implementations (resources/class/{base|patch}/class_13.ts)', () => {
+        /**
+         * fails if the implementations aren't merged
+         */
+        const result:String[] = merge(false, baseTestResources + "class_13.ts", patchTestResources + "class_13.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'missformed class declaration');
+    });
+    it('should merge implementations with patchOverrides (resources/class/{base|patch}/class_13.ts)', () => {
+        /**
+         * fails if the implementations aren't merged
+         */
+        const result:String[] = merge(false, baseTestResources + "class_13.ts", patchTestResources + "class_13.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'missformed class declaration');
+    });
 });
