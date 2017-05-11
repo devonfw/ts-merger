@@ -1,5 +1,5 @@
 {
-  "name": "tsm",
+  "name": "ts-merger",
   "dependencies": {
     "chai": "registry:npm/chai#3.5.0+20160723033700"
   },
