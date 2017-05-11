@@ -1,5 +1,5 @@
 import { readFileSync } from 'fs';
-import * as ts from "typescript";
+import * as ts from 'typescript';
 import { ImportClause } from './components/ImportClause';
 import { ImportMerge } from './utils/ImportMerge';
 import { ClassDeclaration } from './components/classDeclaration/ClassDeclaration';
