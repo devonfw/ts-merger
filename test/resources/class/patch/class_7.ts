@@ -1,0 +1,4 @@
+@decb
+class a {
+
+}

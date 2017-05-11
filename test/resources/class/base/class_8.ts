@@ -1,0 +1,2 @@
+@deca(true)
+class a {}
