@@ -70,6 +70,4 @@ describe('Merge class fields with merge():', () => {
             .filter(value => value != "");
         expect(result.indexOf('public b;')).to.be.greaterThan(0, 'b should have modifier from patch');
     });
-
-    
 });

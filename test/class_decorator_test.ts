@@ -104,4 +104,25 @@ describe('Merge class decorators with merge():', () => {
         expect(result.filter(value => /[^]*id: '2'[^]*/.test(value.toString())).length).to.be.equal(1, 'id should have value from patch');
     });
 
+    it('should add the patch decorator although base hase none (resources/class/{base|patch}/class_14.ts)', () => {
+        /**
+         * fails if the result doesn't use the decorator from the patch
+         */
+        const result:String[] = merge(false, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /@deca.*/.test(value.toString())).length).to.be.equal(1, 'id should have value from patch');
+    });
+    it('should add the patch decorator although base hase none with patchOverride (resources/class/{base|patch}/class_14.ts)', () => {
+        /**
+         * fails if the result doesn't use the decorator from the patch
+         */
+        const result:String[] = merge(true, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "");
+        expect(result.filter(value => /@deca.*/.test(value.toString())).length).to.be.equal(1, 'id should have value from patch');
+    });
+
 });
