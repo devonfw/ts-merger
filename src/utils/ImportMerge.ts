@@ -96,22 +96,22 @@ export class ImportMerge{
      * @memberof ImportMerge
      */
     mergeImports(){
+        
         this.sourceFilePatch.getChildAt(0).getChildren().forEach(childPatch => {
             let exists: boolean = false;
             switch (childPatch.kind) {
                 case ts.SyntaxKind.ImportDeclaration:
-                this.imports.forEach(importElement => {
-                    if((<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text == importElement.getModule()){
-                        exists = true;
-                        if(importElement.getNameSpace() != "" && importElement.getNamed().length > 0){
-                            (<ts.NamedImports>(<ts.ImportDeclaration>childPatch).importClause.namedBindings).elements.forEach(clause => {
-                                if(!importElement.contains((<String>clause.name.text))){
-                                    importElement.addNamed((<String>clause.name.text));
-                                }
-                            })
+                    this.imports.forEach(importElement => {
+                        if((<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text === importElement.getModule()){
+                            if(importElement.getNameSpace() === "" && importElement.getNamed().length > 0){
+                                (<ts.NamedImports>(<ts.ImportDeclaration>childPatch).importClause.namedBindings).elements.forEach(clause => {
+                                    if(!importElement.hasNamed((<String>clause.name.text))){
+                                        importElement.addNamed((<String>clause.name.text));
+                                    }
+                                })
+                            }
                         }
-                    }
-                })
+                    })
                 break;
             }
         })
