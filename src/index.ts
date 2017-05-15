@@ -53,7 +53,6 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                 if (patchOverrides) {
                     classToPrint.addDecorators(getDecorators(classDeclPatch, sourceFilePatch));
                     //get decorators, modifiers and heritages of class from patch file
-                    //getDecorators(classDeclPatch, sourceFilePatch, result);
                     classToPrint.addModifiers(getModifiers(classDeclPatch, sourceFilePatch));
                     classToPrint.addHeritages(getHeritages(classDeclPatch, sourceFilePatch));
                     result.push(classToPrint.toString());
