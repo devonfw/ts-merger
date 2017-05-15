@@ -32,6 +32,16 @@ export class ClassDeclaration{
         })
     }
 
+    addHeritage(heritage: String){
+        this.heritages.push(heritage);
+    }
+
+    addHeritages(heritages: String []){
+        heritages.forEach(heritage => {
+            this.heritages.push(heritage);
+        })
+    }
+
     toString(): String{
         let classDeclaration: String[] = [];
         this.decorators.forEach(decorator => {

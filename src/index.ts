@@ -54,22 +54,19 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                     classToPrint.addDecorators(getDecorators(classDeclPatch, sourceFilePatch));
                     //get decorators, modifiers and heritages of class from patch file
                     //getDecorators(classDeclPatch, sourceFilePatch, result);
-                    getModifiers(classDeclPatch, sourceFilePatch, result);
-                    result.push(" class ", classDeclPatch.name.text);
-                    getHeritages(classDeclPatch, sourceFilePatch, result);
-                    result.push(" {\n");
+                    classToPrint.addModifiers(getModifiers(classDeclPatch, sourceFilePatch));
+                    classToPrint.addHeritages(getHeritages(classDeclPatch, sourceFilePatch));
+                    result.push(classToPrint.toString());
                     //TODO -- finish classMerge with patchOverrides = true
 
                 } else {
                     //get decorators of base file testing if it anyone is NgModule decorator merging it if it is
-                    getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch, sourceFile, sourceFilePatch, result);
+                    classToPrint.addDecorators(getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch, sourceFile, sourceFilePatch));
                     
                     //get modifiers and heritages of class from base file
-                    getModifiers(classDecl, sourceFile, result);
-                    result.push(" class ", classDecl.name.text);
-                    getHeritages(classDecl, sourceFile, result);
-                    result.push(" {\n");
-
+                    classToPrint.addModifiers(getModifiers(classDecl, sourceFile));
+                    classToPrint.addHeritages(getHeritages(classDecl, sourceFile));
+                    result.push(classToPrint.toString());
                     //merge methods and properties of classes
                     let methodsBase: string[] = [];
                     let propertiesBase: string[] = [];
@@ -288,7 +285,7 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                                                         //         result.push(decorator.getText(sourceFile));
                                                         //     })
                                                         // }
-                                                        getModifiers(methodBase, sourceFile, result);
+                                                        //getModifiers(methodBase, sourceFile);
                                                         // if (methodBase.modifiers) {
                                                         //     methodBase.modifiers.forEach(modifier => {
                                                         //         result.push(modifier.getText(sourceFile));
@@ -604,27 +601,33 @@ function getDecorators(node: ts.Node, source: ts.SourceFile){
     return decorators;
 }
 
-function getModifiers(node: ts.Node, source: ts.SourceFile, result: String []){
+function getModifiers(node: ts.Node, source: ts.SourceFile){
+    let modifiers: String[] = [];
     if (node.modifiers) {
         node.modifiers.forEach(modifier => {
-            result.push(modifier.getFullText(source));
+            modifiers.push(modifier.getFullText(source));
         })
     }
+    return modifiers;
 }
 
-function getHeritages(node: ts.ClassDeclaration, source: ts.SourceFile, result: String []){
+function getHeritages(node: ts.ClassDeclaration, source: ts.SourceFile){
+    let heritages:String[] = [];
     if (node.heritageClauses) {
         node.heritageClauses.forEach(heritage => {
-            result.push(heritage.getFullText(source));
+            heritages.push(heritage.getFullText(source));
         })
     }
+    return heritages;
 }
 
-function getClassDecoratorWithNgModuleCase(classDecl: ts.ClassDeclaration, classDeclPatch: ts.ClassDeclaration, sourceFile: ts.SourceFile, sourceFilePatch: ts.SourceFile, result: String[]){
+function getClassDecoratorWithNgModuleCase(classDecl: ts.ClassDeclaration, classDeclPatch: ts.ClassDeclaration, sourceFile: ts.SourceFile, sourceFilePatch: ts.SourceFile){
+    let decorators: String[] = [];
+    let ngModule: String[] = [];
     if (classDecl.decorators) {
         classDecl.decorators.forEach(decorator => {
             if (decorator.getFullText(sourceFile).indexOf("NgModule") >= 0) {
-                result.push("\n@NgModule({\n");
+                ngModule.push("\n@NgModule({\n");
                 interface properties {
                     key: string,
                     values: string[]
@@ -655,38 +658,40 @@ function getClassDecoratorWithNgModuleCase(classDecl: ts.ClassDeclaration, class
                 if ((<ts.CallExpression>decorator.expression).arguments) {
                     if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties) {
                         (<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties.forEach(property => {
-                            result.push((<ts.Identifier>property.name).text + ": [");
+                            ngModule.push((<ts.Identifier>property.name).text + ": [");
                             let elements: string[] = [];
                             if ((<ts.PropertyAssignment>property).initializer.kind == ts.SyntaxKind.ArrayLiteralExpression) {
                                 let arrayBase: string[] = [];
                                 let elements = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements;
                                 elements.forEach(elem => {
                                     arrayBase.push(elem.getFullText(sourceFile));
-                                    result.push(elem.getFullText(sourceFile), ",");
+                                    ngModule.push(elem.getFullText(sourceFile), ",");
                                 });
                                 arrayProperties.forEach(prop => {
                                     if (prop.key == (<ts.Identifier>property.name).text) {
                                         prop.values.forEach(proPatch => {
                                             if (arrayBase.indexOf(proPatch) < 0) {
-                                                result.push(proPatch);
+                                                ngModule.push(proPatch);
                                                 if(arrayBase.indexOf(proPatch) < arrayBase.length - 1){
-                                                    result.push(",");
+                                                    ngModule.push(",");
                                                 }
                                             }
                                         });
                                     }
                                 });
-                                result.push("\n],\n");
+                                ngModule.push("\n],\n");
                             }
                         });
                     }
                 }
-                result.push("})\n")
+                ngModule.push("})\n")
+                decorators.push(ngModule.join(""));
 
             } else {
-                result.push(decorator.getFullText(sourceFile) + "\n");
+                decorators.push(decorator.getFullText(sourceFile) + "\n");
             }
         })
+        return decorators;
     }
 }
 
