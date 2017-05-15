@@ -71,7 +71,11 @@ export class ImportMerge{
                         if((<ts.ImportDeclaration>child).importClause.namedBindings){
                             if((<ts.ImportDeclaration>child).importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
                                 (<ts.NamedImports>(<ts.ImportDeclaration>child).importClause.namedBindings).elements.forEach(named => {
-                                    importElement.addNamed((<String>named.name.text));
+                                    if(named.propertyName){
+                                        importElement.addNamed((<String>named.propertyName.text) + " as " + (<String>named.name.text));
+                                    }else{
+                                        importElement.addNamed((<String>named.name.text));
+                                    }
                                 })
                             }else {
                                 importElement.setNamespace((<ts.NamespaceImport>(<ts.ImportDeclaration>child).importClause.namedBindings).name.text);
