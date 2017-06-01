@@ -1,13 +1,38 @@
+import { Method } from './members/method/Method';
+
+/**
+ * Defines the structure of class objects
+ * 
+ * @export
+ * @class ClassDeclaration
+ */
 export class ClassDeclaration{
 
     private name: String = "";
     private decorators: String [] = [];
     private heritages: String[] = [];
     private modifiers: String[] = [];
-
+    private methods: Method[] = [];
     private properties: String[] = [];
+    private construct: String = "";
 
+    getConstructor(){
+        return this.construct;
+    }
+
+    setConstructor(constrcut: String){
+        this.construct = constrcut;
+    }
     getName():String{
+
+
+        let name: string;
+        let surname: string;
+        let age: number;
+        let salary: number;
+        let mail: string;
+
+
         return this.name;
     }
 
@@ -42,6 +67,26 @@ export class ClassDeclaration{
         })
     }
 
+    addProperty(property: String) {
+        this.properties.push(property);
+    }
+
+    addProperties(properties: String[]){
+        properties.forEach(property => {
+            this.properties.push(property);
+        })
+    }
+
+    addMethod(method: Method){
+        this.methods.push(method);
+    }
+
+    addMethods(methods: Method[]){
+        methods.forEach(method => {
+            this.methods.push(method);
+        })
+    }
+
     toString(): String{
         let classDeclaration: String[] = [];
         this.decorators.forEach(decorator => {
@@ -55,7 +100,20 @@ export class ClassDeclaration{
             classDeclaration.push(heritage, " ");
         })
         classDeclaration.push("{\n");
+
+        this.properties.forEach(property => {
+            classDeclaration.push(property, "\n");
+        })
+
+        classDeclaration.push(this.construct, "\n");
+        this.methods.forEach(method => {
+            classDeclaration.push(method.toString());
+        })
+
+        classDeclaration.push("\n}\n");
         
         return classDeclaration.join("");
     }
 }
+
+export default ClassDeclaration;
