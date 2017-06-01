@@ -1,3 +1,10 @@
+
+/**
+ *Defines and import clause structure 
+ * 
+ * @export
+ * @class ImportClause
+ */
 export class ImportClause{
     private module: String = "";
     private named: String[] = [];
@@ -63,3 +70,5 @@ export class ImportClause{
         return clause.join("");
     }
 }
+
+export default ImportClause;
