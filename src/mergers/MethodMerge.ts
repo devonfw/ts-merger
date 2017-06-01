@@ -76,7 +76,7 @@ export class MethodMerge{
                     if(methodBase.type){
                         method.setType(methodBase.type.getFullText(this.sourceFile));
                     }
-                    method.addDecorators(ga.getDecorators(methodBase, this.sourceFile));
+                    method.addDecorators(ga.getDecorators(methodBase, memberPatch, this.patchOverrides, this.sourceFile, this.sourceFilePatch));
                     method.addModifiers(ga.getModifiers(methodBase, this.sourceFile));
                     if (methodBase.parameters) {
                         methodBase.parameters.forEach(parameter => {
@@ -91,7 +91,7 @@ export class MethodMerge{
                         classToPrint.addMethod(this.buildMethod(this.sourceFilePatch, methodPatch));
                     }else{
                         let body: String[] = [];
-                        body.push("{\n");
+                        body.push("    {\n");
                         switch (identifier) {
                             case Constants.cbGetData:
                                 cbMerge.mergeGetData(methodBase, methodPatch, body, this.sourceFile, this.sourceFilePatch, properties, method, classToPrint);

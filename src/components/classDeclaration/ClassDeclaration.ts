@@ -72,7 +72,7 @@ export class ClassDeclaration{
     }
 
     addProperties(properties: String[]){
-        properties.forEach(property => {
+        this.properties.forEach(property => {
             this.properties.push(property);
         })
     }
@@ -82,7 +82,7 @@ export class ClassDeclaration{
     }
 
     addMethods(methods: Method[]){
-        methods.forEach(method => {
+        this.methods.forEach(method => {
             this.methods.push(method);
         })
     }
@@ -97,7 +97,7 @@ export class ClassDeclaration{
         })
         classDeclaration.push("class ", this.name);
         this.heritages.forEach(heritage => {
-            classDeclaration.push(heritage, " ");
+            classDeclaration.push(heritage);
         })
         classDeclaration.push("{\n");
 

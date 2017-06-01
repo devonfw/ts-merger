@@ -99,9 +99,9 @@ export class ImportMerge{
                 this.imports.forEach(importElement => {
                     if((<ts.Identifier>(<ts.ImportDeclaration>childPatch).moduleSpecifier).text == importElement.getModule()){
                         exists = true;
-                        if(importElement.getNameSpace() != "" && importElement.getNamed().length > 0){
+                        if(importElement.getNamed().length > 0){
                             (<ts.NamedImports>(<ts.ImportDeclaration>childPatch).importClause.namedBindings).elements.forEach(clause => {
-                                if(!importElement.contains((<String>clause.name.text))){
+                                if(!importElement.contains((<String>clause.name.text))){                     
                                     importElement.addNamed((<String>clause.name.text));
                                 }
                             })

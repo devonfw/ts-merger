@@ -65,19 +65,14 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
                     classToPrint.setName(classDecl.name.text);
                     if (patchOverrides) {
                         //get decorators, modifiers and heritages of class from patch file
-                        classToPrint.addDecorators(ga.getDecorators(classDeclPatch, sourceFilePatch));
-                        classToPrint.addModifiers(ga.getModifiers(classDeclPatch, sourceFilePatch));
-                        classToPrint.addHeritages(ga.getHeritages(classDeclPatch, sourceFilePatch));
+                        classToPrint.addDecorators(ga.getDecorators(classDecl, classDeclPatch, patchOverrides, sourceFile, sourceFilePatch));
                     } else {
                         //get decorators of base file testing if it anyone is NgModule decorator merging it if it is
-                        classToPrint.addDecorators(cbMerge.getClassDecoratorWithNgModuleCase(classDecl, classDeclPatch, sourceFile, sourceFilePatch));
-                        
-                        //get modifiers and heritages of class from base file
-                        classToPrint.addModifiers(ga.getModifiers(classDecl, sourceFile));
-                        classToPrint.addHeritages(ga.getHeritages(classDecl, sourceFile));
-                    
-                        //merge methods and properties of classes
+                        classToPrint.addDecorators(ga.getDecorators(classDecl, classDeclPatch, patchOverrides, sourceFile, sourceFilePatch));
                     }
+                    //get modifiers and heritages of class from base file
+                    classToPrint.addModifiers(ga.getModifiers(classDeclPatch, sourceFilePatch));
+                    classToPrint.addHeritages(ga.getHeritages(classDeclPatch, sourceFilePatch));
                     let propertiesBase: string[] = [];
                     if (classDecl.members) {
                         classDecl.members.forEach(member => {

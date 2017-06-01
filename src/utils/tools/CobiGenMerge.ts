@@ -370,6 +370,63 @@ export function getClassDecoratorWithNgModuleCase(classDecl: ts.ClassDeclaration
                 decorators.push(decorator.getFullText(sourceFile) + "\n");
             }
         })
-        return decorators;
     }
+    return decorators;
+}
+
+export function ngModuleCase(decorator: ts.Decorator, decoratorPatch: ts.Decorator, sourceFile: ts.SourceFile, sourceFilePatch: ts.SourceFile){
+    let ngModule: String[] = [];
+    ngModule.push("\n@NgModule({\n");
+    interface properties {
+        key: string,
+        values: string[]
+    };
+    let arrayProperties: properties[] = [];
+    if ((<ts.CallExpression>decoratorPatch.expression).arguments) {
+        if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties) {
+            (<ts.ObjectLiteralExpression>(<ts.CallExpression>decoratorPatch.expression).arguments[0]).properties.forEach(propertyPatch => {
+                let elements: string[] = [];
+                if ((<ts.PropertyAssignment>propertyPatch).initializer.kind === ts.SyntaxKind.ArrayLiteralExpression) {
+                    let array: ts.ArrayLiteralExpression = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>propertyPatch).initializer);
+                    array.elements.forEach(element => {
+                        elements.push(element.getFullText(sourceFilePatch));
+                    });
+                    arrayProperties.push({ key: (<ts.Identifier>propertyPatch.name).text, values: elements });
+                }
+
+            });
+        }
+    }
+    if ((<ts.CallExpression>decorator.expression).arguments) {
+        if ((<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties) {
+            (<ts.ObjectLiteralExpression>(<ts.CallExpression>decorator.expression).arguments[0]).properties.forEach(property => {
+                ngModule.push((<ts.Identifier>property.name).text + ": [");
+                let elements: string[] = [];
+                if ((<ts.PropertyAssignment>property).initializer.kind === ts.SyntaxKind.ArrayLiteralExpression) {
+                    let arrayBase: string[] = [];
+                    let elements = (<ts.ArrayLiteralExpression>(<ts.PropertyAssignment>property).initializer).elements;
+                    elements.forEach(elem => {
+                        arrayBase.push(elem.getFullText(sourceFile));
+                        ngModule.push(elem.getFullText(sourceFile), ",");
+                    });
+                    arrayProperties.forEach(prop => {
+                        if (prop.key === (<ts.Identifier>property.name).text) {
+                            prop.values.forEach(proPatch => {
+                                if (arrayBase.indexOf(proPatch) < 0) {
+                                    ngModule.push(proPatch);
+                                    if(arrayBase.indexOf(proPatch) < arrayBase.length - 1){
+                                        ngModule.push(",");
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    ngModule.push("\n],\n");
+                }
+            });
+        }
+    }
+    ngModule.push("})\n");
+    return ngModule.join("");            
+    
 }

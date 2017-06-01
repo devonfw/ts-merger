@@ -23,7 +23,7 @@ export class ImportClause{
         this.nameSpace = nameSpace;
     }
 
-    hasNamed(named: String): boolean{
+    contains(named: String): boolean{
         if(this.named.indexOf(named) >= 0){
             return true;
         }else{
