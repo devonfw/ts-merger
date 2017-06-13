@@ -1,3 +1,4 @@
+import { GeneralInterface } from '../../../general/GeneralInterface';
 
 /**
  * Defines the structure of a class method parameter
@@ -5,31 +6,41 @@
  * @export
  * @class Parameter
  */
-export class Parameter{
-    private name: String = "";
-    private type: String = "";
+export class Parameter extends GeneralInterface {
 
-    setName(name: String){
-        this.name = name;
-    } 
+    private modifiers: String[] = [];
 
-    setType(type: String){
-        this.type = type;
+    addModifier(modifier: String) {
+        this.modifiers.push(modifier);
     }
 
-    getName(): String{
-        return this.name;
+    getModifiers() {
+        return this.modifiers;
     }
 
-    getType():String{
-        return this.type;
+    setModifiers(modifiers: String[]) {
+        this.modifiers = modifiers;
+    }
+
+    merge(patchParameter: Parameter, patchOverrides: boolean) {
+        if(patchOverrides) {
+            this.setType(patchParameter.getType());
+            this.setModifiers(patchParameter.getModifiers());
+        }
     }
 
     toString(): String{
-        if(this.type !== "")
-            return this.name + ": " + this.type;
+        let result: String[] = [];
+
+        this.modifiers.forEach(modifier => {
+            result.push(modifier, " ");
+        })
+        if(this.getType() !== "")
+            result.push(this.getIdentifier() + ": " + this.getType());
         else
-            return this.name;
+            result.push(this.getIdentifier());
+
+        return result.join("");
     }
 }
 

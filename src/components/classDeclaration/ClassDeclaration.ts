@@ -1,3 +1,7 @@
+import { Constructor } from './members/constructor/Constructor';
+import { PropertyDeclaration } from './members/property/PropertyDeclaration';
+import { Decorator } from '../decorator/Decorator';
+import { GeneralInterface } from '../general/GeneralInterface';
 import { Method } from './members/method/Method';
 
 /**
@@ -6,47 +10,40 @@ import { Method } from './members/method/Method';
  * @export
  * @class ClassDeclaration
  */
-export class ClassDeclaration{
+export class ClassDeclaration extends GeneralInterface{
 
-    private name: String = "";
-    private decorators: String [] = [];
+    private decorators: Decorator [] = [];
     private heritages: String[] = [];
     private modifiers: String[] = [];
     private methods: Method[] = [];
-    private properties: String[] = [];
-    private construct: String = "";
+    private properties: PropertyDeclaration[] = [];
+    private construct: Constructor = new Constructor();
 
     getConstructor(){
         return this.construct;
     }
 
-    setConstructor(constrcut: String){
+    setConstructor(constrcut: Constructor){
         this.construct = constrcut;
     }
-    getName():String{
 
-
-        let name: string;
-        let surname: string;
-        let age: number;
-        let salary: number;
-        let mail: string;
-
-
-        return this.name;
-    }
-
-    setName(name: String){
-        this.name = name;
-    }
-    addDecorator(decorator: String){
+    addDecorator(decorator: Decorator){
         this.decorators.push(decorator);
     }
-    addDecorators(decorators: String[]){
+    addDecorators(decorators: Decorator[]){
         decorators.forEach(decorator => {
             this.decorators.push(decorator);
         })
     }
+
+    getDecorators() {
+        return this.decorators;
+    }
+
+    setDecorators(decorators: Decorator[]) {
+        this.decorators = decorators;
+    }
+
     addModifier(modifier: String){
         this.modifiers.push(modifier);
     }
@@ -55,6 +52,14 @@ export class ClassDeclaration{
         modifiers.forEach(modifier => {
             this.modifiers.push(modifier);
         })
+    }
+
+    getModifiers() {
+        return this.modifiers;
+    }
+
+    setModifiers(modifiers: String[]) {
+        this.modifiers = modifiers;
     }
 
     addHeritage(heritage: String){
@@ -67,14 +72,26 @@ export class ClassDeclaration{
         })
     }
 
-    addProperty(property: String) {
+    getHeritages() {
+        return this.heritages;
+    }
+
+    setHeritages(heritages: String[]) {
+        this.heritages = heritages;
+    }
+
+    addProperty(property: PropertyDeclaration) {
         this.properties.push(property);
     }
 
-    addProperties(properties: String[]){
+    addProperties(properties: PropertyDeclaration[]){
         this.properties.forEach(property => {
             this.properties.push(property);
         })
+    }
+
+    getProperties() {
+        return this.properties;
     }
 
     addMethod(method: Method){
@@ -87,25 +104,33 @@ export class ClassDeclaration{
         })
     }
 
+    getMethods() {
+        return this.methods;
+    }
+
+    setMethods(methods: Method[]) {
+        this.methods = methods;
+    }
+
     toString(): String{
         let classDeclaration: String[] = [];
         this.decorators.forEach(decorator => {
-            classDeclaration.push(decorator, "\n");
+            classDeclaration.push(decorator.toString(), "\n");
         })
         this.modifiers.forEach(modifier => {
             classDeclaration.push(modifier, " ");
         })
-        classDeclaration.push("class ", this.name);
+        classDeclaration.push("class ", this.getIdentifier());
         this.heritages.forEach(heritage => {
             classDeclaration.push(heritage);
         })
-        classDeclaration.push("{\n");
+        classDeclaration.push(" {\n");
 
         this.properties.forEach(property => {
-            classDeclaration.push(property, "\n");
+            classDeclaration.push(property.toString(), "\n");
         })
 
-        classDeclaration.push(this.construct, "\n");
+        classDeclaration.push(this.construct.toString(), "\n");
         this.methods.forEach(method => {
             classDeclaration.push(method.toString());
         })

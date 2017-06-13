@@ -1,4 +1,8 @@
+import { Decorator } from '../../../decorator/Decorator';
+import { GeneralInterface } from '../../../general/GeneralInterface';
 import { Parameter } from './Parameter';
+import * as mergeTools from '../../../../tools/MergerTools';
+import { BodyMethod, default as Body } from './body/BodyMethod';
 
 
 /**
@@ -7,13 +11,11 @@ import { Parameter } from './Parameter';
  * @export
  * @class Method
  */
-export class Method{
+export class Method extends GeneralInterface{
     private parameters: Parameter[] = [];
     private modifiers: String[] = [];
-    private decorators: String[] = [];
-    private name: String = "";
-    private body: String = "";
-    private type: String = "";
+    private decorators: Decorator[] = [];
+    private body: BodyMethod = new BodyMethod();
     
     getParameters():Parameter[] {
         return this.parameters;
@@ -23,24 +25,16 @@ export class Method{
         return this.modifiers;
     }
 
-    getDecorators():String[] {
+    setModifiers(modifiers: String[]) {
+        this.modifiers = modifiers;
+    }
+
+    getDecorators() {
         return this.decorators;
     }
 
-    getName():String {
-        return this.name;
-    }
-
-    setName(name: String){
-        this.name = name;
-    }
-
-    getType(): String{
-        return this.type;
-    }
-
-    setType(type: String){
-        this.type= type;
+    setDecorators(decorators: Decorator[]) {
+        this.decorators = decorators;
     }
 
     addParameter(parameter: Parameter){
@@ -63,33 +57,70 @@ export class Method{
         })
     }
 
-    addDecorator(decorator: String){
+    addDecorator(decorator: Decorator){
         this.decorators.push(decorator);
     }
 
-    addDecorators(decorators: String[]){
+    addDecorators(decorators: Decorator[]){
         decorators.forEach(decorator => {
             this.decorators.push(decorator);
         })
     }
 
-    getBody():String {
+    getBody():BodyMethod {
         return this.body;
     }
 
-    setBody(body: String){
+    setBody(body: BodyMethod){
         this.body = body;
+    }
+
+    merge(patchMethod: Method, patchOverrides: boolean) {
+        let paramExists: boolean;
+
+        mergeTools.mergeDecorators(this.getDecorators(), patchMethod.getDecorators(), patchOverrides);
+        if(patchOverrides) {
+            this.setModifiers(patchMethod.getModifiers());
+            this.setBody(patchMethod.getBody());
+        } else {
+            let exists: boolean;
+            patchMethod.getModifiers().forEach(patchModifier => {
+                this.getModifiers().forEach(modifier => {
+                    if(patchModifier === modifier) {
+                        exists = true;
+                    }
+                })
+                if(!exists) {
+                    this.addModifier(patchModifier);
+                }
+            })
+
+            this.getBody().merge(patchMethod.getBody(), patchOverrides);
+        }
+
+        patchMethod.getParameters().forEach(patchParameter => {
+            paramExists = false;
+            this.getParameters().forEach(parameter => {
+                if(patchParameter.getIdentifier() === parameter.getIdentifier()) {
+                    paramExists = true;
+                    parameter.merge(patchParameter, patchOverrides);
+                }
+            })
+            if(!paramExists){
+                this.addParameter(patchParameter);
+            }
+        })
     }
 
     toString(): String{
         let result: String[] = [];
         this.decorators.forEach(decorator => {
-            result.push(decorator, "\n");
+            result.push(decorator.toString(), "\n");
         })
         this.modifiers.forEach(modifier => {
             result.push(modifier, " ");
         })
-        result.push(this.name, "(");
+        result.push(this.getIdentifier(), "(");
         this.parameters.forEach(parameter => {
             result.push(parameter.toString());
             if(this.parameters.indexOf(parameter) < this.parameters.length - 1){
@@ -97,10 +128,10 @@ export class Method{
             }
         })
         result.push(")");
-        if(this.type !== "")
-            result.push(": ", this.type, "\n", this.body, "\n", "\n");
+        if(this.getType() !== "")
+            result.push(": ", this.getType(), "\n", this.body.toString(), "\n", "\n");
         else
-            result.push("\n", this.body, "\n", "\n");
+            result.push("\n", this.body.toString(), "\n", "\n");
         
 
         return result.join("");
