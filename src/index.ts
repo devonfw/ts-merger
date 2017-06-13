@@ -12,7 +12,7 @@ import ImportClause  from './components/import/ImportClause';
 import ClassDeclaration  from './components/classDeclaration/ClassDeclaration';
 import Method from './components/classDeclaration/members/method/Method';
 import Parameter from './components/classDeclaration/members/method/Parameter';
-import * as mapTools from './tools/Mappingtools';
+import * as mapTools from './tools/MappingTools';
 
 
 let strategy = process.argv[2].toLowerCase() === "true" ? true : false;
