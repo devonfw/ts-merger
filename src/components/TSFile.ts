@@ -1,3 +1,4 @@
+import { FunctionDeclaration } from './general/FunctionDeclaration';
 import { VariableStatement } from './general/VariableStatement';
 import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
 import { ImportClause } from './import/ImportClause';
@@ -7,11 +8,23 @@ export class TSFile {
     private importClauses: ImportClause[] = [];
     private class: ClassDeclaration;
     private variables: VariableStatement[] = [];
+    private functions: FunctionDeclaration[] = [];
 
     addImport(importClause: ImportClause){
         this.importClauses.push(importClause);
     }
+    
+    addFunction(functionDecl: FunctionDeclaration) {
+        this.functions.push(functionDecl);
+    }
 
+    getFunctions() {
+        return this.functions;
+    }
+
+    setFunctions(functions: FunctionDeclaration[]) {
+        this.functions = functions;
+    }
     setClass(classDeclaration: ClassDeclaration){
         this.class = classDeclaration;
     }
@@ -42,6 +55,9 @@ export class TSFile {
         if(this.variables.length > 0) {
             mergeTools.mergeVariables(this, patchFile, patchOverrides);
         }
+        if(this.functions.length > 0) {
+            mergeTools.mergeFunctions(this.functions, patchFile.getFunctions(), patchOverrides);
+        }
     }
 
     toString() {
@@ -50,6 +66,10 @@ export class TSFile {
             file.push(importClause.toString());
         })
         file.push("\n");
+
+        this.functions.forEach(func => {
+            file.push(func.toString());
+        })
         if(this.class){
             file.push(this.class.toString());
         } else {

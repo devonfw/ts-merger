@@ -22,7 +22,6 @@ export class BodyMethod {
             this.getStatements().forEach(statement => {
                 if(patchStatement instanceof VariableStatement && statement instanceof VariableStatement){
                     if((<VariableStatement>patchStatement).getIdentifier() === (<VariableStatement>statement).getIdentifier()) {
-                        console.log((<VariableStatement>patchStatement).getIdentifier());
                         (<VariableStatement>statement).merge(<VariableStatement>patchStatement, patchOverrides);
                     }
                 }

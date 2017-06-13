@@ -1,3 +1,4 @@
+import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
 import { VariableStatement } from '../components/general/VariableStatement';
 import { TSFile } from '../components/TSFile';
 import { ImportClause } from '../components/import/ImportClause';
@@ -28,6 +29,8 @@ export function mapFile(sourceFile: ts.SourceFile) {
             case ts.SyntaxKind.VariableStatement:
                 file.addVariable(mapVariableStatement((<ts.VariableStatement>child), sourceFile));
             break;
+            case ts.SyntaxKind.FunctionDeclaration:
+                file.addFunction(mapFunction((<ts.FunctionDeclaration>child), sourceFile));
 
         }
     });
@@ -238,17 +241,27 @@ export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceF
 }
 
 export function mapTypes(type: ts.TypeNode){
+
+    let typeArgument: String[] = [];
+    let resultType: String[] = []
     switch(type.kind) {
         case ts.SyntaxKind.AnyKeyword:
             return "any";
         case ts.SyntaxKind.NumberKeyword:
-            return "number"
+            return "number";
         case ts.SyntaxKind.StringKeyword:
             return "string"
         case ts.SyntaxKind.BooleanKeyword:
             return "boolean";
         case ts.SyntaxKind.TypeReference:
-            return (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text;
+            if((<ts.TypeReferenceNode>type).typeArguments) {
+                typeArgument.push("<");
+                (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
+                    typeArgument.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
+                })
+                typeArgument.push(">");
+            }
+            return (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text + typeArgument;
         case ts.SyntaxKind.TupleType:
             let tuple: String[] = [];
             tuple.push("[");
@@ -263,6 +276,8 @@ export function mapTypes(type: ts.TypeNode){
             return tuple.join("");
         case ts.SyntaxKind.ArrayType:
             return mapTypes((<ts.ArrayTypeNode>type).elementType) + "[]"; 
+        case ts.SyntaxKind.VoidKeyword:
+            return "void";
     }
 }
 
@@ -442,4 +457,34 @@ export function mapVariableStatement(statement: ts.VariableStatement, source: ts
         }
     }
     return variable;
+}
+
+export function mapFunction(fileFunction: ts.FunctionDeclaration, sourceFile: ts.SourceFile) {
+    let func: FunctionDeclaration = new FunctionDeclaration();
+    func.setIdentifier((<ts.Identifier>(<ts.FunctionDeclaration>fileFunction).name).text);
+    if(fileFunction.type){
+        func.setType(mapTypes(fileFunction.type));
+    }
+
+    if(fileFunction.decorators){
+        fileFunction.decorators.forEach(decorator => {
+            func.addDecorators(mapDecorator((<ts.Decorator>decorator), sourceFile));
+        })
+    }
+    if (fileFunction.modifiers){
+        fileFunction.modifiers.forEach(modifier => {
+            func.addModifier(mapModifier(modifier));
+        })
+    }
+    if (fileFunction.parameters) {
+        fileFunction.parameters.forEach(parameter => {
+            func.addParameter(mapParameter(parameter));
+        })
+    }
+
+    if(fileFunction.body){
+        func.setBody(mapBodyMethod(fileFunction.body.getFullText(sourceFile)));
+    }
+
+    return func;
 }

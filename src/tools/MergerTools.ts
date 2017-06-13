@@ -1,3 +1,4 @@
+import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
 import { VariableStatement } from '../components/general/VariableStatement';
 import { Decorator } from '../components/decorator/Decorator';
 import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
@@ -115,4 +116,25 @@ export function mergeVariables(baseFile: TSFile, patchFile: TSFile, patchOverrid
             baseFile.addVariable(patchVariable);
         }
     })
+}
+
+export function mergeFunctions(baseFunctions: FunctionDeclaration[], patchFunctions: FunctionDeclaration[], patchOverrides) {
+    let exists: boolean;
+
+    patchFunctions.forEach(patchFunction => {
+        exists = false;
+        baseFunctions.forEach(func => {
+            if(patchFunction.getIdentifier() === func.getIdentifier()){
+                exists = true;
+                mergeFunction(func, patchFunction, patchOverrides);
+            }
+        })
+        if(!exists) {
+            baseFunctions.push(patchFunction);
+        }
+    })
+}
+
+export function mergeFunction(baseFunction: FunctionDeclaration, patchFunction: FunctionDeclaration, patchOverrides: boolean) {
+    baseFunction.merge(patchFunction, patchOverrides);
 }
