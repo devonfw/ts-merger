@@ -1,0 +1,445 @@
+import { VariableStatement } from '../components/general/VariableStatement';
+import { TSFile } from '../components/TSFile';
+import { ImportClause } from '../components/import/ImportClause';
+import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
+import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
+import { Parameter } from '../components/classDeclaration/members/method/Parameter';
+import { Decorator } from '../components/decorator/Decorator';
+import { Method } from '../components/classDeclaration/members/method/Method';
+import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
+import { CallExpression } from '../components/general/CallExpression';
+import { GeneralInterface } from '../components/general/GeneralInterface';
+import { ArrayLiteralExpression } from '../components/general/ArrayLiteralExpression';
+import { PropertyAssignment } from '../components/general/PropertyAssignment';
+import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
+import * as ts from 'typescript';
+import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
+
+export function mapFile(sourceFile: ts.SourceFile) {
+    let file: TSFile = new TSFile();
+    sourceFile.getChildAt(0).getChildren().forEach(child => {
+        switch(child.kind){
+            case ts.SyntaxKind.ImportDeclaration:
+                file.addImport(mapImport((<ts.ImportDeclaration>child)));
+            break;
+            case ts.SyntaxKind.ClassDeclaration:
+                file.setClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
+            break;
+            case ts.SyntaxKind.VariableStatement:
+                file.addVariable(mapVariableStatement((<ts.VariableStatement>child), sourceFile));
+            break;
+
+        }
+    });
+    return file;
+}
+export function mapObjectLiteral(objectFromFile: ts.ObjectLiteralExpression, sourceFile: ts.SourceFile) {
+
+    let objLiteral: ObjectLiteralExpression = new ObjectLiteralExpression();
+    objectFromFile.properties.forEach(property => {
+        let propertyFromFile = (<ts.PropertyAssignment>property);
+        let propertyAssignment: PropertyAssignment = new PropertyAssignment();
+        propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
+        switch(propertyFromFile.initializer.kind){
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                propertyAssignment.setGeneral(mapArrayLiteral((<ts.ArrayLiteralExpression>propertyFromFile.initializer).elements, sourceFile));
+            break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                propertyAssignment.setGeneral(mapObjectLiteral((<ts.ObjectLiteralExpression>propertyFromFile.initializer), sourceFile));
+            break;
+            case ts.SyntaxKind.Identifier:
+                propertyAssignment.setGeneral((<ts.Identifier>propertyFromFile.initializer).text);
+            break;
+            case ts.SyntaxKind.StringLiteral:
+                propertyAssignment.setGeneral("'" + (<ts.StringLiteral>propertyFromFile.initializer).text + "'");
+            break;
+            case ts.SyntaxKind.NullKeyword:
+                propertyAssignment.setGeneral("null");
+            break;
+            case ts.SyntaxKind.CallExpression:
+                propertyAssignment.setGeneral(mapCallExpression((<ts.CallExpression>propertyFromFile.initializer), sourceFile));
+            break;
+            default:
+                propertyAssignment.setGeneral(propertyFromFile.initializer.getFullText(sourceFile))
+        }
+        objLiteral.addProperty(propertyAssignment);
+    });
+
+    return objLiteral;
+}
+
+export function mapCallExpression(node: ts.CallExpression, sourceFile: ts.SourceFile) {
+    let expression: CallExpression = new CallExpression();
+    let propExpr = (<ts.PropertyAccessExpression>node.expression);
+    if(propExpr.expression.kind === ts.SyntaxKind.ThisKeyword){
+        expression.setIdentifier("this");
+    } else {
+        expression.setIdentifier((<ts.Identifier>propExpr.expression).text);
+    }
+    expression.setName((<ts.Identifier>propExpr.name).text);
+    if(node.arguments) {
+        node.arguments.forEach(argument => {
+            switch(argument.kind){
+                case ts.SyntaxKind.ObjectLiteralExpression:
+                    expression.addArgument(mapObjectLiteral((<ts.ObjectLiteralExpression>argument), sourceFile));
+                break;
+                case ts.SyntaxKind.StringLiteral:
+                    expression.addArgument("'" + (<ts.StringLiteral>argument).text + "'");
+                break;
+                case ts.SyntaxKind.Identifier:
+                    expression.addArgument((<ts.Identifier>argument).text);
+                break;
+            }
+        })
+    }
+    return expression;
+}
+
+export function mapArrayLiteral(elements: ts.NodeArray<any>, sourceFile: ts.SourceFile) {
+    let array: ArrayLiteralExpression = new ArrayLiteralExpression();
+    elements.forEach(element => {
+        switch(element.kind){
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                array.addElement(mapObjectLiteral(<ts.ObjectLiteralExpression>element, sourceFile));
+            break;
+            case ts.SyntaxKind.Identifier:
+                array.addElement((<ts.Identifier>element).text);
+            break;
+            case ts.SyntaxKind.StringLiteral:
+                array.addElement("'" + (<ts.StringLiteral>element).text + "'");
+            break;
+            case ts.SyntaxKind.CallExpression:
+                array.addElement(mapCallExpression((<ts.CallExpression>element), sourceFile));
+            break;
+            default:
+                array.addElement(element.getFullText(sourceFile));
+        }
+    });
+    return array;
+}
+
+export function mapImport(fileImport: ts.ImportDeclaration){
+    let importElement: ImportClause = new ImportClause();
+    importElement.setModule((<ts.Identifier>fileImport.moduleSpecifier).text);
+    if(fileImport.importClause){
+        if(fileImport.importClause.namedBindings){
+            if(fileImport.importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
+                (<ts.NamedImports>fileImport.importClause.namedBindings).elements.forEach(named => {
+                    importElement.addNamed((<String>named.name.text));
+                })
+            }else {
+                importElement.setNamespace((<ts.NamespaceImport>fileImport.importClause.namedBindings).name.text);
+            }
+        }
+    }else {
+        importElement.setSpaceBinding(false);
+    }
+    return importElement;
+}
+
+export function mapClass(fileClass: ts.ClassDeclaration, sourceFile: ts.SourceFile) {
+
+    let classTo: ClassDeclaration = new ClassDeclaration();
+    classTo.setIdentifier(fileClass.name.text);
+    if (fileClass.decorators) {
+        fileClass.decorators.forEach(decorator => {
+            classTo.addDecorators(mapDecorator((<ts.Decorator>decorator), sourceFile));
+        })
+    }
+    if (fileClass.modifiers){
+        fileClass.modifiers.forEach(modifier => {
+            classTo.addModifier(mapModifier(modifier));
+        })
+    }
+    if (fileClass.heritageClauses) {
+        fileClass.heritageClauses.forEach(heritage => {
+            classTo.addHeritage(heritage.getFullText(sourceFile));
+        })
+    }
+
+    if (fileClass.members) {
+        fileClass.members.forEach(member => {
+            switch(member.kind) {
+                case ts.SyntaxKind.PropertyDeclaration:
+                    classTo.addProperty(mapPropertyDeclaration((<ts.PropertyDeclaration>member), sourceFile));
+                break;
+                case ts.SyntaxKind.Constructor:
+                    let fileCtr: ts.ConstructorDeclaration = (<ts.ConstructorDeclaration>member);
+                    let ctr: Constructor = mapConstructor(fileCtr, sourceFile);
+                    if(fileCtr.body) {
+                        ctr.setBody(mapBodyMethod(fileCtr.body.getFullText(sourceFile)));
+
+                    }
+                    classTo.setConstructor(ctr);
+                    
+                break;
+                case ts.SyntaxKind.MethodDeclaration:
+                    let fileMethod: ts.MethodDeclaration = (<ts.MethodDeclaration>member);
+                    let method: Method = mapMethod(fileMethod, sourceFile);
+                    
+                    if(fileMethod.body){
+                        method.setBody(mapBodyMethod(fileMethod.body.getFullText(sourceFile)));
+                    }
+                    classTo.addMethod(method);
+                break;
+            }
+        })
+    }
+    return classTo;
+}
+
+export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceFile: ts.SourceFile) {
+
+    let prop: PropertyDeclaration = new PropertyDeclaration();
+    prop.setIdentifier((<ts.Identifier>property.name).text);
+    if(property.type){
+        prop.setType(mapTypes(property.type));
+    }
+
+    if (property.modifiers){
+        property.modifiers.forEach(modifier => {
+            prop.addModifier(mapModifier(modifier));
+        })
+    }
+
+    if(property.decorators){
+        property.decorators.forEach(decorator => {
+            prop.addDecorators(mapDecorator((<ts.Decorator>decorator), sourceFile));
+        })
+    }
+    if(property.initializer){
+        switch(property.initializer.kind) {
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                prop.setInitializer(mapObjectLiteral((<ts.ObjectLiteralExpression>property.initializer), sourceFile));
+            break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                prop.setInitializer(mapArrayLiteral((<ts.ArrayLiteralExpression>property.initializer).elements, sourceFile))
+            break;
+            case ts.SyntaxKind.StringLiteral:
+                prop.setInitializer("'" + (<ts.StringLiteral>property.initializer).text + "'");
+            break;
+            case ts.SyntaxKind.TrueKeyword:
+                prop.setInitializer("true");
+            break;
+            case ts.SyntaxKind.FalseKeyword:
+                prop.setInitializer("false");
+            break;
+            case ts.SyntaxKind.Identifier:
+                prop.setInitializer((<ts.Identifier>property.initializer).text);
+            break;
+            case ts.SyntaxKind.CallExpression:
+                prop.setInitializer(mapCallExpression((<ts.CallExpression>property.initializer), sourceFile));
+            break;
+            default:
+                prop.setInitializer(property.initializer.getFullText(sourceFile));
+        }
+    }
+    return prop;
+}
+
+export function mapTypes(type: ts.TypeNode){
+    switch(type.kind) {
+        case ts.SyntaxKind.AnyKeyword:
+            return "any";
+        case ts.SyntaxKind.NumberKeyword:
+            return "number"
+        case ts.SyntaxKind.StringKeyword:
+            return "string"
+        case ts.SyntaxKind.BooleanKeyword:
+            return "boolean";
+        case ts.SyntaxKind.TypeReference:
+            return (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text;
+        case ts.SyntaxKind.TupleType:
+            let tuple: String[] = [];
+            tuple.push("[");
+            let elementTypes = (<ts.TupleTypeNode>type).elementTypes;
+            elementTypes.forEach(elementType => {
+                tuple.push(mapTypes((<ts.TypeNode>elementType)));
+                if (elementTypes.indexOf(elementType) < elementTypes.length - 1){
+                    tuple.push(", ");
+                }
+            })
+            tuple.push("]");
+            return tuple.join("");
+        case ts.SyntaxKind.ArrayType:
+            return mapTypes((<ts.ArrayTypeNode>type).elementType) + "[]"; 
+    }
+}
+
+export function mapConstructor(fileCtr: ts.ConstructorDeclaration, sourceFile: ts.SourceFile) {
+    let ctr: Constructor = new Constructor();
+
+    if(fileCtr.decorators){
+        fileCtr.decorators.forEach(decorator => {
+            ctr.addDecorators(mapDecorator((<ts.Decorator>decorator), sourceFile));
+        })
+    }
+    ctr.setIdentifier("constructor");
+    if(fileCtr.parameters){
+        fileCtr.parameters.forEach(parameter => {
+            ctr.addParameter(mapParameter(parameter));
+        })
+    }
+
+    return ctr;
+}
+
+export function mapParameter(parameter: ts.ParameterDeclaration) {
+    let param: Parameter = new Parameter();
+
+    if(parameter.modifiers) {
+        parameter.modifiers.forEach(modifier => {
+            param.addModifier(mapModifier(modifier));
+        })
+    }
+    param.setIdentifier((<ts.Identifier>parameter.name).text);
+    if(parameter.type)
+        param.setType(mapTypes(parameter.type));
+    return param;
+}
+
+export function mapMethod(fileMethod: ts.MethodDeclaration, sourceFile: ts.SourceFile) {
+    let method: Method = new Method();
+    method.setIdentifier((<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text);
+    if(fileMethod.type){
+        method.setType(mapTypes(fileMethod.type));
+    }
+
+    if(fileMethod.decorators){
+        fileMethod.decorators.forEach(decorator => {
+            method.addDecorators(mapDecorator((<ts.Decorator>decorator), sourceFile));
+        })
+    }
+    if (fileMethod.modifiers){
+        fileMethod.modifiers.forEach(modifier => {
+            method.addModifier(mapModifier(modifier));
+        })
+    }
+    if (fileMethod.parameters) {
+        fileMethod.parameters.forEach(parameter => {
+            method.addParameter(mapParameter(parameter));
+        })
+    }
+
+    return method;
+}
+
+export function mapModifier(modifier: ts.Modifier) {
+    switch(modifier.kind) {
+        case ts.SyntaxKind.PrivateKeyword:
+            return "private"
+        case ts.SyntaxKind.PublicKeyword:
+            return "public"
+        case ts.SyntaxKind.ExportKeyword:
+            return "export"
+    }
+}
+
+export function mapDecorator(decorator: ts.Decorator, sourceFile: ts.SourceFile){
+    let decorators: Decorator[] = [];
+    let decoratorElement: Decorator = new Decorator();
+    
+    switch(decorator.expression.kind){
+        case ts.SyntaxKind.CallExpression:
+            decoratorElement.setIsCallExpression(true);
+            decoratorElement.setIdentifier((<ts.Identifier>(<ts.CallExpression>decorator.expression).expression).text);
+            let argumentsArray = (<ts.CallExpression>decorator.expression).arguments;
+            if(argumentsArray){
+                argumentsArray.forEach(argument => {
+                    switch(argument.kind){
+                        case ts.SyntaxKind.ObjectLiteralExpression:
+                            decoratorElement.addArgument(mapObjectLiteral((<ts.ObjectLiteralExpression>argument), sourceFile));
+                        break;
+                        case ts.SyntaxKind.TrueKeyword:
+                            decoratorElement.addArgument(true);
+                        break;
+                        case ts.SyntaxKind.FalseKeyword:
+                            decoratorElement.addArgument(false);
+                        break;
+                        case ts.SyntaxKind.Identifier:
+                            decoratorElement.addArgument((<ts.Identifier>argument).text);
+                        break;
+                        case ts.SyntaxKind.StringLiteral:
+                            decoratorElement.addArgument("'" + (<ts.StringLiteral>argument).text + "'");
+                        break;                       
+                        //ADD MORE CASES FOR OTHER NODE TYPES
+                    }
+                })
+                decorators.push(decoratorElement);
+            }
+        break;
+        case ts.SyntaxKind.Identifier:
+            decoratorElement.setIdentifier((<ts.Identifier>(<ts.Decorator>decorator).expression).text);
+            decorators.push(decoratorElement);
+        break;
+        
+    } 
+    return decorators;
+}
+
+export function mapBodyMethod(body: String) {
+    let bodySource: ts.SourceFile = ts.createSourceFile("body", <string>body, ts.ScriptTarget.ES2016, false);
+    let bodyMethod: BodyMethod = new BodyMethod();
+    bodySource.getChildAt(0).getChildren().forEach(child => {
+        if((<ts.Block>child).statements) {
+            (<ts.Block>child).statements.forEach(statement => {
+                switch(statement.kind){
+                    case ts.SyntaxKind.VariableStatement:
+                        bodyMethod.addStatement(mapVariableStatement(<ts.VariableStatement>statement, bodySource));
+                    break;
+                    default:
+                        bodyMethod.addStatement(statement.getFullText(bodySource));
+                }
+            })
+        }
+    })
+    return bodyMethod;
+}
+
+export function mapVariableStatement(statement: ts.VariableStatement, source: ts.SourceFile){
+    let variable: VariableStatement = new VariableStatement();
+    let fileVariable: ts.VariableStatement = (<ts.VariableStatement>statement);
+    if(fileVariable.getFullText(source).search('const ') > -1){
+        variable.setIsConst(true);
+    }
+
+    if(fileVariable.modifiers) {
+        fileVariable.modifiers.forEach(modifier => {
+            variable.addModifier(mapModifier(modifier));
+        })
+    }
+    if(fileVariable.decorators) {
+        fileVariable.decorators.forEach(decorator => {
+            variable.addDecorators(mapDecorator(decorator, source));
+        })
+    }
+    variable.setIdentifier((<ts.Identifier>fileVariable.declarationList.declarations[0].name).text);
+    if(fileVariable.declarationList.declarations[0].type) {
+        variable.setType(mapTypes(fileVariable.declarationList.declarations[0].type));
+    }
+    if((<ts.VariableStatement>statement).declarationList.declarations[0].initializer){
+        switch((<ts.VariableStatement>statement).declarationList.declarations[0].initializer.kind) {
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                variable.setInitializer(mapObjectLiteral((<ts.ObjectLiteralExpression>fileVariable.declarationList.declarations[0].initializer), source));
+            break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                variable.setInitializer(mapArrayLiteral((<ts.ArrayLiteralExpression>fileVariable.declarationList.declarations[0].initializer).elements, source))
+            break;
+            case ts.SyntaxKind.StringLiteral:
+                variable.setInitializer("'" + (<ts.StringLiteral>fileVariable.declarationList.declarations[0].initializer).text + "'");
+            break;
+            case ts.SyntaxKind.TrueKeyword:
+                variable.setInitializer("true");
+            break;
+            case ts.SyntaxKind.FalseKeyword:
+                variable.setInitializer("false");
+            break;
+            case ts.SyntaxKind.Identifier:
+                variable.setInitializer((<ts.Identifier>fileVariable.declarationList.declarations[0].initializer).text);
+            break;
+            default:
+                variable.setInitializer((<ts.VariableStatement>statement).declarationList.declarations[0].initializer.getFullText(source));
+        }
+    }
+    return variable;
+}
