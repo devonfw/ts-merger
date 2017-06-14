@@ -15,7 +15,7 @@ describe('Merge class methods with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('private c(b:any):number{'))
+        expect(result.indexOf('private c(b: any): number'))
             .to.be.greaterThan(0, 'declaration should be present in class a');
     });
     it('should add the method from the patch with patchOverride. (./test/resources/class/{base|patch}/class_4.ts)', () => {
@@ -26,7 +26,7 @@ describe('Merge class methods with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('private c(b:any):number{'))
+        expect(result.indexOf('private c(b: any): number'))
             .to.be.greaterThan(0, 'declaration should be present in class a');
     });
     it('should use the method body from the base if method is present in base and patch. (./test/resources/class/{base|patch}/class_5.ts)', () => {
@@ -57,7 +57,7 @@ describe('Merge class methods with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('private b(a:any):void{')).to.be.greaterThan(0, 'b should have modifier from base');
+        expect(result.indexOf('private b(a: any): void')).to.be.greaterThan(0, 'b should have modifier from base');
     });
     it('should use the modifier from the patch if method is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_6.ts)', () => {
         /**
@@ -67,7 +67,7 @@ describe('Merge class methods with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('public b(a:any):void{')).to.be.greaterThan(0, 'b should have modifier from patch');
+        expect(result.indexOf('public b(a: any): void')).to.be.greaterThan(0, 'b should have modifier from patch');
     });
 
 });
