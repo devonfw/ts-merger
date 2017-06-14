@@ -95,6 +95,7 @@ describe('Merge imports with merge()', () => {
   xit('Should prefer the base import name in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_6.ts)', () => {
     /**
      * fails if the renaming of the patch is used
+     * currently not supported
      */
     const result : String[] = merge(false, baseTestResources + 'imports_6.ts', patchTestResources + 'imports_6.ts').split('\n').filter(r => {return r.trim() != ""});
     expect(result.length).to.be.equal(1);
@@ -104,6 +105,7 @@ describe('Merge imports with merge()', () => {
   xit('Should prefer the patch import name in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_6.ts)', () => {
     /**
      * fails if the renaming of the base is used
+     * currently not supported
      */
     const result : String[] = merge(true, baseTestResources + 'imports_6.ts', patchTestResources + 'imports_6.ts').split('\n').filter(r => {return r.trim() != ""});
     expect(result.length).to.be.equal(1);
@@ -113,6 +115,7 @@ describe('Merge imports with merge()', () => {
   xit('Should prefer the base import artifact in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_7.ts)', () => {
     /**
      * fails if the import artifact of the patch is used
+     * currently not supported
      */
     const result : String[] = merge(false, baseTestResources + 'imports_7.ts', patchTestResources + 'imports_7.ts').split('\n').filter(r => {return r.trim() != ""});
     expect(result.length).to.be.equal(1);
@@ -122,6 +125,7 @@ describe('Merge imports with merge()', () => {
   xit('Should prefer the patch import artifact in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_7.ts)', () => {
     /**
      * fails if the import artifact of the base is used
+     * currently not supported
      */
     const result : String[] = merge(true, baseTestResources + 'imports_7.ts', patchTestResources + 'imports_7.ts').split('\n').filter(r => {return r.trim() != ""});
     expect(result.length).to.be.equal(1);
