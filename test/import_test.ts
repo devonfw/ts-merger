@@ -92,7 +92,7 @@ describe('Merge imports with merge()', () => {
   });
 
   // ---- Guess work based tests ---- //
-  it('Should prefer the base import name in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_6.ts)', () => {
+  xit('Should prefer the base import name in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_6.ts)', () => {
     /**
      * fails if the renaming of the patch is used
      */
@@ -101,7 +101,7 @@ describe('Merge imports with merge()', () => {
     let importRegex = new RegExp('.*\{ a as b \}.*');
     expect(importRegex.test(result[0].toString())).to.be.true;
   });
-  it('Should prefer the patch import name in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_6.ts)', () => {
+  xit('Should prefer the patch import name in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_6.ts)', () => {
     /**
      * fails if the renaming of the base is used
      */
@@ -110,7 +110,7 @@ describe('Merge imports with merge()', () => {
     let importRegex = new RegExp('.*\{ a as d \}.*');
     expect(importRegex.test(result[0].toString())).to.be.true;
   });
-  it('Should prefer the base import artifact in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_7.ts)', () => {
+  xit('Should prefer the base import artifact in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_7.ts)', () => {
     /**
      * fails if the import artifact of the patch is used
      */
@@ -119,7 +119,7 @@ describe('Merge imports with merge()', () => {
     let importRegex = new RegExp('.*\{ a as b \}.*');
     expect(importRegex.test(result[0].toString())).to.be.true;
   });
-  it('Should prefer the patch import artifact in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_7.ts)', () => {
+  xit('Should prefer the patch import artifact in case of conflicts if patchOverride==true. (resources/import/{base|patch}/imports_7.ts)', () => {
     /**
      * fails if the import artifact of the base is used
      */
