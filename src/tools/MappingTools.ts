@@ -16,6 +16,7 @@ import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpr
 import * as ts from 'typescript';
 import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
 
+
 export function mapFile(sourceFile: ts.SourceFile) {
     let file: TSFile = new TSFile();
     sourceFile.getChildAt(0).getChildren().forEach(child => {
@@ -36,6 +37,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
     });
     return file;
 }
+
 export function mapObjectLiteral(objectFromFile: ts.ObjectLiteralExpression, sourceFile: ts.SourceFile) {
 
     let objLiteral: ObjectLiteralExpression = new ObjectLiteralExpression();
@@ -242,8 +244,7 @@ export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceF
 
 export function mapTypes(type: ts.TypeNode){
 
-    let typeArgument: String[] = [];
-    let resultType: String[] = []
+    let typeToReturn: String[] = [];
     switch(type.kind) {
         case ts.SyntaxKind.AnyKeyword:
             return "any";
@@ -254,14 +255,18 @@ export function mapTypes(type: ts.TypeNode){
         case ts.SyntaxKind.BooleanKeyword:
             return "boolean";
         case ts.SyntaxKind.TypeReference:
+            typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text)
             if((<ts.TypeReferenceNode>type).typeArguments) {
-                typeArgument.push("<");
+                typeToReturn.push("<");
                 (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
-                    typeArgument.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
+                    typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
+                    if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
+                        typeToReturn.push(",");
+                    }
                 })
-                typeArgument.push(">");
+                typeToReturn.push(">");
             }
-            return (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text + typeArgument;
+            return typeToReturn.join("");
         case ts.SyntaxKind.TupleType:
             let tuple: String[] = [];
             tuple.push("[");
