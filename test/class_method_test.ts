@@ -2,7 +2,7 @@ import merge from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 
-describe.only('Merge class methods with merge():', () => {
+describe('Merge class methods with merge():', () => {
     let testResources = './test/resources/class/';
     let baseTestResources = testResources + 'base/';
     let patchTestResources = testResources + 'patch/';
@@ -66,7 +66,7 @@ describe.only('Merge class methods with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.filter(res => /public\s+b\s*\(\s*a\s*:\s*any\s*\)\s*:\s*void\s*\{?/.test(res.toString()))).length.to.be.greaterThan(0, 'b should have modifier from patch but was ' + result.reduce((prev,curr) => prev.toString() + curr.toString(), ""));
+        expect(result.filter(res => /public\s+b\s*\(\s*a\s*:\s*any\s*\)\s*:\s*void\s*\{?/.test(res.toString()))).length.to.be.greaterThan(0, 'b should have modifier from patch but was ' + result.reduce((prev, curr) => prev.toString() + curr.toString(), ""));
     });
 
 });
