@@ -10,18 +10,25 @@ import * as ts from 'typescript';
 
 export function mergeImports(baseFile: TSFile, patchFile: TSFile){
     let exists: boolean;
-    patchFile.getImports().forEach(patchImportClause => {
-        exists = false;
-        baseFile.getImports().forEach(importClause => {
-            if(importClause.getModule() === patchImportClause.getModule()){
-                importClause.merge(patchImportClause);
-                exists = true;
+
+    if(baseFile.getImports().length === 0) {
+        patchFile.getImports().forEach(patchImportClause => {
+            baseFile.addImport(patchImportClause);
+        })
+    } else {
+        patchFile.getImports().forEach(patchImportClause => {
+            exists = false;
+            baseFile.getImports().forEach(importClause => {
+                if(importClause.getModule() === patchImportClause.getModule()){
+                    importClause.merge(patchImportClause);
+                    exists = true;
+                }
+            })
+            if(!exists){
+                baseFile.addImport(patchImportClause);
             }
         })
-        if(!exists){
-            baseFile.addImport(patchImportClause);
-        }
-    })
+    }
 }
 
 export function mergeClass(baseFile: TSFile, patchFile: TSFile, patchOverrides: boolean) {
