@@ -38,7 +38,8 @@ describe('Merge class fields with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('private b = 1;')).to.be.greaterThan(0, 'b should have value from base');
+        expect(result.filter(res => /private\s+b\s*=\s*1;/.test(res.toString()))).length.is.greaterThan(0);
+        //expect(result.indexOf('private b = 1;')).to.be.greaterThan(0, 'b should have value from base');
     });
     it('should use the value from the patch if variable is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_2.ts)', () => {
         /**
@@ -48,7 +49,7 @@ describe('Merge class fields with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('private b = 2;')).to.be.greaterThan(0, 'b should have value from patch');
+        expect(result.filter(res => /private\s+b\s*=\s*2;/.test(res.toString()))).length.is.greaterThan(0, 'b should have value from patch');
     });
     it('should use the modifier from the base if variable is present in base and patch. (./test/resources/class/{base|patch}/class_3.ts)', () => {
         /**
