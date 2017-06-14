@@ -261,7 +261,7 @@ export function mapTypes(type: ts.TypeNode){
                 (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
                     typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
                     if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
-                        typeToReturn.push(",");
+                        typeToReturn.push(", ");
                     }
                 })
                 typeToReturn.push(">");
@@ -297,16 +297,20 @@ export function mapConstructor(fileCtr: ts.ConstructorDeclaration, sourceFile: t
     ctr.setIdentifier("constructor");
     if(fileCtr.parameters){
         fileCtr.parameters.forEach(parameter => {
-            ctr.addParameter(mapParameter(parameter));
+            ctr.addParameter(mapParameter(parameter, sourceFile));
         })
     }
 
     return ctr;
 }
 
-export function mapParameter(parameter: ts.ParameterDeclaration) {
+export function mapParameter(parameter: ts.ParameterDeclaration, sourceFile: ts.SourceFile) {
     let param: Parameter = new Parameter();
-
+    if(parameter.decorators) {
+        parameter.decorators.forEach(decorator => {
+            param.addDecorators(mapDecorator(decorator, sourceFile));
+        })
+    }
     if(parameter.modifiers) {
         parameter.modifiers.forEach(modifier => {
             param.addModifier(mapModifier(modifier));
@@ -337,7 +341,7 @@ export function mapMethod(fileMethod: ts.MethodDeclaration, sourceFile: ts.Sourc
     }
     if (fileMethod.parameters) {
         fileMethod.parameters.forEach(parameter => {
-            method.addParameter(mapParameter(parameter));
+            method.addParameter(mapParameter(parameter, sourceFile));
         })
     }
 
@@ -483,7 +487,7 @@ export function mapFunction(fileFunction: ts.FunctionDeclaration, sourceFile: ts
     }
     if (fileFunction.parameters) {
         fileFunction.parameters.forEach(parameter => {
-            func.addParameter(mapParameter(parameter));
+            func.addParameter(mapParameter(parameter, sourceFile));
         })
     }
 

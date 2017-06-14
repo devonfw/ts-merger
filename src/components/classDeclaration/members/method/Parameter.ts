@@ -1,3 +1,4 @@
+import { Decorator } from '../../../decorator/Decorator';
 import { GeneralInterface } from '../../../general/GeneralInterface';
 
 /**
@@ -8,6 +9,7 @@ import { GeneralInterface } from '../../../general/GeneralInterface';
  */
 export class Parameter extends GeneralInterface {
 
+    private decorators: Decorator[] = [];
     private modifiers: String[] = [];
 
     addModifier(modifier: String) {
@@ -22,6 +24,24 @@ export class Parameter extends GeneralInterface {
         this.modifiers = modifiers;
     }
 
+    addDecorator(decorator: Decorator) {
+        this.decorators.push(decorator);
+    }
+
+    addDecorators(decorators: Decorator[]) {
+        decorators.forEach(decorator => {
+            this.addDecorator(decorator);
+        })
+    }
+
+    getDecorators() {
+        return this.decorators;
+    }
+
+    setDecorators(decorators: Decorator[]) {
+        this.decorators = decorators;
+    }
+
     merge(patchParameter: Parameter, patchOverrides: boolean) {
         if(patchOverrides) {
             this.setType(patchParameter.getType());
@@ -32,6 +52,9 @@ export class Parameter extends GeneralInterface {
     toString(): String{
         let result: String[] = [];
 
+        this.decorators.forEach(decorator => {
+            result.push(decorator.toString());
+        })
         this.modifiers.forEach(modifier => {
             result.push(modifier, " ");
         })

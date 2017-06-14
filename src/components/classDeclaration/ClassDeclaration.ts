@@ -129,8 +129,9 @@ export class ClassDeclaration extends GeneralInterface{
         this.properties.forEach(property => {
             classDeclaration.push(property.toString(), "\n");
         })
-
-        classDeclaration.push(this.construct.toString(), "\n");
+        if(this.construct.getIdentifier() !== ""){
+            classDeclaration.push(this.construct.toString(), "\n");
+        }
         if(this.methods.length > 0) {
             this.methods.forEach(method => {
                 classDeclaration.push(method.toString());
