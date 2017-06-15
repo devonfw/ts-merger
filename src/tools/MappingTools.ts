@@ -236,7 +236,7 @@ export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceF
                 prop.setInitializer(mapCallExpression((<ts.CallExpression>property.initializer), sourceFile));
             break;
             default:
-                prop.setInitializer(property.initializer.getFullText(sourceFile));
+                prop.setInitializer(property.initializer.getFullText(sourceFile).substr(1));
         }
     }
     return prop;
