@@ -83,18 +83,6 @@ export class Method extends GeneralInterface{
             this.setModifiers(patchMethod.getModifiers());
             this.setBody(patchMethod.getBody());
         } else {
-            let exists: boolean;
-            patchMethod.getModifiers().forEach(patchModifier => {
-                this.getModifiers().forEach(modifier => {
-                    if(patchModifier === modifier) {
-                        exists = true;
-                    }
-                })
-                if(!exists) {
-                    this.addModifier(patchModifier);
-                }
-            })
-
             this.getBody().merge(patchMethod.getBody(), patchOverrides);
         }
 
