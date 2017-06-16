@@ -10,7 +10,7 @@ import * as ts from 'typescript';
 
 export function mergeImports(baseFile: TSFile, patchFile: TSFile){
     let exists: boolean;
-
+    
     if(baseFile.getImports().length === 0) {
         patchFile.getImports().forEach(patchImportClause => {
             baseFile.addImport(patchImportClause);

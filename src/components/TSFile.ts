@@ -46,9 +46,8 @@ export class TSFile {
     }
 
     merge(patchFile: TSFile, patchOverrides: boolean) {
-        if(this.importClauses.length > 0) {
-            mergeTools.mergeImports(this, patchFile);
-        }
+        
+        mergeTools.mergeImports(this, patchFile);
         if(this.class){
             mergeTools.mergeClass(this, patchFile, patchOverrides);
         }
