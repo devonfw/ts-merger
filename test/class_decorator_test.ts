@@ -41,7 +41,7 @@ describe('Merge class decorators with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('@deca(true)')).to.be.greaterThan(0, 'decoration should have value from base');
+        expect(result.indexOf('@deca(true)')).to.be.greaterThan(-1, 'decoration should have value from base');
     });
     it('should use the value from the patch if decoration is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_8.ts)', () => {
         /**
@@ -51,7 +51,7 @@ describe('Merge class decorators with merge():', () => {
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
-        expect(result.indexOf('@deca(false)')).to.be.greaterThan(0, 'decoration should have value from patch');
+        expect(result.indexOf('@deca(false)')).to.be.greaterThan(-1, 'decoration should have value from patch');
     });
     it('should merge the NgModule decorator properties (./test/resources/class/{base|patch}/class_9.ts)', () => {
         /**
