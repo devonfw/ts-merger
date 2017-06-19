@@ -59,14 +59,16 @@ describe('Merge class decorators with merge():', () => {
          */
         const fullResult:String = merge(false, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
         const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
-        let ngModuleRegex=new RegExp("@NgModule\\(\{.*");
-        let ngModuleFullRegex=new RegExp("@NgModule(\{.*,.*\}).*");
-        let providerRegex=new RegExp(".*providers: \[a, b\].*");
-        let idRegex = new RegExp(".*id: '1'.*");
+        const concatResult:String=result.reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        let ngModuleRegex=/@NgModule\(\{.*/;
+        let ngModuleFullRegex=/@NgModule\(\{.*,.*\}\).*/;
+        let providerRegex=/.*providers:\s*\[\s*a\s*,\s*b\s*\].*/;
+        let idRegex =/.*id:\s*'1'.*/;
         expect(result.filter(value => ngModuleRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one @NgModule decorator');
-        expect(result.filter(value => providerRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
-        expect(result.filter(value => idRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one id property in the NgModule');
-        expect(ngModuleFullRegex.test(fullResult.toString())).to.be.true('The @NgModule decorator should be valid TypeScript');
+        //expect(result.filter(value => providerRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
+        expect(providerRegex.test(concatResult.toString()), 'The "providers" property should be present').to.be.true;
+        expect(idRegex.test(concatResult.toString()), 'The "id" property should be present').to.be.true;
+        expect(ngModuleFullRegex.test(concatResult.toString()), 'The @NgModule decorator should be valid TypeScript').to.be.true;
     });
     it('should merge the NgModule decorator properties with patchOverride (./test/resources/class/{base|patch}/class_9.ts)', () => {
         /**
@@ -74,14 +76,19 @@ describe('Merge class decorators with merge():', () => {
          */
         const fullResult:String = merge(true, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
         const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
-        let ngModuleRegex=new RegExp("@NgModule\\(\\{.*");
-        let ngModuleFullRegex=new RegExp("@NgModule\\(\\{[^]*,[^]*\\}\\)[^]*");
-        let providerRegex=new RegExp(".*providers: \\[a, b\\].*");
-        let idRegex = new RegExp(".*id: '1'.*");
+        const concatResult:String=result.reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        console.log(concatResult);
+        let ngModuleRegex=/@NgModule\(\{.*/;
+        let ngModuleFullRegex=/@NgModule\(\{.*,.*\}\)/;
+        let providerExistenceRegex=/.*providers\s*:.*/;
+        let providerRegex=/.*providers:\s*\[\s*a\s*,\s*b\s*\].*/;
+        let idExistenceRegex=/.*id\s*:.*/;
+        let idRegex = /.*id\s*:\s*'1'.*/;
         expect(result.filter(value => ngModuleRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one @NgModule decorator');
-        expect(result.filter(value => providerRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
-        expect(result.filter(value => idRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one id property in the NgModule');
-        expect(ngModuleFullRegex.test(fullResult.toString())).to.be.true('The @NgModule decorator should be valid TypeScript');
+        //TODO: 0, if patchOverride doesn't merge. If so, adapt message
+        expect(result.filter(value => providerExistenceRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one providers property in the NgModule');
+        expect(result.filter(value => idExistenceRegex.test(value.toString())).length).to.be.equal(1, 'There should exactly be one id property in the NgModule');
+        expect(ngModuleFullRegex.test(fullResult.toString()), 'The @NgModule decorator should be valid TypeScript').to.be.true;
     });
     it('should use the value from the base if NgModule property is present in base and patch. (./test/resources/class/{base|patch}/class_10.ts)', () => {
         /**
@@ -124,5 +131,42 @@ describe('Merge class decorators with merge():', () => {
             .filter(value => value != "");
         expect(result.filter(value => /@deca.*/.test(value.toString())).length).to.be.equal(1, 'id should have value from patch');
     });
+
+    it('should use the property value from the base (resources/class/{base|patch}/class_15.ts)', () => {
+        const result = merge(false, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        const baseDecoratorRegex = /@decorator\(\s*["']a["']\s*,\s*["']b["']\s*\).*/;
+        expect(baseDecoratorRegex.test(result.toString()), 'id of the base should be present').to.be.true;
+    });
+
+    it('should use the property value from the patch with patchOverride (resources/class/{base|patch}/class_15.ts)', () => {
+        const result = merge(true, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        const patchDecoratorRegex = /@decorator\(\s*["']c["']\s*,\s*["']d["']\s*\).*/;
+        expect(patchDecoratorRegex.test(result.toString()), 'id of the patch should be present').to.be.true;
+    });
+    
+    it('shouldn\'t merge the decorator argument since 2 are present (resources/class/{base|patch}/class_16.ts)', () => {
+        const result = merge(false, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        const patchDecoratorRegex = /.*id.*/;
+        expect(patchDecoratorRegex.test(result.toString()), 'id of the base should be present').to.be.false;
+    });
+    
+    it('shouldn\'t merge the decorator argument since 2 are present with patchOverride (resources/class/{base|patch}/class_16.ts)', () => {
+        const result = merge(true, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts")
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
+        const baseDecoratorRegex = /.*provider.*/;
+        expect(baseDecoratorRegex.test(result.toString()), 'id of the patch should be present').to.be.false;
+    });
+
 
 });
