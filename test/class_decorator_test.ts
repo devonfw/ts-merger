@@ -48,7 +48,8 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the value from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts", outputTestTempResources + 'decorator_8_output_override.ts', 'UTF-8')        .split("\n")
+        const result:String[] = merge(true, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts", outputTestTempResources + 'decorator_8_output_override.ts', 'UTF-8')
+            .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
         expect(result.indexOf('@deca(false)')).to.be.greaterThan(-1, 'decoration should have value from patch');
