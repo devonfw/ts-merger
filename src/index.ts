@@ -15,7 +15,6 @@ import Method from './components/classDeclaration/members/method/Method';
 import Parameter from './components/classDeclaration/members/method/Parameter';
 import * as mapTools from './tools/MappingTools';
 
-
 let strategy = process.argv[2].toLowerCase() === "true" ? true : false;
 let base = process.argv[3];
 let patch = process.argv[4];
@@ -46,16 +45,15 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     let sourceFilePatch: ts.SourceFile;
     let sourceFile: ts.SourceFile
     if(encoding === "ISO-8859-1") {
-        let patchContents = fs.readFileSync(filePatch, {encoding: "binary"});
-        let baseContents = fs.readFileSync(fileBase, {encoding: "binary"});
-        sourceFilePatch = ts.createSourceFile(filePatch, encIconV.decode(Buffer.from(patchContents, "binary"), "ISO-8859-1"), ts.ScriptTarget.ES2016, false);
-        sourceFile = ts.createSourceFile(fileBase, encIconV.decode(Buffer.from(baseContents, "binary"), "ISO-8859-1"), ts.ScriptTarget.ES2016, false);
+        let patchContents = Buffer.from(fs.readFileSync(filePatch, {encoding: "binary"}), "UTF-8");
+        let baseContents = Buffer.from(fs.readFileSync(fileBase, {encoding: "binary"}), "UTF-8");
+        sourceFilePatch = ts.createSourceFile(filePatch, encIconV.decode(patchContents, "ISO-8859-1"), ts.ScriptTarget.ES2016, false);
+        sourceFile = ts.createSourceFile(fileBase, encIconV.decode(baseContents, "ISO-8859-1"), ts.ScriptTarget.ES2016, false);
     } else {
         sourceFilePatch = ts.createSourceFile(filePatch, fs.readFileSync(filePatch, {encoding: encoding}).toString(), ts.ScriptTarget.ES2016, false);
         sourceFile = ts.createSourceFile(fileBase, fs.readFileSync(fileBase, {encoding : encoding}).toString(), ts.ScriptTarget.ES2016, false);
     }
 
-    
 
     let baseFile: TSFile = mapTools.mapFile(sourceFile);
     let patchFile: TSFile = mapTools.mapFile(sourceFilePatch);
