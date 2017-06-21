@@ -24,7 +24,9 @@
     "typescript": "^2.2.1",
     "typescript-formatter": "^5.1.3"
   },
-  "dependencies": {},
+  "dependencies": {
+    "iconv-lite": "^0.4.18"
+  },
   "author": "",
   "directories": {
     "test": "test"

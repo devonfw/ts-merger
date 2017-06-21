@@ -56,6 +56,9 @@ export class Decorator extends GeneralInterface{
             if(this.args.length > 0){
                 this.args.forEach(argument => {
                     result.push(argument.toString());
+                    if(this.args.indexOf(argument) < this.args.length - 1) {
+                        result.push(", ");
+                    }
                 })
             }
             result.push(")");
