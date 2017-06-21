@@ -6,12 +6,13 @@ describe('Merge class methods with merge():', () => {
     let testResources = './test/resources/class/';
     let baseTestResources = testResources + 'base/';
     let patchTestResources = testResources + 'patch/';
+    let outputTestTempResources = testResources + 'output/';
     
     it('should add the method from the patch. (./test/resources/class/{base|patch}/class_4.ts)', () => {
         /**
          * fails if the result doesn't contain the method from the patch
          */
-        const result:String[] = merge(false, baseTestResources + "class_4.ts", patchTestResources + "class_4.ts")
+        const result:String[] = merge(false, baseTestResources + "class_4.ts", patchTestResources + "class_4.ts", outputTestTempResources + 'class_4_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -21,7 +22,7 @@ describe('Merge class methods with merge():', () => {
         /**
          * fails if the result doesn't contain the method from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_4.ts", patchTestResources + "class_4.ts")
+        const result:String[] = merge(true, baseTestResources + "class_4.ts", patchTestResources + "class_4.ts", outputTestTempResources + 'class_4_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -32,7 +33,7 @@ describe('Merge class methods with merge():', () => {
         /**
          * fails if the result doesn't use the method body from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_5.ts", patchTestResources + "class_5.ts")
+        const result:String[] = merge(false, baseTestResources + "class_5.ts", patchTestResources + "class_5.ts", outputTestTempResources + 'class_5_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -42,7 +43,7 @@ describe('Merge class methods with merge():', () => {
         /**
          * fails if the result doesn't use the body from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_5.ts", patchTestResources + "class_5.ts")
+        const result:String[] = merge(true, baseTestResources + "class_5.ts", patchTestResources + "class_5.ts", outputTestTempResources + 'class_5_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -52,7 +53,7 @@ describe('Merge class methods with merge():', () => {
         /**
          * fails if the result doesn't use the modifier from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_6.ts", patchTestResources + "class_6.ts")
+        const result:String[] = merge(false, baseTestResources + "class_6.ts", patchTestResources + "class_6.ts", outputTestTempResources + 'class_6_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -62,7 +63,7 @@ describe('Merge class methods with merge():', () => {
         /**
          * fails if the result doesn't use the modifier from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_6.ts", patchTestResources + "class_6.ts")
+        const result:String[] = merge(true, baseTestResources + "class_6.ts", patchTestResources + "class_6.ts", outputTestTempResources + 'class_6_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");

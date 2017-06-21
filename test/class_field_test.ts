@@ -6,13 +6,14 @@ describe('Merge class fields with merge():', () => {
     let testResources = './test/resources/class/';
     let baseTestResources = testResources + 'base/';
     let patchTestResources = testResources + 'patch/';
+    let outputTestTempResources = testResources + 'output/';
 
     // ---- Fields ---- //
     it('should add the field from the patch. (./test/resources/class/{base|patch}/class_1.ts)', () => {
         /**
          * fails if the result doesn't contain the field from the patch
          */
-        const result:String[] = merge(false, baseTestResources + "class_1.ts", patchTestResources + "class_1.ts")
+        const result:String[] = merge(false, baseTestResources + "class_1.ts", patchTestResources + "class_1.ts", outputTestTempResources + 'class_1_output.ts', 'UTF-8')
             .split("\n") // get each individual line
             .map(value => value.trim()) // trim all lines (no whitespaces at the beginning and end of a line)
             .filter(value => value != ""); // remove emtpy lines
@@ -23,7 +24,7 @@ describe('Merge class fields with merge():', () => {
         /**
          * fails if the result doesn't contain the field from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_1.ts", patchTestResources + "class_1.ts")
+        const result:String[] = merge(true, baseTestResources + "class_1.ts", patchTestResources + "class_1.ts", outputTestTempResources + 'class_1_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -34,7 +35,7 @@ describe('Merge class fields with merge():', () => {
         /**
          * fails if the result doesn't use the value from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_2.ts", patchTestResources + "class_2.ts")
+        const result:String[] = merge(false, baseTestResources + "class_2.ts", patchTestResources + "class_2.ts", outputTestTempResources + 'class_2_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -45,7 +46,7 @@ describe('Merge class fields with merge():', () => {
         /**
          * fails if the result doesn't use the value from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_2.ts", patchTestResources + "class_2.ts")
+        const result:String[] = merge(true, baseTestResources + "class_2.ts", patchTestResources + "class_2.ts", outputTestTempResources + 'class_2_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -55,7 +56,7 @@ describe('Merge class fields with merge():', () => {
         /**
          * fails if the result doesn't use the modifier from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_3.ts", patchTestResources + "class_3.ts")
+        const result:String[] = merge(false, baseTestResources + "class_3.ts", patchTestResources + "class_3.ts", outputTestTempResources + 'class_3_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -65,7 +66,7 @@ describe('Merge class fields with merge():', () => {
         /**
          * fails if the result doesn't use the modifier from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_3.ts", patchTestResources + "class_3.ts")
+        const result:String[] = merge(true, baseTestResources + "class_3.ts", patchTestResources + "class_3.ts", outputTestTempResources + 'class_3_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
