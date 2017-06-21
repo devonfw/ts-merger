@@ -6,12 +6,13 @@ describe('Merge class decorators with merge():', () => {
     let testResources = './test/resources/class/';
     let baseTestResources = testResources + 'base/';
     let patchTestResources = testResources + 'patch/';
+    let outputTestTempResources = testResources + 'output/';
 
     it('should add the decorator from the patch. (./test/resources/class/{base|patch}/class_7.ts)', () => {
         /**
          * fails if the result doesn't contain the decorator from the patch
          */
-        const result:String[] = merge(false, baseTestResources + "class_7.ts", patchTestResources + "class_7.ts")
+        const result:String[] = merge(false, baseTestResources + "class_7.ts", patchTestResources + "class_7.ts", outputTestTempResources + 'decorator_7_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -24,7 +25,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't contain the decorator from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_7.ts", patchTestResources + "class_7.ts")
+        const result:String[] = merge(true, baseTestResources + "class_7.ts", patchTestResources + "class_7.ts", outputTestTempResources + 'decorator_7_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -37,7 +38,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the value from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts")
+        const result:String[] = merge(false, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts", outputTestTempResources + 'decorator_8_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -47,8 +48,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the value from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts")
-            .split("\n")
+        const result:String[] = merge(true, baseTestResources + "class_8.ts", patchTestResources + "class_8.ts", outputTestTempResources + 'decorator_8_output_override.ts', 'UTF-8')        .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
         expect(result.indexOf('@deca(false)')).to.be.greaterThan(-1, 'decoration should have value from patch');
@@ -57,7 +57,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the values from the base and patch
          */
-        const fullResult:String = merge(false, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
+        const fullResult:String = merge(false, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts", outputTestTempResources + 'decorator_9_output.ts', 'UTF-8');
         const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
         const concatResult:String=result.reduce((prev, curr) => prev.toString() + curr.toString(), "");
         let ngModuleRegex=/@NgModule\(\{.*/;
@@ -74,7 +74,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the values from the base and patch
          */
-        const fullResult:String = merge(true, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts");
+        const fullResult:String = merge(true, baseTestResources + "class_9.ts", patchTestResources + "class_9.ts", outputTestTempResources + 'decorator_9_output_override.ts', 'UTF-8');
         const result:String[] = fullResult.split("\n").map(value => value.trim()).filter(value => value != "");
         const concatResult:String=result.reduce((prev, curr) => prev.toString() + curr.toString(), "");
         console.log(concatResult);
@@ -94,7 +94,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the value from the base
          */
-        const result:String[] = merge(false, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts")
+        const result:String[] = merge(false, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts", outputTestTempResources + 'decorator_10_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -104,7 +104,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the value from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts")
+        const result:String[] = merge(true, baseTestResources + "class_10.ts", patchTestResources + "class_10.ts", outputTestTempResources + 'decorator_9_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -115,7 +115,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the decorator from the patch
          */
-        const result:String[] = merge(false, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts")
+        const result:String[] = merge(false, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts", outputTestTempResources + 'decorator_14_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -125,7 +125,7 @@ describe('Merge class decorators with merge():', () => {
         /**
          * fails if the result doesn't use the decorator from the patch
          */
-        const result:String[] = merge(true, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts")
+        const result:String[] = merge(true, baseTestResources + "class_14.ts", patchTestResources + "class_14.ts", outputTestTempResources + 'decorator_14_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "");
@@ -133,7 +133,7 @@ describe('Merge class decorators with merge():', () => {
     });
 
     it('should use the property value from the base (resources/class/{base|patch}/class_15.ts)', () => {
-        const result = merge(false, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts")
+        const result = merge(false, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts", outputTestTempResources + 'decorator_15_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
@@ -142,7 +142,7 @@ describe('Merge class decorators with merge():', () => {
     });
 
     it('should use the property value from the patch with patchOverride (resources/class/{base|patch}/class_15.ts)', () => {
-        const result = merge(true, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts")
+        const result = merge(true, baseTestResources + "class_15.ts", patchTestResources + "class_15.ts", outputTestTempResources + 'decorator_15_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
@@ -151,7 +151,7 @@ describe('Merge class decorators with merge():', () => {
     });
     
     it('shouldn\'t merge the decorator argument since 2 are present (resources/class/{base|patch}/class_16.ts)', () => {
-        const result = merge(false, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts")
+        const result = merge(false, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts", outputTestTempResources + 'decorator_16_output.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
@@ -160,7 +160,7 @@ describe('Merge class decorators with merge():', () => {
     });
     
     it('shouldn\'t merge the decorator argument since 2 are present with patchOverride (resources/class/{base|patch}/class_16.ts)', () => {
-        const result = merge(true, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts")
+        const result = merge(true, baseTestResources + "class_16.ts", patchTestResources + "class_16.ts", outputTestTempResources + 'decorator_16_output_override.ts', 'UTF-8')
             .split("\n")
             .map(value => value.trim())
             .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), "");
