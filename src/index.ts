@@ -15,22 +15,23 @@ import Method from './components/classDeclaration/members/method/Method';
 import Parameter from './components/classDeclaration/members/method/Parameter';
 import * as mapTools from './tools/MappingTools';
 
-let strategy = process.argv[2].toLowerCase() === "true" ? true : false;
-let base = process.argv[3];
-let patch = process.argv[4];
-let result = process.argv[5];
-let encoding;
-if(process.argv[6]) {
-    encoding = process.argv[6];
-} else {
-    encoding = 'UTF-8';
+/**
+ * Defines possible arguments and processes them. If all necessary arguments are given, the merge will be performed. 
+ */
+
+const commandLineArgs = require('command-line-args');
+const optionDefinitions = [
+  { name: 'patchOverride', alias: 'f', type: Boolean, defaultValue: false },
+  { name: 'basePath', alias:'b', type: String },
+  { name: 'patchPath', alias: 'p', type: String },
+  { name: 'outputPath', alias: 'o', type: String },
+  { name: 'encoding', alias: 'e', type: String, defaultValue: 'UTF-8' }
+];
+const options = commandLineArgs(optionDefinitions, { partial: true });
+if (options.basePath && options.patchPath && options.outputPath){
+    merge(options.patchOverride, options.basePath, options.patchPath, options.outputPath, options.encoding);
 }
 
-if(strategy){
-    merge(true, base, patch, result, encoding);
-}else{
-    merge(false, base, patch, result, encoding);
-}
 
 /**
  * Performs a merge of a patch and base file depending on the merge strategy
@@ -44,7 +45,7 @@ if(strategy){
 export function merge(patchOverrides: boolean, fileBase: string, filePatch: string, resultFile: string, encoding: string): string {
     let sourceFilePatch: ts.SourceFile;
     let sourceFile: ts.SourceFile
-    if(encoding === "ISO-8859-1") {
+    if (encoding === "ISO-8859-1") {
         let patchContents = Buffer.from(fs.readFileSync(filePatch, "binary"), "UTF-8");
         let baseContents = Buffer.from(fs.readFileSync(fileBase, "binary"), "UTF-8");
         sourceFilePatch = ts.createSourceFile(filePatch, encIconV.decode(patchContents, "ISO-8859-1"), ts.ScriptTarget.ES2016, false);
@@ -60,10 +61,10 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     
     baseFile.merge(patchFile, patchOverrides);
 
-    if(encoding === "ISO-8859-1"){
-        fs.writeFileSync(resultFile, baseFile.toString(), "binary");
+    if (encoding === "ISO-8859-1"){
+        fs.writeFileSync(resultFile, baseFile.toString(), {encoding:"binary", flag:'w'});
     } else {
-        fs.writeFileSync(resultFile, baseFile.toString(), encoding);
+        fs.writeFileSync(resultFile, baseFile.toString(), {encoding:encoding, flag:'w'});
     }
     return baseFile.toString();
     
