@@ -19,24 +19,20 @@ export class ObjectLiteralExpression {
 
     merge(patchObjectLiteral: ObjectLiteralExpression, patchOverrides: boolean) {
 
-        if(patchOverrides) {
-            this.setProperties(patchObjectLiteral.getProperties());
-        } else {
-            let exists: boolean;
-    
-            patchObjectLiteral.getProperties().forEach(patchProperty => {
-                exists = false;
-                this.getProperties().forEach(property => {
-                    if(property.getIdentifier() === patchProperty.getIdentifier()){
-                        property.merge(patchProperty, patchOverrides);
-                        exists = true;
-                    }
-                })
-                if(!exists){
-                    this.addProperty(patchProperty);
+        let exists: boolean;
+
+        patchObjectLiteral.getProperties().forEach(patchProperty => {
+            exists = false;
+            this.getProperties().forEach(property => {
+                if(property.getIdentifier() === patchProperty.getIdentifier()){
+                    property.merge(patchProperty, patchOverrides);
+                    exists = true;
                 }
             })
-        }
+            if(!exists){
+                this.addProperty(patchProperty);
+            }
+        })
     }
 
     toString() {

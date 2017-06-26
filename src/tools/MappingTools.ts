@@ -130,7 +130,11 @@ export function mapImport(fileImport: ts.ImportDeclaration){
         if(fileImport.importClause.namedBindings){
             if(fileImport.importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
                 (<ts.NamedImports>fileImport.importClause.namedBindings).elements.forEach(named => {
-                    importElement.addNamed((<String>named.name.text));
+                    if (named.propertyName) {
+                        importElement.addNamed(named.propertyName.text + " as " + (<String>named.name.text));    
+                    } else {
+                        importElement.addNamed((<String>named.name.text));
+                    }
                 })
             }else {
                 importElement.setNamespace((<ts.NamespaceImport>fileImport.importClause.namedBindings).name.text);
