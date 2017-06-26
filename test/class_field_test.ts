@@ -2,14 +2,14 @@ import merge from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 
-describe('Merge class fields with merge():', () => {
+describe('Merge class fields with merge():', function() {
     let testResources = './test/resources/class/';
     let baseTestResources = testResources + 'base/';
     let patchTestResources = testResources + 'patch/';
     let outputTestTempResources = testResources + 'output/';
 
     // ---- Fields ---- //
-    it('should add the field from the patch. (./test/resources/class/{base|patch}/class_1.ts)', () => {
+    it('should add the field from the patch. (./test/resources/class/{base|patch}/class_1.ts)', function() {
         /**
          * fails if the result doesn't contain the field from the patch
          */
@@ -20,7 +20,7 @@ describe('Merge class fields with merge():', () => {
         expect(result.indexOf('private c;'))
             .to.be.greaterThan(0, 'declaration should be present in class a');
     });
-    it('should add the field from the patch with patchOverride. (./test/resources/class/{base|patch}/class_1.ts)', () => {
+    it('should add the field from the patch with patchOverride. (./test/resources/class/{base|patch}/class_1.ts)', function() {
         /**
          * fails if the result doesn't contain the field from the patch
          */
@@ -31,7 +31,7 @@ describe('Merge class fields with merge():', () => {
         expect(result.indexOf('private c;'))
             .to.be.greaterThan(0, 'declaration should be present in class a');
     });
-    it('should use the value from the base if variable is present in base and patch. (./test/resources/class/{base|patch}/class_2.ts)', () => {
+    it('should use the value from the base if variable is present in base and patch. (./test/resources/class/{base|patch}/class_2.ts)', function() {
         /**
          * fails if the result doesn't use the value from the base
          */
@@ -42,7 +42,7 @@ describe('Merge class fields with merge():', () => {
         expect(result.filter(res => /private\s+b\s*=\s*1;/.test(res.toString()))).length.is.greaterThan(0);
         //expect(result.indexOf('private b = 1;')).to.be.greaterThan(0, 'b should have value from base');
     });
-    it('should use the value from the patch if variable is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_2.ts)', () => {
+    it('should use the value from the patch if variable is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_2.ts)', function() {
         /**
          * fails if the result doesn't use the value from the patch
          */
@@ -52,7 +52,7 @@ describe('Merge class fields with merge():', () => {
             .filter(value => value != "");
         expect(result.filter(res => /private\s+b\s*=\s*2;/.test(res.toString()))).length.is.greaterThan(0, 'b should have value from patch');
     });
-    it('should use the modifier from the base if variable is present in base and patch. (./test/resources/class/{base|patch}/class_3.ts)', () => {
+    it('should use the modifier from the base if variable is present in base and patch. (./test/resources/class/{base|patch}/class_3.ts)', function() {
         /**
          * fails if the result doesn't use the modifier from the base
          */
@@ -62,7 +62,7 @@ describe('Merge class fields with merge():', () => {
             .filter(value => value != "");
         expect(result.indexOf('private b;')).to.be.greaterThan(0, 'b should have modifier from base');
     });
-    it('should use the modifier from the patch if variable is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_3.ts)', () => {
+    it('should use the modifier from the patch if variable is present in base and patch, and patchOverride is true. (./test/resources/class/{base|patch}/class_3.ts)', function() {
         /**
          * fails if the result doesn't use the modifier from the patch
          */
