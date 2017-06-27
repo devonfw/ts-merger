@@ -47,6 +47,7 @@ The merger allows merging of this node kinds:
 - ArrayLiteralExpression
 - ObjectLiteralExpression
 - CallExpression
+- VariableAssignment
 
 This version allows merging of TypeScript files that follow this structure:
 
