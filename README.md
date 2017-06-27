@@ -87,6 +87,8 @@ class Example1 {
 
     anotherMethod(){}
 }
+
+class AnotherClass {}
 ```
 **Resultant merged code WITH FALSE PATCHOVERRIDES**
 
@@ -105,6 +107,8 @@ class Example1 {
 
     anotherMethod(){}
 }
+
+class AnotherClass {}
 ```
 
 **Resultant merged code WITH TRUE PATCHOVERRIDES**
@@ -124,6 +128,8 @@ class Example1 {
 
     anotherMethod(){}
 }
+
+class AnotherClass {}
 ```
 
 ## Future version
