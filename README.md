@@ -28,7 +28,7 @@ let tsm = require('@oasp/ts-merger');
 let mergedCode: string = tsm.merge(patchOverrides, 'path/to/base/file', 'path/to/patch/file', '', '');
 ```
 
-This will not write an resultant file and will use UITF-8 as encoding.
+This will not write an resultant file and will use UTF-8 as encoding.
 
 ## Features
 
