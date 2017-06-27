@@ -1,18 +1,7 @@
-import { Constructor } from './components/classDeclaration/members/constructor/Constructor';
-import { PropertyDeclaration } from './components/classDeclaration/members/property/PropertyDeclaration';
-import { GeneralInterface } from './components/general/GeneralInterface';
-import { ArrayLiteralExpression } from './components/general/ArrayLiteralExpression';
-import { PropertyAssignment } from './components/general/PropertyAssignment';
-import { ObjectLiteralExpression } from './components/general/ObjectLiteralExpression';
-import { Decorator } from './components/decorator/Decorator';
 import { TSFile } from './components/TSFile';
 import * as fs from 'fs';
 import * as ts from 'typescript';
 import * as encIconV from 'iconv-lite';
-import ImportClause  from './components/import/ImportClause';
-import ClassDeclaration  from './components/classDeclaration/ClassDeclaration';
-import Method from './components/classDeclaration/members/method/Method';
-import Parameter from './components/classDeclaration/members/method/Parameter';
 import * as mapTools from './tools/MappingTools';
 
 /**

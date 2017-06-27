@@ -1,7 +1,7 @@
 import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
 import { VariableStatement } from '../components/general/VariableStatement';
 import { TSFile } from '../components/TSFile';
-import { ImportClause } from '../components/import/ImportClause';
+import { ImportDeclaration } from '../components/import/ImportDeclaration';
 import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
 import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
 import { Parameter } from '../components/classDeclaration/members/method/Parameter';
@@ -25,7 +25,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
                 file.addImport(mapImport((<ts.ImportDeclaration>child)));
             break;
             case ts.SyntaxKind.ClassDeclaration:
-                file.setClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
+                file.addClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
             break;
             case ts.SyntaxKind.VariableStatement:
                 file.addVariable(mapVariableStatement((<ts.VariableStatement>child), sourceFile));
@@ -124,7 +124,7 @@ export function mapArrayLiteral(elements: ts.NodeArray<any>, sourceFile: ts.Sour
 }
 
 export function mapImport(fileImport: ts.ImportDeclaration){
-    let importElement: ImportClause = new ImportClause();
+    let importElement: ImportDeclaration = new ImportDeclaration();
     importElement.setModule((<ts.Identifier>fileImport.moduleSpecifier).text);
     if(fileImport.importClause){
         if(fileImport.importClause.namedBindings){
@@ -139,6 +139,8 @@ export function mapImport(fileImport: ts.ImportDeclaration){
             }else {
                 importElement.setNamespace((<ts.NamespaceImport>fileImport.importClause.namedBindings).name.text);
             }
+        } else if(fileImport.importClause.name) {
+            importElement.setClause((<ts.Identifier>fileImport.importClause.name).text);
         }
     }else {
         importElement.setSpaceBinding(false);

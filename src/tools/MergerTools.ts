@@ -31,22 +31,19 @@ export function mergeImports(baseFile: TSFile, patchFile: TSFile){
     }
 }
 
-export function mergeClass(baseFile: TSFile, patchFile: TSFile, patchOverrides: boolean) {
-    let baseClass: ClassDeclaration = baseFile.getClass();
-    let patchClass: ClassDeclaration = patchFile.getClass();
+export function mergeClass(baseClass: ClassDeclaration, patchClass: ClassDeclaration, patchOverrides: boolean) {
+
     let exists: boolean;
 
-    if(baseClass.getIdentifier() === patchClass.getIdentifier()){
-        if(patchOverrides) {
-            baseClass.setModifiers(patchClass.getModifiers())
-            baseClass.setHeritages(patchClass.getHeritages());
-        }
-
-        mergeDecorators(baseClass.getDecorators(), patchClass.getDecorators(), patchOverrides);
-        mergeProperties(baseClass.getProperties(), patchClass.getProperties(), patchOverrides);
-        mergeConstructor(baseClass.getConstructor(), patchClass.getConstructor(), patchOverrides);
-        mergeMethods(baseClass.getMethods(), patchClass.getMethods(), patchOverrides);
+    if(patchOverrides) {
+        baseClass.setModifiers(patchClass.getModifiers())
+        baseClass.setHeritages(patchClass.getHeritages());
     }
+
+    mergeDecorators(baseClass.getDecorators(), patchClass.getDecorators(), patchOverrides);
+    mergeProperties(baseClass.getProperties(), patchClass.getProperties(), patchOverrides);
+    mergeConstructor(baseClass.getConstructor(), patchClass.getConstructor(), patchOverrides);
+    mergeMethods(baseClass.getMethods(), patchClass.getMethods(), patchOverrides);
 
 }
 
