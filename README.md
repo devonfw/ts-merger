@@ -1,5 +1,5 @@
 # TS-Merger
-TypeScript Merger for Angular-Cli
+Generic TypeScript Merger
 
 [![build status](https://travis-ci.org/oasp/ts-merger.svg?branch=master)](https://travis-ci.org/oasp/ts-merger)
 
@@ -29,6 +29,37 @@ let mergedCode: string = tsm.merge(patchOverrides, 'path/to/base/file', 'path/to
 ```
 
 This will not write an resultant file and will use UITF-8 as encoding.
+
+## Features
+
+The merger allows merging of this node kinds:
+
+- ImportDeclaration
+- ClassDeclaration
+- Decorator
+- FunctionDeclaration
+- MethodDeclaration
+- Parameter
+- BodyMethod
+- PropertyAssignment
+- PropertyDeclaration
+- Constructor
+- ArrayLiteralExpression
+- ObjectLiteralExpression
+- CallExpression
+
+This version allows merging of TypeScript files that follow this structure:
+
+- Array of imports
+- Array of functions
+- Array of variables
+- A class with same name at base and patch
+
+ImportDeclaration's must follow the format:
+
+```javascript
+import { a } from 'b';
+```
 
 ##Examples
 
@@ -65,8 +96,8 @@ class Example1 {
 **Resultant merged code WITH FALSE PATCHOVERRIDES**
 
 ```javascript
-import a from 'b';
-import c from 'd';
+import { a } from 'b';
+import { c } from 'd';
 import { f, h } from 'g';
 
 class Example1 {
@@ -84,8 +115,8 @@ class Example1 {
 **Resultant merged code WITH TRUE PATCHOVERRIDES**
 
 ```javascript
-import a from 'b';
-import c from 'd';
+import { a } from 'b';
+import { c } from 'd';
 import { f, h } from 'g';
 
 class Example1 {
@@ -99,3 +130,11 @@ class Example1 {
     anotherMethod(){}
 }
 ```
+
+## Future version
+
+Next releases will include merge support for:
+
+- InteraceDeclaration
+- TypeScript files with more than one class
+- Support for simple ImportClauses (import a from 'b';)
