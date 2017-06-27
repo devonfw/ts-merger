@@ -53,20 +53,14 @@ This version allows merging of TypeScript files that follow this structure:
 - Array of imports
 - Array of functions
 - Array of variables
-- A class with same name at base and patch
-
-ImportDeclaration's must follow the format:
-
-```javascript
-import { a } from 'b';
-```
+- Array of classes
 
 ##Examples
 
 **Base file**
 ```javascript
-import { a } from 'b';
-import { f } from 'g';
+import a from 'b';
+import f from 'g';
 
 class Example1 {
     private propertyFromBase: string;
@@ -80,8 +74,8 @@ class Example1 {
 **Patch file**
 
 ```javascript
-import { c } from 'd';
-import { h } from 'g';
+import c from 'd';
+import h from 'g';
 
 class Example1 {
     private propertyFromPatch: number;
@@ -96,8 +90,8 @@ class Example1 {
 **Resultant merged code WITH FALSE PATCHOVERRIDES**
 
 ```javascript
-import { a } from 'b';
-import { c } from 'd';
+import a from 'b';
+import c from 'd';
 import { f, h } from 'g';
 
 class Example1 {
@@ -115,8 +109,8 @@ class Example1 {
 **Resultant merged code WITH TRUE PATCHOVERRIDES**
 
 ```javascript
-import { a } from 'b';
-import { c } from 'd';
+import a from 'b';
+import c from 'd';
 import { f, h } from 'g';
 
 class Example1 {
@@ -135,6 +129,4 @@ class Example1 {
 
 Next releases will include merge support for:
 
-- InteraceDeclaration
-- TypeScript files with more than one class
-- Support for simple ImportClauses (import a from 'b';)
+- InterfaceDeclaration
