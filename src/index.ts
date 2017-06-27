@@ -24,11 +24,11 @@ const optionDefinitions = [
   { name: 'patchOverride', alias: 'f', type: Boolean, defaultValue: false },
   { name: 'basePath', alias:'b', type: String },
   { name: 'patchPath', alias: 'p', type: String },
-  { name: 'outputPath', alias: 'o', type: String },
+  { name: 'outputPath', alias: 'o', type: String, defaultValue: "" },
   { name: 'encoding', alias: 'e', type: String, defaultValue: 'UTF-8' }
 ];
 const options = commandLineArgs(optionDefinitions, { partial: true });
-if (options.basePath && options.patchPath && options.outputPath){
+if (options.basePath && options.patchPath){
     merge(options.patchOverride, options.basePath, options.patchPath, options.outputPath, options.encoding);
 }
 
@@ -61,11 +61,14 @@ export function merge(patchOverrides: boolean, fileBase: string, filePatch: stri
     
     baseFile.merge(patchFile, patchOverrides);
 
-    if (encoding === "ISO-8859-1"){
-        fs.writeFileSync(resultFile, baseFile.toString(), {encoding:"binary", flag:'w'});
-    } else {
-        fs.writeFileSync(resultFile, baseFile.toString(), {encoding:encoding, flag:'w'});
+    if(resultFile != "") {
+        if (encoding === "ISO-8859-1"){
+            fs.writeFileSync(resultFile, baseFile.toString(), {encoding:"binary", flag:'w'});
+        } else {
+            fs.writeFileSync(resultFile, baseFile.toString(), {encoding:encoding, flag:'w'});
+        }
     }
+
     return baseFile.toString();
     
 }
