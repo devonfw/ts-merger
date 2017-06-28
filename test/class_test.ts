@@ -99,6 +99,24 @@ describe('Merge class declarations with merge():', function() {
             .filter(value => value != "");
         expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base shouldn\'t be kept');
     });
+
+    it('Should accumulate the classes (resources/class/{base|patch}/class_17.ts)', function(){
+        const result:String = merge(false, patchTestResources + "class_17.ts", baseTestResources + "class_17.ts", outputTestTempResources + 'class_17_output.ts', 'UTF-8')
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
+        let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
+        expect(regex.test(result.toString())).true;
+    });
+    it('Should accumulate the classes with patchOverride (shouldn\'t make a difference) (resources/class/{base|patch}/class_17.ts)', function(){
+        const result:String = merge(false, patchTestResources + "class_17.ts", baseTestResources + "class_17.ts", outputTestTempResources + 'class_17_output_override.ts', 'UTF-8')
+            .split("\n")
+            .map(value => value.trim())
+            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
+        let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
+        expect(regex.test(result.toString())).true;
+    });
+
     xit('should merge implementations (resources/class/{base|patch}/class_13.ts)', function() {
         /**
          * fails if the implementations aren't merged
