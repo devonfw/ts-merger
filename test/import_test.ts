@@ -92,6 +92,18 @@ describe('Merge imports with merge()', function() {
     expect(result.length).to.be.equal(1);
   });
 
+  it('Should merge entries from the same source (resources/import/{base|patch}/imports_8.ts', function(){
+    const result : String[] = merge(false, baseTestResources + 'imports_8.ts', patchTestResources + 'imports_8.ts', outputTestTempResources + 'import_8_output.ts', 'UTF-8').split('\n').filter(r => {return r.trim() != ""});
+    let importRegex = /import\s*\{\s*c\s*,\s*e\s*\}\s*from\s*'d'\s*[;]?/;
+    expect(result.filter(value => importRegex.test(value.toString())).length).equal(1);
+  });
+
+  it('Should merge entries from the same source with patchOverride is set (shouldn\'t make a difference) (resources/import/{base|patch}/imports_8.ts', function(){
+    const result : String[] = merge(true, baseTestResources + 'imports_8.ts', patchTestResources + 'imports_8.ts', outputTestTempResources + 'import_8_output_override.ts', 'UTF-8').split('\n').filter(r => {return r.trim() != ""});
+    let importRegex = /import\s*\{\s*c\s*,\s*e\s*\}\s*from\s*'d'\s*[;]?/;
+    expect(result.filter(value => importRegex.test(value.toString())).length).equal(1);
+  });
+
   // ---- Guess work based tests ---- //
   xit('Should prefer the base import name in case of conflicts if patchOverride==false. (resources/import/{base|patch}/imports_6.ts)', function() {
     /**
