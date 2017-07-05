@@ -248,7 +248,7 @@ export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceF
     return prop;
 }
 
-export function mapTypes(type: ts.TypeNode){
+export function mapTypes(type: ts.Node){
 
     let typeToReturn: String[] = [];
     switch(type.kind) {
@@ -265,9 +265,13 @@ export function mapTypes(type: ts.TypeNode){
             if((<ts.TypeReferenceNode>type).typeArguments) {
                 typeToReturn.push("<");
                 (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
-                    typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
-                    if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
-                        typeToReturn.push(", ");
+                    if((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName)) {
+                        typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
+                        if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
+                            typeToReturn.push(", ");
+                        }
+                    } else {
+                        typeToReturn.push(mapTypes(arg));
                     }
                 })
                 typeToReturn.push(">");
