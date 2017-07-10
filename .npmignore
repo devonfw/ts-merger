@@ -1,0 +1,10 @@
+dist/
+.vscode/
+test/
+src/
+tslint.json
+yarn.lock
+tsconfig.json
+webpack.config.js
+package-lock.json
+build/**/*.js.map

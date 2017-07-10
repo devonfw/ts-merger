@@ -1,7 +1,7 @@
 import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
 import { VariableStatement } from '../components/general/VariableStatement';
 import { TSFile } from '../components/TSFile';
-import { ImportClause } from '../components/import/ImportClause';
+import { ImportDeclaration } from '../components/import/ImportDeclaration';
 import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
 import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
 import { Parameter } from '../components/classDeclaration/members/method/Parameter';
@@ -25,7 +25,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
                 file.addImport(mapImport((<ts.ImportDeclaration>child)));
             break;
             case ts.SyntaxKind.ClassDeclaration:
-                file.setClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
+                file.addClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
             break;
             case ts.SyntaxKind.VariableStatement:
                 file.addVariable(mapVariableStatement((<ts.VariableStatement>child), sourceFile));
@@ -124,17 +124,23 @@ export function mapArrayLiteral(elements: ts.NodeArray<any>, sourceFile: ts.Sour
 }
 
 export function mapImport(fileImport: ts.ImportDeclaration){
-    let importElement: ImportClause = new ImportClause();
+    let importElement: ImportDeclaration = new ImportDeclaration();
     importElement.setModule((<ts.Identifier>fileImport.moduleSpecifier).text);
     if(fileImport.importClause){
         if(fileImport.importClause.namedBindings){
             if(fileImport.importClause.namedBindings.kind == ts.SyntaxKind.NamedImports){
                 (<ts.NamedImports>fileImport.importClause.namedBindings).elements.forEach(named => {
-                    importElement.addNamed((<String>named.name.text));
+                    if (named.propertyName) {
+                        importElement.addNamed(named.propertyName.text + " as " + (<String>named.name.text));    
+                    } else {
+                        importElement.addNamed((<String>named.name.text));
+                    }
                 })
             }else {
                 importElement.setNamespace((<ts.NamespaceImport>fileImport.importClause.namedBindings).name.text);
             }
+        } else if(fileImport.importClause.name) {
+            importElement.setClause((<ts.Identifier>fileImport.importClause.name).text);
         }
     }else {
         importElement.setSpaceBinding(false);
@@ -242,7 +248,7 @@ export function mapPropertyDeclaration(property: ts.PropertyDeclaration, sourceF
     return prop;
 }
 
-export function mapTypes(type: ts.TypeNode){
+export function mapTypes(type: ts.Node){
 
     let typeToReturn: String[] = [];
     switch(type.kind) {
@@ -259,9 +265,13 @@ export function mapTypes(type: ts.TypeNode){
             if((<ts.TypeReferenceNode>type).typeArguments) {
                 typeToReturn.push("<");
                 (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
-                    typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
-                    if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
-                        typeToReturn.push(", ");
+                    if((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName)) {
+                        typeToReturn.push((<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text);
+                        if((<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) < (<ts.TypeReferenceNode>type).typeArguments.length - 1) {
+                            typeToReturn.push(", ");
+                        }
+                    } else {
+                        typeToReturn.push(mapTypes(arg));
                     }
                 })
                 typeToReturn.push(">");

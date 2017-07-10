@@ -1,4 +1,0 @@
-= TS-Merger
-TypeScript Merger for Angular-Cli
-
-image:https://travis-ci.org/oasp/ts-merger.svg?branch=master["Build Status", link="https://travis-ci.org/oasp/ts-merger"]
