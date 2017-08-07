@@ -2,6 +2,7 @@
 Generic TypeScript Merger
 
 [![build status](https://travis-ci.org/oasp/ts-merger.svg?branch=master)](https://travis-ci.org/oasp/ts-merger)
+[![build status](https://travis-ci.org/oasp/ts-merger.svg?branch=develop)](https://travis-ci.org/oasp/ts-merger)
 
 ## Usage
 
