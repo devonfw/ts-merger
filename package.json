@@ -13,11 +13,12 @@
   ],
   "main": "build/index.js",
   "scripts": {
+    "preinstall": "use-yarn",
     "build": "tsc",
     "dev": "tsc -w",
     "test": "mocha-webpack --webpack-config webpack.config.js \"test/**/*_test.ts\"",
     "test-watch": "mocha-webpack --webpack-config webpack.config.js --watch \"test/**/*_test.ts\"",
-    "prepublish": "npm run build && npm run test && npm run bundle",
+    "prepublish": "use-yarn && npm run build && npm run test && npm run bundle",
     "bundle": "webpack -p"
   },
   "keywords": [
@@ -38,6 +39,7 @@
     "tslint": "^5.5.0",
     "tslint-language-service": "^0.9.6",
     "typescript": "^2.2.1",
+    "use-yarn": "^1.0.1",
     "webpack": "^3.4.1"
   },
   "dependencies": {},
