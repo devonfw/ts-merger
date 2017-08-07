@@ -18,7 +18,7 @@
     "dev": "tsc -w",
     "test": "mocha-webpack --webpack-config webpack.config.js \"test/**/*_test.ts\"",
     "test-watch": "mocha-webpack --webpack-config webpack.config.js --watch \"test/**/*_test.ts\"",
-    "prepublish": "npm run preinstall && npm run build && npm run test && npm run bundle",
+    "prepublish": "npm run build && npm run test && npm run bundle",
     "bundle": "webpack -p"
   },
   "keywords": [
