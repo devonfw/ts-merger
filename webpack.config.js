@@ -1,7 +1,7 @@
 module.exports = {
     entry: './src/index.ts',
     output: {
-        filename: 'tsmerger.umd.js',
+        filename: 'ts-merger.umd.js',
         path: __dirname + '/dist',
         libraryTarget: "umd",
     },
