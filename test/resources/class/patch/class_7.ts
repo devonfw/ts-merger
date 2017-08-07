@@ -1,4 +1,0 @@
-@decb
-class a {
-
-}

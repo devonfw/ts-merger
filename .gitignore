@@ -1,5 +1,4 @@
 node_modules
 build
 dist
-test/resources/class/output/
-test/resources/import/output/
+.tmp

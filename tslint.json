@@ -2,13 +2,19 @@
     "rules": {
         "indent": [
             true,
-            4
+            2
         ],
         "whitespace": [
             true,
             "check-branch",
             "check-operator",
             "check-separator"
-        ]
+        ],
+        "max-line-length": [true, 160],
+        "no-any": true
+    },
+
+    "jsRules": {
+        "max-line-length": [true, 160]
     }
 }

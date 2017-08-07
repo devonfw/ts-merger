@@ -1,3 +1,0 @@
-class a {
-    private c;
-}

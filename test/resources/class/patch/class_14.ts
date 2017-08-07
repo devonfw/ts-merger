@@ -1,4 +1,0 @@
-@deca 
-class a {
-
-}

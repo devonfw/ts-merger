@@ -1,4 +1,9 @@
 {
-    "vsicons.presets.angular": false,
-    "typescript.tsdk": "./node_modules/typescript/lib"
+  "vsicons.presets.angular": false,
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  "typescript.tsserver.log": "off",
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "typescript.format.enable": true,
+  "editor.detectIndentation": false
 }

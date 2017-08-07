@@ -2,141 +2,129 @@ import merge from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 
-describe('Merge class declarations with merge():', function() {
-    let testResources = './test/resources/class/';
-    let baseTestResources = testResources + 'base/';
-    let patchTestResources = testResources + 'patch/';
-    let outputTestTempResources = testResources + 'output/';
+describe('Merging class declarations', () => {
 
-    it('merge should yield a valid class (resources/class/{base|patch}/class_11.ts)', function() {
-        /**
-         * fails if the result isn't a valid typescript class
-         */
-        const result:String[] = merge(false, baseTestResources + "class_11.ts", patchTestResources + "class_11.ts", outputTestTempResources + 'class_11_output.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value.trim() != "");
-        const assembledResult : String = result.reduce((prev:String, current:String) => {return prev.toString() + current.toString(); }, ""); 
-        expect(assembledResult).equal("class a {}", "Result is not valid");
-    });
-    it('shouldn\'t use the patch extension (resources/class/{base|patch}/class_11.ts)', function() {
-        /**
-         * fails if the extension from the patch is applied 
-         */
-        const result:String[] = merge(false, baseTestResources + "class_11.ts", patchTestResources + "class_11.ts", outputTestTempResources + 'class_11_output1.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value.trim() != "");
-        expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch shouldn\'t be applied');
-    });
-    it('should use the patch extension with patchOverride (resources/class/{base|patch}/class_11.ts)', function() {
-        /**
-         * fails if the extension from the patch isn't applied
-         */
-        const result:String[] = merge(true, baseTestResources + "class_11.ts", patchTestResources + "class_11.ts", outputTestTempResources + 'class_11_output_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch should be applied');
-    });
-    it('should keep the base extension (resources/class/{base|patch}/class_11.ts, base and patch switched)', function() {
-        /**
-         * fails if the patch overrides the base extension declaration. This tests also uses class_11.ts, but the file in base directory is used as patch and vice versa!
-         */
-        const result:String[] = merge(false, patchTestResources + "class_11.ts", baseTestResources + "class_11.ts", outputTestTempResources + 'class_11_output3.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base should be kept');
-    });
-    it('shouldn\'t keep the base extension with patchOverride (resources/class/{base|patch}/class_11.ts, base and patch switched)', function() {
-        /**
-         * fails if the patch override the base extension declaration. This tests also uses class_11.ts, but the file in base directory is used as patch and vice versa!
-         */
-        const result:String[] = merge(true, patchTestResources + "class_11.ts", baseTestResources + "class_11.ts", outputTestTempResources + 'class_11_output1_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base shouldn\'t be kept');
-    });
-    it('shouldn\'t use the patch implementations (resources/class/{base|patch}/class_12.ts)', function() {
-        /**
-         * fails if the implementation from the patch is applied 
-         */
-        const result:String[] = merge(false, baseTestResources + "class_12.ts", patchTestResources + "class_12.ts", outputTestTempResources + 'class_12_output.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch shouldn\'t be applied');
-    });
-    it('should use the patch implementation with patchOverride (resources/class/{base|patch}/class_12.ts)', function() {
-        /**
-         * fails if the implementation from the patch isn't applied
-         */
-        const result:String[] = merge(true, baseTestResources + "class_12.ts", patchTestResources + "class_12.ts", outputTestTempResources + 'class_12_output_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch should be applied');
-    });
-    it('should keep the base implementation (resources/class/{base|patch}/class_11.ts, base and patch switched)', function() {
-        /**
-         * fails if the patch overrides the base implementation declaration. This tests also uses class_12.ts, but the file in base directory is used as patch and vice versa!
-         */
-        const result:String[] = merge(false, patchTestResources + "class_12.ts", baseTestResources + "class_12.ts", outputTestTempResources + 'class_12_output1.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base should be kept');
-    });
-    it('shouldn\'t keep the base implementation with patchOverride (resources/class/{base|patch}/class_12.ts, base and patch switched)', function() {
-        /**
-         * fails if the patch doesn't override the base implementation declaration. This tests also uses class_12.ts, but the file in base directory is used as patch and vice versa!
-         */
-        const result:String[] = merge(true, patchTestResources + "class_12.ts", baseTestResources + "class_12.ts", outputTestTempResources + 'class_12_output1_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base shouldn\'t be kept');
+    describe('handling inheritance', () => {
+
+        const base = `class a {}`, patch = `class a extends b {}`;
+
+        it('should yield a valid class.', () => {
+            const result: String[] = merge(base, patch, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value.trim() != "");
+            const assembledResult: String = result.reduce((prev: String, current: String) => { return prev.toString() + current.toString(); }, "");
+            expect(assembledResult).equal("class a {}", "Result is not valid");
+        });
+        it('should not use the patch extension.', () => {
+            const result: String[] = merge(base, patch, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value.trim() != "");
+            expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch should not be applied');
+        });
+        it('should use the patch extension with patchOverride.', () => {
+            const result: String[] = merge(base, patch, true)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from patch should be applied');
+        });
+        it('should keep the base extension.', () => {
+            const result: String[] = merge(patch, base, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a extends b[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base should be kept');
+        });
+        it('should not keep the base extension with patchOverride.', () => {
+            const result: String[] = merge(patch, base, true)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'extension from base should not be kept');
+        });
     });
 
-    it('Should accumulate the classes (resources/class/{base|patch}/class_17.ts)', function(){
-        const result:String = merge(false, patchTestResources + "class_17.ts", baseTestResources + "class_17.ts", outputTestTempResources + 'class_17_output.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
-        let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
-        expect(regex.test(result.toString())).true;
-    });
-    it('Should accumulate the classes with patchOverride (shouldn\'t make a difference) (resources/class/{base|patch}/class_17.ts)', function(){
-        const result:String = merge(false, patchTestResources + "class_17.ts", baseTestResources + "class_17.ts", outputTestTempResources + 'class_17_output_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
-        let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
-        expect(regex.test(result.toString())).true;
+    describe('handling aliasing', () => {
+
+        const base = `class a {}`, patch = `class a implements b {}`;
+
+        it('should not use the patch implementations.', () => {
+            const result: String[] = merge(base, patch, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch should not be applied');
+        });
+        it('should use the patch implementation with patchOverride.', () => {
+            const result: String[] = merge(base, patch, true)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from patch should be applied');
+        });
+        it('should keep the base implementation.', () => {
+            const result: String[] = merge(patch, base, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a implements b[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base should be kept');
+        });
+        it('should not keep the base implementation with patchOverride.', () => {
+            const result: String[] = merge(patch, base, true)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a \{[^]*/.test(value.toString())).length).to.be.equal(1, 'implementation from base should not be kept');
+        });
+    }); 
+ 
+    describe('multiple class definitions', () => {
+
+        const base = `class a {}`, patch = `class b {}`;
+
+        it('should be accumulated.', () => {
+            const result: String = merge(patch, base, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
+            let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
+            expect(regex.test(result.toString())).true;
+        });
+        it('should be accumulated with patchOverride (should not make a difference).', () => {
+            const result: String = merge(patch, base, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "").reduce((prev, curr) => prev.toString() + curr.toString(), '');
+            let regex = /\s*class\s+[ab]\s*\{\}\s*class\s+[ab].*/;
+            expect(regex.test(result.toString())).true;
+        });
     });
 
-    xit('should merge implementations (resources/class/{base|patch}/class_13.ts)', function() {
-        /**
-         * fails if the implementations aren't merged
-         * currently not supported
-         */
-        const result:String[] = merge(false, baseTestResources + "class_13.ts", patchTestResources + "class_13.ts", outputTestTempResources + 'class_13_output.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'missformed class declaration');
-    });
-    xit('should merge implementations with patchOverrides (resources/class/{base|patch}/class_13.ts)', function() {
-        /**
-         * fails if the implementations aren't merged
-         * currently not supported
-         */
-        const result:String[] = merge(false, baseTestResources + "class_13.ts", patchTestResources + "class_13.ts", outputTestTempResources + 'class_13_output_override.ts', 'UTF-8')
-            .split("\n")
-            .map(value => value.trim())
-            .filter(value => value != "");
-        expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'missformed class declaration');
+    describe('should accumulate implemented interfaces', () => {
+
+        const base = `class a implements b {}`, patch = `class a implements c {}`;
+
+        xit('by default.', () => {
+            /**
+             * currently not supported
+             */
+            const result: String[] = merge(base, patch, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'misformed class declaration');
+        });
+        xit('with patchOverrides.', () => {
+            /**
+             * currently not supported
+             */
+            const result: String[] = merge(base, patch, false)
+                .split("\n")
+                .map(value => value.trim())
+                .filter(value => value != "");
+            expect(result.filter(value => /class a implements\s*\w\s*,\s*\w.*/.test(value.toString())).length).to.be.equal(1, 'misformed class declaration');
+        });
     });
 });

@@ -1,6 +1,6 @@
 {
   "name": "@oasp/ts-merger",
-  "version": "1.0.12",
+  "version": "2.0.0-rc.1",
   "description": "2-way TypeScript Merger",
   "author": {
     "name": "Capgemini",
@@ -15,8 +15,10 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc -w",
-    "test": "mocha -r node_modules/ts-node/register.js ./test/*_test.ts",
-    "prepublish": "npm run build"
+    "test": "mocha-webpack --webpack-config webpack.config.js \"test/**/*_test.ts\"",
+    "test-watch": "mocha-webpack --webpack-config webpack.config.js --watch \"test/**/*_test.ts\"",
+    "prepublish": "npm run build && npm run test && npm run bundle",
+    "bundle": "webpack -p"
   },
   "keywords": [
     "TypeScript",
@@ -30,15 +32,15 @@
     "chai": "^3.5.0",
     "cpx": "^1.5.0",
     "mocha": "^3.2.0",
+    "mocha-webpack": "1.0.0-rc.1",
     "source-map-support": "0.4.3",
     "ts-loader": "^2.1.0",
-    "ts-node": "^2.1.0",
-    "typescript": "^2.2.1"
+    "tslint": "^5.5.0",
+    "tslint-language-service": "^0.9.6",
+    "typescript": "^2.2.1",
+    "webpack": "^3.4.1"
   },
-  "dependencies": {
-    "command-line-args": "^4.0.6",
-    "iconv-lite": "^0.4.18"
-  },
+  "dependencies": {},
   "directories": {
     "test": "test"
   },

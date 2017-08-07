@@ -1,2 +1,0 @@
-@deca(true)
-class a {}

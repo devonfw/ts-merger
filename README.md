@@ -7,28 +7,19 @@ Generic TypeScript Merger
 
 ```javascript
 let tsm = require('@oasp/ts-merger');
-let mergedCode: string = tsm.merge(patchOverrides, 'path/to/base/file', 'path/to/patch/file', '/path/to/result/file', 'encoding');
+let mergedCode: string = tsm.merge(baseContents, pathContents, patchOverrides);
 ```
 
 Being:
-- patchOverrides(**true**/**false**): Being false, base conflicts will have priority. With true, patch conflicts will have priority.  
-- Path to result file: Leaving it as '' in case of no ouput file needed.
-- encoding: **UTF-8** or **ISO-8895-1**. UTF-8 by default if encoding = ''
+- baseContents: contents of the base in a string
+- patchContents: contents of the patch in a string
+- patchOverrides(**true**/**false**): Being false, base will have priority in case of conflicts. With true, patch will have priority.  
 
 ### Example
 ```javascript
 let tsm = require('@oasp/ts-merger');
-let mergedCode: string = tsm.merge(patchOverrides, 'path/to/base/file', 'path/to/patch/file', '', 'ISO-8859-1');
+let mergedCode: string = tsm.merge(baseContents, pathContents, patchOverrides);
 ```
-
-This will not write an resultant file
-
-```javascript
-let tsm = require('@oasp/ts-merger');
-let mergedCode: string = tsm.merge(patchOverrides, 'path/to/base/file', 'path/to/patch/file', '', '');
-```
-
-This will not write an resultant file and will use UTF-8 as encoding.
 
 ## Features
 
@@ -90,7 +81,7 @@ class Example1 {
 
 class AnotherClass {}
 ```
-**Resultant merged code WITH FALSE PATCHOVERRIDES**
+**Resultant merged code (patchOverrides=false)**
 
 ```javascript
 import a from 'b';
@@ -111,7 +102,7 @@ class Example1 {
 class AnotherClass {}
 ```
 
-**Resultant merged code WITH TRUE PATCHOVERRIDES**
+**Resulting merged code (patchOverrides=true)**
 
 ```javascript
 import a from 'b';

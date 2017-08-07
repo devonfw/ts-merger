@@ -1,20 +1,24 @@
 module.exports = {
-  entry: './src/index.ts',
-  output: {
-    filename: 'tsmerger.js',
-    path: __dirname + '/dist',
-    libraryTarget: "commonjs",
-  },
-  target: 'node',
-  module: {
-    rules: [
-      {
-        loader: 'ts-loader',
-        exclude: [/node_modules/, /test/, /dist/]
-      }
-    ]
-  },
-  resolve: {
-    extensions: [".tsx", ".ts", ".js"]
-  }
+    entry: './src/index.ts',
+    output: {
+        filename: 'tsmerger.umd.js',
+        path: __dirname + '/dist',
+        libraryTarget: "umd",
+    },
+    module: {
+        loaders: [
+            {
+                test: /\.tsx?$/,
+                exclude: /node_modules/,
+                loader: 'ts-loader'
+            }
+        ]
+    },
+    resolve: {
+        extensions: [".tsx", ".ts", ".js"]
+    },
+    node: {
+        fs: "empty",
+        child_process: 'empty'
+    }
 };
