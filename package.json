@@ -1,6 +1,6 @@
 {
   "name": "@oasp/ts-merger",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.3",
   "description": "2-way TypeScript Merger",
   "author": {
     "name": "Capgemini",
@@ -45,6 +45,10 @@
   "directories": {
     "test": "test"
   },
+  "files": [
+    "src/",
+    "dist"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oasp/ts-merger.git"
