@@ -30,6 +30,20 @@ export function mapFile(sourceFile: ts.SourceFile) {
         case ts.SyntaxKind.ExportDeclaration:
           file.addExport(mapExport(<ts.ExportDeclaration>child));
           break;
+        case ts.SyntaxKind.ExportKeyword:
+          // This case arises when the export statement does not contain brackets
+          mapExportKeyword(child).forEach((module) => {
+            let notExistsInArray: boolean = true;
+            file.getExports().forEach((fileModule) => {
+              if (
+                fileModule.getNamed().toString() == module.getNamed().toString()
+              ) {
+                notExistsInArray = false;
+              }
+            });
+            if (notExistsInArray) file.addExport(module);
+          });
+          break;
         case ts.SyntaxKind.ClassDeclaration:
           file.addClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
           break;
@@ -205,10 +219,68 @@ export function mapImport(fileImport: ts.ImportDeclaration) {
 export function mapExport(fileExport: ts.ExportDeclaration) {
   let exportElement: ExportDeclaration = new ExportDeclaration();
   exportElement.setModule((<ts.Identifier>fileExport.moduleSpecifier).text);
+  if (fileExport.exportClause) {
+    fileExport.exportClause.elements.forEach((named) => {
+      if (named.propertyName) {
+        exportElement.addNamed(
+          named.propertyName.text + ' as ' + <String>named.name.text,
+        );
+      } else {
+        exportElement.addNamed(<String>named.name.text);
+      }
+    });
+  }
   if (!fileExport.exportClause) {
     exportElement.setSpaceBinding(false);
   }
   return exportElement;
+}
+
+export function mapExportKeyword(fileExport) {
+  // We are going to retrieve all the export declarations without brackets
+  let exportElements: ExportDeclaration[] = [];
+  // export a from b;
+  // 'a' is a named attribute
+  let namedAttributes: string[] = [];
+  // 'b' is a module attribute
+  let moduleAttributes: string[] = [];
+
+  // identifiers => named
+  fileExport.parent.identifiers.forEach((named) => {
+    namedAttributes.push(named);
+  });
+  // statements => modules
+  fileExport.parent.statements.forEach((module) => {
+    let moduleText = module.expression.text;
+    let notExistsInArray: boolean = true;
+    // We don't want duplicated exports
+    namedAttributes.forEach((named) => {
+      if (moduleText == named) notExistsInArray = false;
+    });
+
+    if (moduleText != 'from' && notExistsInArray)
+      moduleAttributes.push(moduleText);
+  });
+
+  // Now let's create and store the export declarations
+  moduleAttributes.forEach((module) => {
+    let exportElement: ExportDeclaration = new ExportDeclaration();
+    exportElement.setModule(module);
+    for (let index = 0; index < namedAttributes.length; index++) {
+      const named = namedAttributes[index];
+      if (named == 'from') {
+        namedAttributes.splice(index, 1);
+        break;
+      } else {
+        exportElement.addNamed(named);
+        namedAttributes.splice(index, 1);
+        index = index - 1;
+      }
+    }
+    exportElements.push(exportElement);
+  });
+
+  return exportElements;
 }
 
 export function mapClass(

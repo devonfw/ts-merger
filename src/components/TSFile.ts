@@ -93,6 +93,9 @@ export class TSFile {
     this.importDeclarations.forEach((importDeclaration) => {
       file.push(importDeclaration.toString());
     });
+    this.exportDeclarations.forEach((exportDeclaration) => {
+      file.push(exportDeclaration.toString());
+    });
     file.push('\n');
 
     this.functions.forEach((func) => {
