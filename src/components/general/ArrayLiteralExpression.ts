@@ -4,55 +4,56 @@ import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { GeneralInterface } from './GeneralInterface';
 
 export class ArrayLiteralExpression {
-    private elements: any[] = [];
+  private elements: any[];
 
-    addElement(element: any){
-        this.elements.push(element);
-    }
+  constructor() {
+    this.elements = [];
+  }
 
-    getElements(){
-        return this.elements;
-    }
+  addElement(element: any) {
+    this.elements.push(element);
+  }
 
-    setElements(elements: any[]) {
-        this.elements = elements;
-    }
+  getElements() {
+    return this.elements;
+  }
 
-    merge(patchArray: ArrayLiteralExpression, patchOverrides: boolean) {
-        
-        let exists: boolean;
-        patchArray.getElements().forEach(patchElement => {
-            exists = false;
-            this.getElements().forEach(element => {
-                if (patchElement.toString() === element.toString()) {
-                    exists = true;
-                } 
-                // else if(patchElement instanceof ObjectLiteralExpression && element instanceof ObjectLiteralExpression) {
-                //     (<ObjectLiteralExpression>element).merge(<ObjectLiteralExpression>patchElement, patchOverrides);
-                // }
-                
-            })
-            if(!exists) {
-                this.addElement(patchElement);
-            }
-        })
-        
-    }
+  setElements(elements: any[]) {
+    this.elements = elements;
+  }
 
-    toString() {
-        let result: String[] = [];
-        result.push("[\n");
+  merge(patchArray: ArrayLiteralExpression, patchOverrides: boolean) {
+    let exists: boolean;
+    patchArray.getElements().forEach((patchElement) => {
+      exists = false;
+      this.getElements().forEach((element) => {
+        if (patchElement.toString() === element.toString()) {
+          exists = true;
+        }
+        // else if(patchElement instanceof ObjectLiteralExpression && element instanceof ObjectLiteralExpression) {
+        //     (<ObjectLiteralExpression>element).merge(<ObjectLiteralExpression>patchElement, patchOverrides);
+        // }
+      });
+      if (!exists) {
+        this.addElement(patchElement);
+      }
+    });
+  }
 
-       this.getElements().forEach(element => {
-            if(this.elements.indexOf(element) < this.elements.length - 1){
-                result.push(element.toString(), ",\n");
-            } else{
-                result.push(element.toString(), "\n");
-            }
-        })
-        result.push("]");
-        return result.join("");
-    }
+  toString() {
+    let result: String[] = [];
+    result.push('[\n');
+
+    this.getElements().forEach((element) => {
+      if (this.elements.indexOf(element) < this.elements.length - 1) {
+        result.push(element.toString(), ',\n');
+      } else {
+        result.push(element.toString(), '\n');
+      }
+    });
+    result.push(']');
+    return result.join('');
+  }
 }
 
 export default ArrayLiteralExpression;

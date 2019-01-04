@@ -36,7 +36,8 @@ export function mapFile(sourceFile: ts.SourceFile) {
             let notExistsInArray: boolean = true;
             file.getExports().forEach((fileModule) => {
               if (
-                fileModule.getNamed().toString() == module.getNamed().toString()
+                fileModule.getNamed().toString() ===
+                module.getNamed().toString()
               ) {
                 notExistsInArray = false;
               }
@@ -187,17 +188,18 @@ export function mapImport(fileImport: ts.ImportDeclaration) {
   if (fileImport.importClause) {
     if (fileImport.importClause.namedBindings) {
       if (
-        fileImport.importClause.namedBindings.kind == ts.SyntaxKind.NamedImports
+        fileImport.importClause.namedBindings.kind ===
+        ts.SyntaxKind.NamedImports
       ) {
         (<ts.NamedImports>(
           fileImport.importClause.namedBindings
         )).elements.forEach((named) => {
           if (named.propertyName) {
             importElement.addNamed(
-              named.propertyName.text + ' as ' + <String>named.name.text,
+              named.propertyName.text + ' as ' + <string>named.name.text,
             );
           } else {
-            importElement.addNamed(<String>named.name.text);
+            importElement.addNamed(<string>named.name.text);
           }
         });
       } else {
@@ -223,10 +225,10 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
     fileExport.exportClause.elements.forEach((named) => {
       if (named.propertyName) {
         exportElement.addNamed(
-          named.propertyName.text + ' as ' + <String>named.name.text,
+          named.propertyName.text + ' as ' + <string>named.name.text,
         );
       } else {
-        exportElement.addNamed(<String>named.name.text);
+        exportElement.addNamed(<string>named.name.text);
       }
     });
   }
@@ -255,10 +257,10 @@ export function mapExportKeyword(fileExport) {
     let notExistsInArray: boolean = true;
     // We don't want duplicated exports
     namedAttributes.forEach((named) => {
-      if (moduleText == named) notExistsInArray = false;
+      if (moduleText === named) notExistsInArray = false;
     });
 
-    if (moduleText != 'from' && notExistsInArray)
+    if (moduleText !== 'from' && notExistsInArray)
       moduleAttributes.push(moduleText);
   });
 
@@ -268,7 +270,7 @@ export function mapExportKeyword(fileExport) {
     exportElement.setModule(module);
     for (let index = 0; index < namedAttributes.length; index++) {
       const named = namedAttributes[index];
-      if (named == 'from') {
+      if (named === 'from') {
         namedAttributes.splice(index, 1);
         break;
       } else {

@@ -5,11 +5,19 @@
  * @class exportClause
  */
 export class ExportDeclaration {
-  private clause: String = '';
-  private module: String = '';
-  private named: String[] = [];
-  private nameSpace: String = '';
-  private spaceBinding: boolean = true;
+  private clause: String;
+  private module: String;
+  private named: String[];
+  private nameSpace: String;
+  private spaceBinding: boolean;
+
+  constructor() {
+    this.clause = '';
+    this.module = '';
+    this.named = [];
+    this.nameSpace = '';
+    this.spaceBinding = true;
+  }
 
   addNamed(named: String) {
     this.named.push(named);
@@ -59,7 +67,7 @@ export class ExportDeclaration {
     if (this.getModule() === patchExportDeclaration.getModule()) {
       if (
         patchExportDeclaration.getNamed().length > 0 &&
-        this.getClause() != ''
+        this.getClause() !== ''
       ) {
         this.addNamed(this.getClause());
         this.setClause('');
@@ -69,15 +77,15 @@ export class ExportDeclaration {
           }
         });
       } else if (
-        patchExportDeclaration.getClause() != '' &&
+        patchExportDeclaration.getClause() !== '' &&
         this.getNamed().length > 0
       ) {
         if (!this.contains(patchExportDeclaration.getClause())) {
           this.addNamed(patchExportDeclaration.getClause());
         }
       } else if (
-        patchExportDeclaration.getClause() != '' &&
-        this.getClause() != ''
+        patchExportDeclaration.getClause() !== '' &&
+        this.getClause() !== ''
       ) {
         this.addNamed(this.getClause());
         this.addNamed(patchExportDeclaration.getClause());
@@ -101,7 +109,7 @@ export class ExportDeclaration {
       clause.push("export '", this.module, "';\n");
     } else {
       clause.push('export ');
-      if (this.named.length != 0) {
+      if (this.named.length !== 0) {
         clause.push('{ ');
         this.named.forEach((name) => {
           clause.push(name);
@@ -110,7 +118,7 @@ export class ExportDeclaration {
           }
         });
         clause.push(" } from '", this.module, "';\n");
-      } else if (this.nameSpace != '') {
+      } else if (this.nameSpace !== '') {
         clause.push('* as ', this.nameSpace, " from '", this.module, "';\n");
       } else {
         clause.push(this.clause, " from '", this.module, "';\n");

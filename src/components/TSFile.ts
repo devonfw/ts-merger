@@ -6,11 +6,19 @@ import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';
 
 export class TSFile {
-  private importDeclarations: ImportDeclaration[] = [];
-  private exportDeclarations: ExportDeclaration[] = [];
-  private classes: ClassDeclaration[] = [];
-  private variables: VariableStatement[] = [];
-  private functions: FunctionDeclaration[] = [];
+  private importDeclarations: ImportDeclaration[];
+  private exportDeclarations: ExportDeclaration[];
+  private classes: ClassDeclaration[];
+  private variables: VariableStatement[];
+  private functions: FunctionDeclaration[];
+
+  constructor() {
+    this.importDeclarations = [];
+    this.exportDeclarations = [];
+    this.classes = [];
+    this.variables = [];
+    this.functions = [];
+  }
 
   addImport(importDeclaration: ImportDeclaration) {
     this.importDeclarations.push(importDeclaration);
