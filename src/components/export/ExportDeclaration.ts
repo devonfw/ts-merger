@@ -1,10 +1,10 @@
 /**
- *Defines and import clause structure
+ *Defines and export clause structure
  *
  * @export
- * @class ImportClause
+ * @class exportClause
  */
-export class ImportDeclaration {
+export class ExportDeclaration {
   private clause: String;
   private module: String;
   private named: String[];
@@ -63,38 +63,38 @@ export class ImportDeclaration {
     return this.module;
   }
 
-  merge(patchImportDeclaration: ImportDeclaration) {
-    if (this.getModule() === patchImportDeclaration.getModule()) {
+  merge(patchExportDeclaration: ExportDeclaration) {
+    if (this.getModule() === patchExportDeclaration.getModule()) {
       if (
-        patchImportDeclaration.getNamed().length > 0 &&
+        patchExportDeclaration.getNamed().length > 0 &&
         this.getClause() !== ''
       ) {
         this.addNamed(this.getClause());
         this.setClause('');
-        patchImportDeclaration.getNamed().forEach((named) => {
+        patchExportDeclaration.getNamed().forEach((named) => {
           if (!this.contains(named)) {
             this.addNamed(named);
           }
         });
       } else if (
-        patchImportDeclaration.getClause() !== '' &&
+        patchExportDeclaration.getClause() !== '' &&
         this.getNamed().length > 0
       ) {
-        if (!this.contains(patchImportDeclaration.getClause())) {
-          this.addNamed(patchImportDeclaration.getClause());
+        if (!this.contains(patchExportDeclaration.getClause())) {
+          this.addNamed(patchExportDeclaration.getClause());
         }
       } else if (
-        patchImportDeclaration.getClause() !== '' &&
+        patchExportDeclaration.getClause() !== '' &&
         this.getClause() !== ''
       ) {
         this.addNamed(this.getClause());
-        this.addNamed(patchImportDeclaration.getClause());
+        this.addNamed(patchExportDeclaration.getClause());
         this.setClause('');
       } else if (
-        patchImportDeclaration.getNamed().length > 0 &&
+        patchExportDeclaration.getNamed().length > 0 &&
         this.getNamed().length > 0
       ) {
-        patchImportDeclaration.getNamed().forEach((named) => {
+        patchExportDeclaration.getNamed().forEach((named) => {
           if (!this.contains(named)) {
             this.addNamed(named);
           }
@@ -106,9 +106,9 @@ export class ImportDeclaration {
   toString(): String {
     let clause: String[] = [];
     if (!this.spaceBinding) {
-      clause.push("import '", this.module, "';\n");
+      clause.push("export '", this.module, "';\n");
     } else {
-      clause.push('import ');
+      clause.push('export ');
       if (this.named.length !== 0) {
         clause.push('{ ');
         this.named.forEach((name) => {
@@ -128,4 +128,4 @@ export class ImportDeclaration {
   }
 }
 
-export default ImportDeclaration;
+export default ExportDeclaration;

@@ -2,95 +2,119 @@ import { FunctionDeclaration } from './general/FunctionDeclaration';
 import { VariableStatement } from './general/VariableStatement';
 import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
 import { ImportDeclaration } from './import/ImportDeclaration';
+import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';
 
 export class TSFile {
-    private importDeclarations: ImportDeclaration[] = [];
-    private classes: ClassDeclaration[] = [];
-    private variables: VariableStatement[] = [];
-    private functions: FunctionDeclaration[] = [];
+  private importDeclarations: ImportDeclaration[];
+  private exportDeclarations: ExportDeclaration[];
+  private classes: ClassDeclaration[];
+  private variables: VariableStatement[];
+  private functions: FunctionDeclaration[];
 
-    addImport(importDeclaration: ImportDeclaration){
-        this.importDeclarations.push(importDeclaration);
-    }
-    
-    addFunction(functionDecl: FunctionDeclaration) {
-        this.functions.push(functionDecl);
-    }
+  constructor() {
+    this.importDeclarations = [];
+    this.exportDeclarations = [];
+    this.classes = [];
+    this.variables = [];
+    this.functions = [];
+  }
 
-    getFunctions() {
-        return this.functions;
-    }
+  addImport(importDeclaration: ImportDeclaration) {
+    this.importDeclarations.push(importDeclaration);
+  }
 
-    setFunctions(functions: FunctionDeclaration[]) {
-        this.functions = functions;
-    }
+  addExport(exportDeclaration: ExportDeclaration) {
+    this.exportDeclarations.push(exportDeclaration);
+  }
 
-    addClass(classToAdd: ClassDeclaration) {
-        this.classes.push(classToAdd);
-    }
+  addFunction(functionDecl: FunctionDeclaration) {
+    this.functions.push(functionDecl);
+  }
 
-    // setClass(classDeclaration: ClassDeclaration){
-    //     this.class = classDeclaration;
-    // }
+  getFunctions() {
+    return this.functions;
+  }
 
-    getClasses() {
-        return this.classes;
-    }
+  setFunctions(functions: FunctionDeclaration[]) {
+    this.functions = functions;
+  }
 
-    getImports() {
-        return this.importDeclarations;
-    }
+  addClass(classToAdd: ClassDeclaration) {
+    this.classes.push(classToAdd);
+  }
 
-    addVariable(variable: VariableStatement) {
-        this.variables.push(variable);
-    }
+  // setClass(classDeclaration: ClassDeclaration){
+  //     this.class = classDeclaration;
+  // }
 
-    getVariables() {
-        return this.variables;
-    }
+  getClasses() {
+    return this.classes;
+  }
 
-    merge(patchFile: TSFile, patchOverrides: boolean) {
-        
-        mergeTools.mergeImports(this, patchFile);
-        let exists: boolean = false;
-        patchFile.getClasses().forEach(patchClass => {
-            exists = false;
-            this.getClasses().forEach(baseClass => {
-                if(patchClass.getIdentifier() === baseClass.getIdentifier()) {
-                    exists = true;
-                    mergeTools.mergeClass(baseClass, patchClass, patchOverrides);
-                }
-            })
-            if(!exists) {
-                this.classes.push(patchClass);
-            }
-        })
-        if(this.variables.length > 0) {
-            mergeTools.mergeVariables(this, patchFile, patchOverrides);
+  getImports() {
+    return this.importDeclarations;
+  }
+
+  getExports() {
+    return this.exportDeclarations;
+  }
+
+  addVariable(variable: VariableStatement) {
+    this.variables.push(variable);
+  }
+
+  getVariables() {
+    return this.variables;
+  }
+
+  merge(patchFile: TSFile, patchOverrides: boolean) {
+    mergeTools.mergeImports(this, patchFile);
+    mergeTools.mergeExports(this, patchFile);
+    let exists: boolean = false;
+    patchFile.getClasses().forEach((patchClass) => {
+      exists = false;
+      this.getClasses().forEach((baseClass) => {
+        if (patchClass.getIdentifier() === baseClass.getIdentifier()) {
+          exists = true;
+          mergeTools.mergeClass(baseClass, patchClass, patchOverrides);
         }
-        if(this.functions.length > 0) {
-            mergeTools.mergeFunctions(this.functions, patchFile.getFunctions(), patchOverrides);
-        }
+      });
+      if (!exists) {
+        this.classes.push(patchClass);
+      }
+    });
+    if (this.variables.length > 0) {
+      mergeTools.mergeVariables(this, patchFile, patchOverrides);
     }
-
-    toString() {
-        let file: String[] = [];
-        this.importDeclarations.forEach(importDeclaration => {
-            file.push(importDeclaration.toString());
-        })
-        file.push("\n");
-
-        this.functions.forEach(func => {
-            file.push(func.toString());
-        })
-        this.variables.forEach(variable => {
-            file.push(variable.toString());
-        })
-        this.classes.forEach(classToPrint => {
-            file.push(classToPrint.toString());
-        })
-        return file.join("");
+    if (this.functions.length > 0) {
+      mergeTools.mergeFunctions(
+        this.functions,
+        patchFile.getFunctions(),
+        patchOverrides,
+      );
     }
+  }
 
+  toString() {
+    let file: String[] = [];
+    this.importDeclarations.forEach((importDeclaration) => {
+      file.push(importDeclaration.toString());
+    });
+    this.exportDeclarations.forEach((exportDeclaration) => {
+      file.push(exportDeclaration.toString());
+    });
+    file.push('\n');
+
+    this.functions.forEach((func) => {
+      file.push(func.toString());
+    });
+    this.variables.forEach((variable) => {
+      file.push(variable.toString());
+    });
+    this.classes.forEach((classToPrint) => {
+      file.push(classToPrint.toString());
+    });
+    return file.join('');
+  }
 }

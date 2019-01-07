@@ -1,26 +1,31 @@
 export class GeneralInterface {
-    private identifier: String = "";
-    private type: String = "";
+  private identifier: String;
+  private type: String;
 
-    setIdentifier(identifier: String){
-        this.identifier = identifier;
-    }
+  constructor() {
+    this.identifier = '';
+    this.type = '';
+  }
 
-    getIdentifier(){
-        return this.identifier;
-    }
-    
-    setType(type: String){
-        this.type = type;
-    }
+  setIdentifier(identifier: String) {
+    this.identifier = identifier;
+  }
 
-    getType(){
-        return this.type;
-    }
+  getIdentifier() {
+    return this.identifier;
+  }
 
-    toString(){
-        return this.getIdentifier();
-    }
+  setType(type: String) {
+    this.type = type;
+  }
+
+  getType() {
+    return this.type;
+  }
+
+  toString() {
+    return this.getIdentifier();
+  }
 }
 
 export default GeneralInterface;

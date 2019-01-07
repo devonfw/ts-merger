@@ -4,32 +4,53 @@ import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { GeneralInterface } from './GeneralInterface';
 
 export class PropertyAssignment extends GeneralInterface {
+  private general: any;
 
-    private general: any;
+  constructor() {
+    super();
+  }
 
-    setGeneral(general){
-        this.general = general;
-    }
+  setGeneral(general) {
+    this.general = general;
+  }
 
-    getGeneral() {
-        return this.general;
-    }
+  getGeneral() {
+    return this.general;
+  }
 
-    merge(patchProperty: PropertyAssignment, patchOverrides: boolean) {
-        if(patchProperty.getGeneral() instanceof ObjectLiteralExpression && this.getGeneral() instanceof ObjectLiteralExpression){
-            (<ObjectLiteralExpression>this.getGeneral()).merge(<ObjectLiteralExpression>patchProperty.getGeneral(), patchOverrides);
-        } else if (patchProperty.getGeneral() instanceof ArrayLiteralExpression && this.getGeneral() instanceof ArrayLiteralExpression) {
-            (<ArrayLiteralExpression>this.getGeneral()).merge(<ArrayLiteralExpression>patchProperty.getGeneral(), patchOverrides);
-        } else if (patchProperty.getGeneral() instanceof CallExpression && this.getGeneral() instanceof CallExpression) {
-            (<CallExpression>this.getGeneral()).merge(<CallExpression>patchProperty.getGeneral(), patchOverrides);
-        } else if(patchOverrides) {
-            this.setGeneral(patchProperty.getGeneral())
-        }
+  merge(patchProperty: PropertyAssignment, patchOverrides: boolean) {
+    if (
+      patchProperty.getGeneral() instanceof ObjectLiteralExpression &&
+      this.getGeneral() instanceof ObjectLiteralExpression
+    ) {
+      (<ObjectLiteralExpression>this.getGeneral()).merge(
+        <ObjectLiteralExpression>patchProperty.getGeneral(),
+        patchOverrides,
+      );
+    } else if (
+      patchProperty.getGeneral() instanceof ArrayLiteralExpression &&
+      this.getGeneral() instanceof ArrayLiteralExpression
+    ) {
+      (<ArrayLiteralExpression>this.getGeneral()).merge(
+        <ArrayLiteralExpression>patchProperty.getGeneral(),
+        patchOverrides,
+      );
+    } else if (
+      patchProperty.getGeneral() instanceof CallExpression &&
+      this.getGeneral() instanceof CallExpression
+    ) {
+      (<CallExpression>this.getGeneral()).merge(
+        <CallExpression>patchProperty.getGeneral(),
+        patchOverrides,
+      );
+    } else if (patchOverrides) {
+      this.setGeneral(patchProperty.getGeneral());
     }
-    
-    toString() {
-        return this.getIdentifier() + ": " + this.getGeneral().toString();
-    }
+  }
+
+  toString() {
+    return this.getIdentifier() + ': ' + this.getGeneral().toString();
+  }
 }
 
 export default PropertyAssignment;
