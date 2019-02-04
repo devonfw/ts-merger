@@ -378,7 +378,7 @@ export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
           break;
         case ts.SyntaxKind.CallSignature:
           break;
-        case ts.SyntaxKind.MethodDeclaration:
+        case ts.SyntaxKind.MethodSignature:
           let fileMethod: ts.MethodDeclaration = <ts.MethodDeclaration>member;
           let method: InterfaceMethod = mapInterfaceMethod(
             fileMethod,
@@ -589,7 +589,7 @@ export function mapMethod(
   return method;
 }
 
-export function mapInterfaceMethod(
+export function mapCallSignature(
   fileMethod: ts.MethodDeclaration,
   sourceFile: ts.SourceFile,
 ) {
@@ -606,9 +606,30 @@ export function mapInterfaceMethod(
       method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
-  if (fileMethod.modifiers) {
-    fileMethod.modifiers.forEach((modifier) => {
-      method.addModifier(mapModifier(modifier));
+  if (fileMethod.parameters) {
+    fileMethod.parameters.forEach((parameter) => {
+      method.addParameter(mapParameter(parameter, sourceFile));
+    });
+  }
+
+  return method;
+}
+
+export function mapInterfaceMethod(
+  fileMethod: ts.MethodDeclaration,
+  sourceFile: ts.SourceFile,
+) {
+  let method: InterfaceMethod = new InterfaceMethod();
+  method.setIdentifier(
+    (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text,
+  );
+  if (fileMethod.type) {
+    method.setType(mapTypes(fileMethod.type));
+  }
+
+  if (fileMethod.decorators) {
+    fileMethod.decorators.forEach((decorator) => {
+      method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileMethod.parameters) {

@@ -11,26 +11,16 @@ import * as mergeTools from '../../../../tools/MergerTools';
  */
 export class InterfaceMethod extends GeneralInterface {
   private parameters: Parameter[];
-  private modifiers: String[];
   private decorators: Decorator[];
 
   constructor() {
     super();
     this.parameters = [];
-    this.modifiers = [];
     this.decorators = [];
   }
 
   getParameters(): Parameter[] {
     return this.parameters;
-  }
-
-  getModifiers(): String[] {
-    return this.modifiers;
-  }
-
-  setModifiers(modifiers: String[]) {
-    this.modifiers = modifiers;
   }
 
   getDecorators() {
@@ -48,16 +38,6 @@ export class InterfaceMethod extends GeneralInterface {
   addParameters(parameters: Parameter[]) {
     parameters.forEach((parameter) => {
       this.parameters.push(parameter);
-    });
-  }
-
-  addModifier(modifier: String) {
-    this.modifiers.push(modifier);
-  }
-
-  addModifiers(modifiers: String[]) {
-    modifiers.forEach((modifier) => {
-      this.modifiers.push(modifier);
     });
   }
 
@@ -79,9 +59,6 @@ export class InterfaceMethod extends GeneralInterface {
       patchMethod.getDecorators(),
       patchOverrides,
     );
-    if (patchOverrides) {
-      this.setModifiers(patchMethod.getModifiers());
-    }
 
     patchMethod.getParameters().forEach((patchParameter) => {
       paramExists = false;
@@ -102,9 +79,6 @@ export class InterfaceMethod extends GeneralInterface {
     this.decorators.forEach((decorator) => {
       result.push(decorator.toString(), '\n');
     });
-    this.modifiers.forEach((modifier) => {
-      result.push(modifier, ' ');
-    });
     result.push(this.getIdentifier(), '(');
     this.parameters.forEach((parameter) => {
       result.push(parameter.toString());
@@ -113,7 +87,7 @@ export class InterfaceMethod extends GeneralInterface {
       }
     });
     result.push(')');
-    if (this.getType() !== '') result.push(': ', this.getType(), '\n', '\n');
+    if (this.getType() !== '') result.push(': ', this.getType(), ';\n', '\n');
 
     return result.join('');
   }
