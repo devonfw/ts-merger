@@ -5,7 +5,7 @@ import * as mergeTools from '../../../../tools/MergerTools';
 import { BodyMethod, default as Body } from './body/BodyMethod';
 
 /**
- * Defines the strucuture of a class method object
+ * Defines the structure of a class method object
  *
  * @export
  * @class Method

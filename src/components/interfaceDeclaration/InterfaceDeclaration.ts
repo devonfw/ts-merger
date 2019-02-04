@@ -1,4 +1,4 @@
-import { GeneralInterface } from '../general/GeneralInterface';
+import { FileDeclaration } from '../general/FileDeclaration';
 import { InterfaceProperty } from './members/InterfaceProperty';
 import { InterfaceMethod } from './members/method/InterfaceMethod';
 /**
@@ -7,17 +7,13 @@ import { InterfaceMethod } from './members/method/InterfaceMethod';
  * @export
  * @interface InterfaceDeclaration
  */
-export class InterfaceDeclaration extends GeneralInterface {
-  private heritages: String[];
-  private modifiers: String[];
+export class InterfaceDeclaration extends FileDeclaration {
   private methods: InterfaceMethod[];
   private properties: InterfaceProperty[];
   private index: string;
 
   constructor() {
     super();
-    this.heritages = [];
-    this.modifiers = [];
     this.methods = [];
     this.properties = [];
   }
@@ -28,42 +24,6 @@ export class InterfaceDeclaration extends GeneralInterface {
 
   setIndex(index: string) {
     this.index = index;
-  }
-
-  addModifier(modifier: String) {
-    this.modifiers.push(modifier);
-  }
-
-  addModifiers(modifiers: String[]) {
-    modifiers.forEach((modifier) => {
-      this.modifiers.push(modifier);
-    });
-  }
-
-  getModifiers() {
-    return this.modifiers;
-  }
-
-  setModifiers(modifiers: String[]) {
-    this.modifiers = modifiers;
-  }
-
-  addHeritage(heritage: String) {
-    this.heritages.push(heritage);
-  }
-
-  addHeritages(heritages: String[]) {
-    heritages.forEach((heritage) => {
-      this.heritages.push(heritage);
-    });
-  }
-
-  getHeritages() {
-    return this.heritages;
-  }
-
-  setHeritages(heritages: String[]) {
-    this.heritages = heritages;
   }
 
   addProperty(property: InterfaceProperty) {
@@ -100,11 +60,11 @@ export class InterfaceDeclaration extends GeneralInterface {
 
   toString(): String {
     let interfaceDeclaration: String[] = [];
-    this.modifiers.forEach((modifier) => {
+    super.getModifiers().forEach((modifier) => {
       interfaceDeclaration.push(modifier, ' ');
     });
     interfaceDeclaration.push('interface ', this.getIdentifier());
-    this.heritages.forEach((heritage) => {
+    super.getHeritages().forEach((heritage) => {
       interfaceDeclaration.push(heritage);
     });
     interfaceDeclaration.push(' {\n');
