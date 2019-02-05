@@ -18,6 +18,7 @@ import { PropertyAssignment } from '../components/general/PropertyAssignment';
 import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
 import * as ts from 'typescript';
 import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
+import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -367,11 +368,12 @@ export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
   if (fileInterface.members) {
     fileInterface.members.forEach((member) => {
       switch (member.kind) {
-        case ts.SyntaxKind.PropertyDeclaration:
-          interfaceTo.addProperty({
-            id: <string>member.name.text,
-            text: <string>member.getFullText(sourceFile),
-          });
+        case ts.SyntaxKind.PropertySignature:
+          let propertyInterface: InterfaceProperty = mapInterfaceProperty(
+            <string>member.name.text,
+            <string>member.getFullText(sourceFile),
+          );
+          interfaceTo.addProperty(propertyInterface);
           break;
         case ts.SyntaxKind.IndexSignature:
           interfaceTo.setIndex(<string>member.getFullText(sourceFile));
@@ -460,6 +462,14 @@ export function mapPropertyDeclaration(
         );
     }
   }
+  return prop;
+}
+
+export function mapInterfaceProperty(id: string, text: string) {
+  let prop: InterfaceProperty = new InterfaceProperty();
+  prop.setId(id);
+  prop.setText(text);
+
   return prop;
 }
 
