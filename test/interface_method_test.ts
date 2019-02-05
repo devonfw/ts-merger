@@ -62,7 +62,7 @@ describe('Merging interface methods', () => {
         ),
       ).length.to.be.greaterThan(
         0,
-        'declaration should be present in interface a',
+        'both method parameters should be present, and should use base method type',
       );
     });
     it('the patch with patchOverride.', () => {
@@ -78,7 +78,7 @@ describe('Merging interface methods', () => {
         ),
       ).length.to.be.greaterThan(
         0,
-        'declaration should be present in interface a',
+        'both method parameters should be present, and should use patch method type',
       );
     });
   });

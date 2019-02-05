@@ -72,6 +72,11 @@ export class InterfaceMethod extends GeneralInterface {
         this.addParameter(patchParameter);
       }
     });
+    if (patchOverrides) {
+      if (patchMethod.getType().length > 0) {
+        this.setType(patchMethod.getType());
+      }
+    }
   }
 
   toString(): String {
