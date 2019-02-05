@@ -4,7 +4,7 @@ import { TSFile } from '../components/TSFile';
 import { ImportDeclaration } from '../components/import/ImportDeclaration';
 import { ExportDeclaration } from '../components/export/ExportDeclaration';
 import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
-import { InterfaceDeclaration } from '../components/interfaceDeclaration/interfaceDeclaration';
+import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
 import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
 import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
 import { Parameter } from '../components/classDeclaration/members/method/Parameter';

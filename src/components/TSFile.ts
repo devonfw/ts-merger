@@ -1,7 +1,7 @@
 import { FunctionDeclaration } from './general/FunctionDeclaration';
 import { VariableStatement } from './general/VariableStatement';
 import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
-import { InterfaceDeclaration } from './interfaceDeclaration/interfaceDeclaration';
+import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaration';
 import { ImportDeclaration } from './import/ImportDeclaration';
 import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';

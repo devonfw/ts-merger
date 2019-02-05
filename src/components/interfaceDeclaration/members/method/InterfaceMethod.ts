@@ -1,6 +1,6 @@
 import { Decorator } from '../../../decorator/Decorator';
 import { GeneralInterface } from '../../../general/GeneralInterface';
-import { Parameter } from '../../../ClassDeclaration/members/method/Parameter';
+import { Parameter } from '../../../classDeclaration/members/method/Parameter';
 import * as mergeTools from '../../../../tools/MergerTools';
 
 /**
