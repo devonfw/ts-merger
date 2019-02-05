@@ -3,11 +3,6 @@ import { expect } from 'chai';
 import 'mocha';
 
 describe('Merging exports', () => {
-  let testResources = './test/resources/export/';
-  let baseTestResources = testResources + 'base/';
-  let patchTestResources = testResources + 'patch/';
-  let outputTestTempResources = testResources + 'output/';
-
   describe('should accumulate exports from', () => {
     describe('disjunct export sets', () => {
       const base = `export { a } from 'b';

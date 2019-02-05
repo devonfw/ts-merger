@@ -109,10 +109,12 @@ export function mergeInterface(
     patchInterface.getMethods(),
     patchOverrides,
   );
-  mergeIndexSignature(
-    baseInterface.getIndex(),
-    patchInterface.getIndex(),
-    patchOverrides,
+  baseInterface.setIndex(
+    mergeIndexSignature(
+      baseInterface.getIndex(),
+      patchInterface.getIndex(),
+      patchOverrides,
+    ),
   );
 }
 
@@ -191,7 +193,12 @@ export function mergeIndexSignature(
   baseIndex: string,
   patchIndex: string,
   patchOverrides: boolean,
-) {}
+): string {
+  if (patchOverrides) {
+    baseIndex = patchIndex;
+  }
+  return baseIndex;
+}
 
 export function mergeInterfaceProperties(
   baseProperties: InterfaceProperty[],

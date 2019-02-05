@@ -78,6 +78,10 @@ export class InterfaceDeclaration extends FileDeclaration {
       });
     }
 
+    if (this.index != null && this.index.length > 0) {
+      interfaceDeclaration.push(this.index);
+    }
+
     interfaceDeclaration.push('\n}\n');
 
     return interfaceDeclaration.join('');
