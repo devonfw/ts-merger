@@ -65,9 +65,14 @@ export function mergeClass(
   let exists: boolean;
 
   if (patchOverrides) {
-    baseClass.setModifiers(patchClass.getModifiers());
     baseClass.setHeritages(patchClass.getHeritages());
   }
+
+  mergeHeritages(
+    baseClass.getHeritages(),
+    patchClass.getHeritages(),
+    patchOverrides,
+  );
 
   mergeComments(
     baseClass.getComments(),
@@ -102,8 +107,12 @@ export function mergeInterface(
 
   if (patchOverrides) {
     baseInterface.setModifiers(patchInterface.getModifiers());
-    baseInterface.setHeritages(patchInterface.getHeritages());
   }
+  mergeHeritages(
+    baseInterface.getHeritages(),
+    patchInterface.getHeritages(),
+    patchOverrides,
+  );
 
   mergeComments(
     baseInterface.getComments(),
@@ -209,6 +218,51 @@ export function mergeIndexSignature(
     baseIndex = patchIndex;
   }
   return baseIndex;
+}
+
+export function mergeHeritages(
+  baseHeritages: String[],
+  patchHeritages: String[],
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  if (patchHeritages.length > 0) {
+    // If there is no extension on base, let's add it directly
+    if (baseHeritages.length <= 0) {
+      baseHeritages[0] = patchHeritages[0];
+    } else {
+      // Currently we only support to either merge extensions or implements
+      let patchHeritage: String = patchHeritages[0];
+      let baseHeritage: String = baseHeritages[0];
+      // We get the string "extends" or "implements"
+      let inheritanceValue: String = baseHeritage.match(/\s*([\w\-]+)/)[0];
+
+      // We only need the interfaces names: extends a,b,c (let's remove "extends")
+      patchHeritage = patchHeritage.trim().replace(/\s*([\w\-]+)/, '');
+      baseHeritage = baseHeritage.trim().replace(/\s*([\w\-]+)/, '');
+      // split by comma to get the different interfaces
+      let patchHeritageNames: String[] = patchHeritage.split(',');
+      let baseHeritageNames: String[] = baseHeritage.split(',');
+
+      patchHeritageNames.forEach((patchHeritageName) => {
+        exists = false;
+        baseHeritageNames.forEach((baseHeritageName) => {
+          if (baseHeritageName === patchHeritageName) {
+            exists = true;
+            if (patchOverrides) {
+              baseHeritageName = patchHeritageName;
+            }
+          }
+        });
+        if (!exists) {
+          baseHeritageNames.push(patchHeritageName);
+        }
+      });
+
+      baseHeritages[0] = inheritanceValue + ' ' + baseHeritageNames.join(',');
+    }
+  }
 }
 
 export function mergeComments(

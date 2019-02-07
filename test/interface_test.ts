@@ -18,16 +18,20 @@ describe('Merging interface declarations', () => {
         },
         '',
       );
-      expect(assembledResult).equal('interface a {}', 'Result is not valid');
+      expect(assembledResult).equal(
+        'interface a extends b {}',
+        'Result is not valid',
+      );
     });
-    it('should not use the patch extension.', () => {
+    it('should use the patch extension.', () => {
       const result: String[] = merge(base, patch, false)
         .split('\n')
         .map((value) => value.trim())
         .filter((value) => value.trim() != '');
       expect(
-        result.filter((value) => /interface a \{[^]*/.test(value.toString()))
-          .length,
+        result.filter((value) =>
+          /interface\s*a\s*extends\s*\w\s*/.test(value.toString()),
+        ).length,
       ).to.be.equal(1, 'extension from patch should not be applied');
     });
     it('should use the patch extension with patchOverride.', () => {
@@ -48,19 +52,9 @@ describe('Merging interface declarations', () => {
         .filter((value) => value != '');
       expect(
         result.filter((value) =>
-          /interface a extends b[^]*/.test(value.toString()),
+          /interface\s*a\s*extends\s*\w\s*/.test(value.toString()),
         ).length,
       ).to.be.equal(1, 'extension from base should be kept');
-    });
-    it('should not keep the base extension with patchOverride.', () => {
-      const result: String[] = merge(patch, base, true)
-        .split('\n')
-        .map((value) => value.trim())
-        .filter((value) => value != '');
-      expect(
-        result.filter((value) => /interface a \{[^]*/.test(value.toString()))
-          .length,
-      ).to.be.equal(1, 'extension from base should not be kept');
     });
   });
 
@@ -90,35 +84,29 @@ describe('Merging interface declarations', () => {
 
   describe('should accumulate extended interfaces', () => {
     const base = `interface a extends b {}`,
-      patch = `interface a extends c {}`;
+      patch = `interface a extends b,c {}`;
 
-    xit('by default.', () => {
-      /**
-       * currently not supported
-       */
+    it('by default should be accumulated.', () => {
       const result: String[] = merge(base, patch, false)
-        .split('\n')
-        .map((value) => value.trim())
-        .filter((value) => value != '');
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
       expect(
         result.filter((value) =>
-          /interface a implements\s*\w\s*,\s*\w.*/.test(value.toString()),
+          /interface\s*a\s*extends\s*\w\s*,\s*\w.*/.test(value.toString()),
         ).length,
-      ).to.be.equal(1, 'misformed interface declaration');
+      ).to.be.equal(1, 'misformed class declaration');
     });
-    xit('with patchOverrides.', () => {
-      /**
-       * currently not supported
-       */
-      const result: String[] = merge(base, patch, false)
-        .split('\n')
-        .map((value) => value.trim())
-        .filter((value) => value != '');
+    it('should be accumulated with patchOverride (should not make a difference).', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
       expect(
         result.filter((value) =>
-          /interface a implements\s*\w\s*,\s*\w.*/.test(value.toString()),
+          /interface\s*a\s*extends\s*\w\s*,\s*\w.*/.test(value.toString()),
         ).length,
-      ).to.be.equal(1, 'misformed interface declaration');
+      ).to.be.equal(1, 'misformed class declaration');
     });
   });
 
