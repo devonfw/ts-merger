@@ -88,9 +88,9 @@ describe('Merging interface declarations', () => {
     });
   });
 
-  describe('should accumulate implemented interfaces', () => {
-    const base = `interface a implements b {}`,
-      patch = `interface a implements c {}`;
+  describe('should accumulate extended interfaces', () => {
+    const base = `interface a extends b {}`,
+      patch = `interface a extends c {}`;
 
     xit('by default.', () => {
       /**
@@ -119,6 +119,44 @@ describe('Merging interface declarations', () => {
           /interface a implements\s*\w\s*,\s*\w.*/.test(value.toString()),
         ).length,
       ).to.be.equal(1, 'misformed interface declaration');
+    });
+  });
+
+  describe('multiple comments on interface definitions', () => {
+    const base = `/* Test this */
+      // Bla test
+      interface a { }`,
+      patch = `/* Test that */
+      // Ble test
+      interface a {}`;
+
+    it('should be accumulated.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
+      expect(result.indexOf('/* Test this */')).to.be.greaterThan(
+        -1,
+        'first base comment should be present in interface a',
+      );
+      expect(result.indexOf('// Bla test')).to.be.greaterThan(
+        0,
+        'second base comment should be present in interface a',
+      );
+    });
+    it('should be accumulated with patchOverride (should not make a difference).', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
+      expect(result.indexOf('/* Test that */')).to.be.greaterThan(
+        -1,
+        'first patch comment should be present in interface',
+      );
+      expect(result.indexOf('// Ble test')).to.be.greaterThan(
+        0,
+        'second patch comment should be present in interface',
+      );
     });
   });
 });

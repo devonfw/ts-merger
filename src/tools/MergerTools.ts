@@ -69,6 +69,12 @@ export function mergeClass(
     baseClass.setHeritages(patchClass.getHeritages());
   }
 
+  mergeComments(
+    baseClass.getComments(),
+    patchClass.getComments(),
+    patchOverrides,
+  );
+
   mergeDecorators(
     baseClass.getDecorators(),
     patchClass.getDecorators(),
@@ -99,6 +105,11 @@ export function mergeInterface(
     baseInterface.setHeritages(patchInterface.getHeritages());
   }
 
+  mergeComments(
+    baseInterface.getComments(),
+    patchInterface.getComments(),
+    patchOverrides,
+  );
   mergeInterfaceProperties(
     baseInterface.getProperties(),
     patchInterface.getProperties(),
@@ -198,6 +209,26 @@ export function mergeIndexSignature(
     baseIndex = patchIndex;
   }
   return baseIndex;
+}
+
+export function mergeComments(
+  baseComments: string[],
+  patchComments: string[],
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  patchComments.forEach((patchComment, index) => {
+    let isNotRemoved: boolean = true;
+    baseComments.forEach((baseComment) => {
+      if (patchOverrides) {
+        if (isNotRemoved) {
+          baseComments.splice(index, 1, patchComment);
+          isNotRemoved = false;
+        }
+      }
+    });
+  });
 }
 
 export function mergeInterfaceProperties(

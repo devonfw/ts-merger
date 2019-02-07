@@ -3,7 +3,8 @@ import { PropertyDeclaration } from './members/property/PropertyDeclaration';
 import { Decorator } from '../decorator/Decorator';
 import { FileDeclaration } from '../general/FileDeclaration';
 import { Method } from './members/method/Method';
-
+import { forEachComment } from 'tsutils/util';
+import * as ts from 'typescript/lib/typescript';
 /**
  * Defines the structure of class objects
  *
@@ -14,6 +15,7 @@ export class ClassDeclaration extends FileDeclaration {
   private decorators: Decorator[];
   private methods: Method[];
   private properties: PropertyDeclaration[];
+  private comments: string[];
   private construct: Constructor;
 
   constructor() {
@@ -22,6 +24,7 @@ export class ClassDeclaration extends FileDeclaration {
     this.methods = [];
     this.properties = [];
     this.construct = new Constructor();
+    this.comments = [];
   }
 
   getConstructor() {
@@ -81,6 +84,38 @@ export class ClassDeclaration extends FileDeclaration {
     this.methods = methods;
   }
 
+  addComment(comment: string) {
+    this.comments.push(comment);
+  }
+
+  getComments() {
+    return this.comments;
+  }
+
+  setComments(comments: string[]) {
+    this.comments = comments;
+  }
+
+  parseComments(fileClass: ts.Node, sourceFile: ts.SourceFile) {
+    // getText() returns the first line without comments
+    let firstLine: string = sourceFile.getText();
+    // getFullText() returns also the comments, now I need the position of the declared class
+    let declarationPos: number = sourceFile.getFullText().indexOf(firstLine);
+    forEachComment(
+      fileClass,
+      (sourceFile, comment) => {
+        if (comment.end < declarationPos) {
+          let commentText: string = sourceFile.substring(
+            comment.pos,
+            comment.end,
+          );
+          this.comments.push(commentText);
+        }
+      },
+      sourceFile,
+    );
+  }
+
   toString(): String {
     let classDeclaration: String[] = [];
     this.decorators.forEach((decorator) => {
@@ -89,6 +124,15 @@ export class ClassDeclaration extends FileDeclaration {
     super.getModifiers().forEach((modifier) => {
       classDeclaration.push(modifier, ' ');
     });
+
+    if (this.comments.length > 0) {
+      this.comments.forEach((comment) => {
+        classDeclaration.push(comment);
+        classDeclaration.push('\n');
+      });
+    }
+    classDeclaration.push('\n');
+
     classDeclaration.push('class ', this.getIdentifier());
     super.getHeritages().forEach((heritage) => {
       classDeclaration.push(heritage);

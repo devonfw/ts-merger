@@ -5,6 +5,7 @@ import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaratio
 import { ImportDeclaration } from './import/ImportDeclaration';
 import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';
+import * as ts from 'typescript/lib/typescript';
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];

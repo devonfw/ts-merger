@@ -22,6 +22,7 @@ import InterfaceProperty from '../components/interfaceDeclaration/members/Interf
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
+
   sourceFile
     .getChildAt(0)
     .getChildren()
@@ -347,6 +348,7 @@ export function mapClass(
           break;
       }
     });
+    classTo.parseComments(fileClass, sourceFile);
   }
   return classTo;
 }
@@ -391,6 +393,7 @@ export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
           break;
       }
     });
+    interfaceTo.parseComments(fileInterface, sourceFile);
   }
   return interfaceTo;
 }

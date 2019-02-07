@@ -41,7 +41,9 @@
     "typescript": "^2.2.1",
     "webpack": "^3.4.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "tsutils": "^3.8.0"
+  },
   "directories": {
     "test": "test"
   },
