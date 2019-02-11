@@ -4,6 +4,8 @@ import { TSFile } from '../components/TSFile';
 import { ImportDeclaration } from '../components/import/ImportDeclaration';
 import { ExportDeclaration } from '../components/export/ExportDeclaration';
 import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
+import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
 import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
 import { Parameter } from '../components/classDeclaration/members/method/Parameter';
 import { Decorator } from '../components/decorator/Decorator';
@@ -16,9 +18,11 @@ import { PropertyAssignment } from '../components/general/PropertyAssignment';
 import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
 import * as ts from 'typescript';
 import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
+import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
+
   sourceFile
     .getChildAt(0)
     .getChildren()
@@ -47,6 +51,11 @@ export function mapFile(sourceFile: ts.SourceFile) {
           break;
         case ts.SyntaxKind.ClassDeclaration:
           file.addClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
+          break;
+        case ts.SyntaxKind.InterfaceDeclaration:
+          file.addInterface(
+            mapInterface(<ts.InterfaceDeclaration>child, sourceFile),
+          );
           break;
         case ts.SyntaxKind.VariableStatement:
           file.addVariable(
@@ -339,8 +348,54 @@ export function mapClass(
           break;
       }
     });
+    classTo.parseComments(fileClass, sourceFile);
   }
   return classTo;
+}
+
+export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
+  let interfaceTo: InterfaceDeclaration = new InterfaceDeclaration();
+  interfaceTo.setIdentifier(fileInterface.name.text);
+  if (fileInterface.modifiers) {
+    fileInterface.modifiers.forEach((modifier) => {
+      interfaceTo.addModifier(mapModifier(modifier));
+    });
+  }
+  if (fileInterface.heritageClauses) {
+    fileInterface.heritageClauses.forEach((heritage) => {
+      interfaceTo.addHeritage(heritage.getFullText(sourceFile));
+    });
+  }
+
+  if (fileInterface.members) {
+    fileInterface.members.forEach((member) => {
+      switch (member.kind) {
+        case ts.SyntaxKind.PropertySignature:
+          let propertyInterface: InterfaceProperty = mapInterfaceProperty(
+            <string>member.name.text,
+            <string>member.getFullText(sourceFile),
+          );
+          interfaceTo.addProperty(propertyInterface);
+          break;
+        case ts.SyntaxKind.IndexSignature:
+          interfaceTo.setIndex(<string>member.getFullText(sourceFile));
+          break;
+        case ts.SyntaxKind.CallSignature:
+          break;
+        case ts.SyntaxKind.MethodSignature:
+          let fileMethod: ts.MethodDeclaration = <ts.MethodDeclaration>member;
+          let method: InterfaceMethod = mapInterfaceMethod(
+            fileMethod,
+            sourceFile,
+          );
+
+          interfaceTo.addMethod(method);
+          break;
+      }
+    });
+    interfaceTo.parseComments(fileInterface, sourceFile);
+  }
+  return interfaceTo;
 }
 
 export function mapPropertyDeclaration(
@@ -410,6 +465,14 @@ export function mapPropertyDeclaration(
         );
     }
   }
+  return prop;
+}
+
+export function mapInterfaceProperty(id: string, text: string) {
+  let prop: InterfaceProperty = new InterfaceProperty();
+  prop.setId(id);
+  prop.setText(text);
+
   return prop;
 }
 
@@ -528,6 +591,58 @@ export function mapMethod(
   if (fileMethod.modifiers) {
     fileMethod.modifiers.forEach((modifier) => {
       method.addModifier(mapModifier(modifier));
+    });
+  }
+  if (fileMethod.parameters) {
+    fileMethod.parameters.forEach((parameter) => {
+      method.addParameter(mapParameter(parameter, sourceFile));
+    });
+  }
+
+  return method;
+}
+
+export function mapCallSignature(
+  fileMethod: ts.MethodDeclaration,
+  sourceFile: ts.SourceFile,
+) {
+  let method: InterfaceMethod = new InterfaceMethod();
+  method.setIdentifier(
+    (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text,
+  );
+  if (fileMethod.type) {
+    method.setType(mapTypes(fileMethod.type));
+  }
+
+  if (fileMethod.decorators) {
+    fileMethod.decorators.forEach((decorator) => {
+      method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
+    });
+  }
+  if (fileMethod.parameters) {
+    fileMethod.parameters.forEach((parameter) => {
+      method.addParameter(mapParameter(parameter, sourceFile));
+    });
+  }
+
+  return method;
+}
+
+export function mapInterfaceMethod(
+  fileMethod: ts.MethodDeclaration,
+  sourceFile: ts.SourceFile,
+) {
+  let method: InterfaceMethod = new InterfaceMethod();
+  method.setIdentifier(
+    (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text,
+  );
+  if (fileMethod.type) {
+    method.setType(mapTypes(fileMethod.type));
+  }
+
+  if (fileMethod.decorators) {
+    fileMethod.decorators.forEach((decorator) => {
+      method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileMethod.parameters) {

@@ -1,14 +1,17 @@
 import { FunctionDeclaration } from './general/FunctionDeclaration';
 import { VariableStatement } from './general/VariableStatement';
 import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaration';
 import { ImportDeclaration } from './import/ImportDeclaration';
 import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';
+import * as ts from 'typescript/lib/typescript';
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];
   private exportDeclarations: ExportDeclaration[];
   private classes: ClassDeclaration[];
+  private interfaces: InterfaceDeclaration[];
   private variables: VariableStatement[];
   private functions: FunctionDeclaration[];
 
@@ -16,6 +19,7 @@ export class TSFile {
     this.importDeclarations = [];
     this.exportDeclarations = [];
     this.classes = [];
+    this.interfaces = [];
     this.variables = [];
     this.functions = [];
   }
@@ -52,6 +56,14 @@ export class TSFile {
     return this.classes;
   }
 
+  addInterface(interfaceToAdd: InterfaceDeclaration) {
+    this.interfaces.push(interfaceToAdd);
+  }
+
+  getInterfaces() {
+    return this.interfaces;
+  }
+
   getImports() {
     return this.importDeclarations;
   }
@@ -71,6 +83,11 @@ export class TSFile {
   merge(patchFile: TSFile, patchOverrides: boolean) {
     mergeTools.mergeImports(this, patchFile);
     mergeTools.mergeExports(this, patchFile);
+    this.checkAndMergeClasses(patchFile, patchOverrides);
+    this.checkAndMergeInterfaces(patchFile, patchOverrides);
+  }
+
+  checkAndMergeClasses(patchFile: TSFile, patchOverrides: boolean) {
     let exists: boolean = false;
     patchFile.getClasses().forEach((patchClass) => {
       exists = false;
@@ -82,6 +99,36 @@ export class TSFile {
       });
       if (!exists) {
         this.classes.push(patchClass);
+      }
+    });
+    if (this.variables.length > 0) {
+      mergeTools.mergeVariables(this, patchFile, patchOverrides);
+    }
+    if (this.functions.length > 0) {
+      mergeTools.mergeFunctions(
+        this.functions,
+        patchFile.getFunctions(),
+        patchOverrides,
+      );
+    }
+  }
+
+  checkAndMergeInterfaces(patchFile: TSFile, patchOverrides: boolean) {
+    let exists: boolean = false;
+    patchFile.getInterfaces().forEach((patchInterface) => {
+      exists = false;
+      this.getInterfaces().forEach((baseInterface) => {
+        if (patchInterface.getIdentifier() === baseInterface.getIdentifier()) {
+          exists = true;
+          mergeTools.mergeInterface(
+            baseInterface,
+            patchInterface,
+            patchOverrides,
+          );
+        }
+      });
+      if (!exists) {
+        this.interfaces.push(patchInterface);
       }
     });
     if (this.variables.length > 0) {
@@ -114,6 +161,9 @@ export class TSFile {
     });
     this.classes.forEach((classToPrint) => {
       file.push(classToPrint.toString());
+    });
+    this.interfaces.forEach((interfaceToPrint) => {
+      file.push(interfaceToPrint.toString());
     });
     return file.join('');
   }

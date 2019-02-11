@@ -5,8 +5,11 @@ import { Constructor } from '../components/classDeclaration/members/constructor/
 import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
 import { Method } from '../components/classDeclaration/members/method/Method';
 import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
+import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
 import { TSFile } from '../components/TSFile';
 import * as ts from 'typescript';
+import { InterfaceProperty } from '../components/interfaceDeclaration/members/InterfaceProperty';
 
 export function mergeImports(baseFile: TSFile, patchFile: TSFile) {
   let exists: boolean;
@@ -62,9 +65,20 @@ export function mergeClass(
   let exists: boolean;
 
   if (patchOverrides) {
-    baseClass.setModifiers(patchClass.getModifiers());
     baseClass.setHeritages(patchClass.getHeritages());
   }
+
+  mergeHeritages(
+    baseClass.getHeritages(),
+    patchClass.getHeritages(),
+    patchOverrides,
+  );
+
+  mergeComments(
+    baseClass.getComments(),
+    patchClass.getComments(),
+    patchOverrides,
+  );
 
   mergeDecorators(
     baseClass.getDecorators(),
@@ -82,6 +96,46 @@ export function mergeClass(
     patchOverrides,
   );
   mergeMethods(baseClass.getMethods(), patchClass.getMethods(), patchOverrides);
+}
+
+export function mergeInterface(
+  baseInterface: InterfaceDeclaration,
+  patchInterface: InterfaceDeclaration,
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  if (patchOverrides) {
+    baseInterface.setModifiers(patchInterface.getModifiers());
+  }
+  mergeHeritages(
+    baseInterface.getHeritages(),
+    patchInterface.getHeritages(),
+    patchOverrides,
+  );
+
+  mergeComments(
+    baseInterface.getComments(),
+    patchInterface.getComments(),
+    patchOverrides,
+  );
+  mergeInterfaceProperties(
+    baseInterface.getProperties(),
+    patchInterface.getProperties(),
+    patchOverrides,
+  );
+  mergeInterfaceMethods(
+    baseInterface.getMethods(),
+    patchInterface.getMethods(),
+    patchOverrides,
+  );
+  baseInterface.setIndex(
+    mergeIndexSignature(
+      baseInterface.getIndex(),
+      patchInterface.getIndex(),
+      patchOverrides,
+    ),
+  );
 }
 
 export function mergeDecorators(
@@ -155,9 +209,137 @@ export function mergeMethods(
   });
 }
 
+export function mergeIndexSignature(
+  baseIndex: string,
+  patchIndex: string,
+  patchOverrides: boolean,
+): string {
+  if (patchOverrides) {
+    baseIndex = patchIndex;
+  }
+  return baseIndex;
+}
+
+export function mergeHeritages(
+  baseHeritages: String[],
+  patchHeritages: String[],
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  if (patchHeritages.length > 0) {
+    // If there is no extension on base, let's add it directly
+    if (baseHeritages.length <= 0) {
+      baseHeritages[0] = patchHeritages[0];
+    } else {
+      // Currently we only support to either merge extensions or implements
+      let patchHeritage: String = patchHeritages[0];
+      let baseHeritage: String = baseHeritages[0];
+      // We get the string "extends" or "implements"
+      let inheritanceValue: String = baseHeritage.match(/\s*([\w\-]+)/)[0];
+
+      // We only need the interfaces names: extends a,b,c (let's remove "extends")
+      patchHeritage = patchHeritage.trim().replace(/\s*([\w\-]+)/, '');
+      baseHeritage = baseHeritage.trim().replace(/\s*([\w\-]+)/, '');
+      // split by comma to get the different interfaces
+      let patchHeritageNames: String[] = patchHeritage.split(',');
+      let baseHeritageNames: String[] = baseHeritage.split(',');
+
+      patchHeritageNames.forEach((patchHeritageName) => {
+        exists = false;
+        baseHeritageNames.forEach((baseHeritageName) => {
+          if (baseHeritageName === patchHeritageName) {
+            exists = true;
+            if (patchOverrides) {
+              baseHeritageName = patchHeritageName;
+            }
+          }
+        });
+        if (!exists) {
+          baseHeritageNames.push(patchHeritageName);
+        }
+      });
+
+      baseHeritages[0] = inheritanceValue + ' ' + baseHeritageNames.join(',');
+    }
+  }
+}
+
+export function mergeComments(
+  baseComments: string[],
+  patchComments: string[],
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  patchComments.forEach((patchComment, index) => {
+    let isNotRemoved: boolean = true;
+    baseComments.forEach((baseComment) => {
+      if (patchOverrides) {
+        if (isNotRemoved) {
+          baseComments.splice(index, 1, patchComment);
+          isNotRemoved = false;
+        }
+      }
+    });
+  });
+}
+
+export function mergeInterfaceProperties(
+  baseProperties: InterfaceProperty[],
+  patchProperties: InterfaceProperty[],
+  patchOverrides: boolean,
+) {
+  let exists: boolean;
+
+  patchProperties.forEach((patchProperty) => {
+    exists = false;
+    baseProperties.forEach((property) => {
+      if (patchProperty.id === property.id) {
+        exists = true;
+        if (patchOverrides) {
+          property.text = patchProperty.text;
+        }
+      }
+    });
+    if (!exists) {
+      baseProperties.push(patchProperty);
+    }
+  });
+}
+
+export function mergeInterfaceMethods(
+  baseMethods: InterfaceMethod[],
+  patchMethods: InterfaceMethod[],
+  patchOverrides,
+) {
+  let exists: boolean;
+
+  patchMethods.forEach((patchMethod) => {
+    exists = false;
+    baseMethods.forEach((method) => {
+      if (patchMethod.getIdentifier() === method.getIdentifier()) {
+        exists = true;
+        mergeInterfaceMethod(method, patchMethod, patchOverrides);
+      }
+    });
+    if (!exists) {
+      baseMethods.push(patchMethod);
+    }
+  });
+}
+
 export function mergeMethod(
   baseMethod: Method,
   patchMethod: Method,
+  patchOverrides: boolean,
+) {
+  baseMethod.merge(patchMethod, patchOverrides);
+}
+
+export function mergeInterfaceMethod(
+  baseMethod: InterfaceMethod,
+  patchMethod: InterfaceMethod,
   patchOverrides: boolean,
 ) {
   baseMethod.merge(patchMethod, patchOverrides);

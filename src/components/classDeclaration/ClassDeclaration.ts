@@ -1,31 +1,30 @@
 import { Constructor } from './members/constructor/Constructor';
 import { PropertyDeclaration } from './members/property/PropertyDeclaration';
 import { Decorator } from '../decorator/Decorator';
-import { GeneralInterface } from '../general/GeneralInterface';
+import { FileDeclaration } from '../general/FileDeclaration';
 import { Method } from './members/method/Method';
-
+import { forEachComment } from 'tsutils/util';
+import * as ts from 'typescript/lib/typescript';
 /**
  * Defines the structure of class objects
  *
  * @export
  * @class ClassDeclaration
  */
-export class ClassDeclaration extends GeneralInterface {
+export class ClassDeclaration extends FileDeclaration {
   private decorators: Decorator[];
-  private heritages: String[];
-  private modifiers: String[];
   private methods: Method[];
   private properties: PropertyDeclaration[];
+  private comments: string[];
   private construct: Constructor;
 
   constructor() {
     super();
     this.decorators = [];
-    this.heritages = [];
-    this.modifiers = [];
     this.methods = [];
     this.properties = [];
     this.construct = new Constructor();
+    this.comments = [];
   }
 
   getConstructor() {
@@ -51,42 +50,6 @@ export class ClassDeclaration extends GeneralInterface {
 
   setDecorators(decorators: Decorator[]) {
     this.decorators = decorators;
-  }
-
-  addModifier(modifier: String) {
-    this.modifiers.push(modifier);
-  }
-
-  addModifiers(modifiers: String[]) {
-    modifiers.forEach((modifier) => {
-      this.modifiers.push(modifier);
-    });
-  }
-
-  getModifiers() {
-    return this.modifiers;
-  }
-
-  setModifiers(modifiers: String[]) {
-    this.modifiers = modifiers;
-  }
-
-  addHeritage(heritage: String) {
-    this.heritages.push(heritage);
-  }
-
-  addHeritages(heritages: String[]) {
-    heritages.forEach((heritage) => {
-      this.heritages.push(heritage);
-    });
-  }
-
-  getHeritages() {
-    return this.heritages;
-  }
-
-  setHeritages(heritages: String[]) {
-    this.heritages = heritages;
   }
 
   addProperty(property: PropertyDeclaration) {
@@ -121,16 +84,57 @@ export class ClassDeclaration extends GeneralInterface {
     this.methods = methods;
   }
 
+  addComment(comment: string) {
+    this.comments.push(comment);
+  }
+
+  getComments() {
+    return this.comments;
+  }
+
+  setComments(comments: string[]) {
+    this.comments = comments;
+  }
+
+  parseComments(fileClass: ts.Node, sourceFile: ts.SourceFile) {
+    // getText() returns the first line without comments
+    let firstLine: string = sourceFile.getText();
+    // getFullText() returns also the comments, now I need the position of the declared class
+    let declarationPos: number = sourceFile.getFullText().indexOf(firstLine);
+    forEachComment(
+      fileClass,
+      (sourceFile, comment) => {
+        if (comment.end < declarationPos) {
+          let commentText: string = sourceFile.substring(
+            comment.pos,
+            comment.end,
+          );
+          this.comments.push(commentText);
+        }
+      },
+      sourceFile,
+    );
+  }
+
   toString(): String {
     let classDeclaration: String[] = [];
     this.decorators.forEach((decorator) => {
       classDeclaration.push(decorator.toString(), '\n');
     });
-    this.modifiers.forEach((modifier) => {
+    super.getModifiers().forEach((modifier) => {
       classDeclaration.push(modifier, ' ');
     });
+
+    if (this.comments.length > 0) {
+      this.comments.forEach((comment) => {
+        classDeclaration.push(comment);
+        classDeclaration.push('\n');
+      });
+    }
+    classDeclaration.push('\n');
+
     classDeclaration.push('class ', this.getIdentifier());
-    this.heritages.forEach((heritage) => {
+    super.getHeritages().forEach((heritage) => {
       classDeclaration.push(heritage);
     });
     classDeclaration.push(' {\n');

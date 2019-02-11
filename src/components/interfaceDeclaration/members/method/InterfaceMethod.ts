@@ -1,39 +1,26 @@
 import { Decorator } from '../../../decorator/Decorator';
 import { GeneralInterface } from '../../../general/GeneralInterface';
-import { Parameter } from './Parameter';
+import { Parameter } from '../../../classDeclaration/members/method/Parameter';
 import * as mergeTools from '../../../../tools/MergerTools';
-import { BodyMethod, default as Body } from './body/BodyMethod';
 
 /**
- * Defines the structure of a class method object
+ * Defines the strucuture of a class method object
  *
  * @export
- * @class Method
+ * @class InterfaceMethod
  */
-export class Method extends GeneralInterface {
+export class InterfaceMethod extends GeneralInterface {
   private parameters: Parameter[];
-  private modifiers: String[];
   private decorators: Decorator[];
-  private body: BodyMethod;
 
   constructor() {
     super();
     this.parameters = [];
-    this.modifiers = [];
     this.decorators = [];
-    this.body = new BodyMethod();
   }
 
   getParameters(): Parameter[] {
     return this.parameters;
-  }
-
-  getModifiers(): String[] {
-    return this.modifiers;
-  }
-
-  setModifiers(modifiers: String[]) {
-    this.modifiers = modifiers;
   }
 
   getDecorators() {
@@ -54,16 +41,6 @@ export class Method extends GeneralInterface {
     });
   }
 
-  addModifier(modifier: String) {
-    this.modifiers.push(modifier);
-  }
-
-  addModifiers(modifiers: String[]) {
-    modifiers.forEach((modifier) => {
-      this.modifiers.push(modifier);
-    });
-  }
-
   addDecorator(decorator: Decorator) {
     this.decorators.push(decorator);
   }
@@ -74,15 +51,7 @@ export class Method extends GeneralInterface {
     });
   }
 
-  getBody(): BodyMethod {
-    return this.body;
-  }
-
-  setBody(body: BodyMethod) {
-    this.body = body;
-  }
-
-  merge(patchMethod: Method, patchOverrides: boolean) {
+  merge(patchMethod: InterfaceMethod, patchOverrides: boolean) {
     let paramExists: boolean;
 
     mergeTools.mergeDecorators(
@@ -90,12 +59,6 @@ export class Method extends GeneralInterface {
       patchMethod.getDecorators(),
       patchOverrides,
     );
-    if (patchOverrides) {
-      this.setModifiers(patchMethod.getModifiers());
-      this.setBody(patchMethod.getBody());
-    } else {
-      this.getBody().merge(patchMethod.getBody(), patchOverrides);
-    }
 
     patchMethod.getParameters().forEach((patchParameter) => {
       paramExists = false;
@@ -109,15 +72,17 @@ export class Method extends GeneralInterface {
         this.addParameter(patchParameter);
       }
     });
+    if (patchOverrides) {
+      if (patchMethod.getType().length > 0) {
+        this.setType(patchMethod.getType());
+      }
+    }
   }
 
   toString(): String {
     let result: String[] = [];
     this.decorators.forEach((decorator) => {
       result.push(decorator.toString(), '\n');
-    });
-    this.modifiers.forEach((modifier) => {
-      result.push(modifier, ' ');
     });
     result.push(this.getIdentifier(), '(');
     this.parameters.forEach((parameter) => {
@@ -127,12 +92,10 @@ export class Method extends GeneralInterface {
       }
     });
     result.push(')');
-    if (this.getType() !== '')
-      result.push(': ', this.getType(), '\n', this.body.toString(), '\n', '\n');
-    else result.push('\n', this.body.toString(), '\n', '\n');
+    if (this.getType() !== '') result.push(': ', this.getType(), ';\n', '\n');
 
     return result.join('');
   }
 }
 
-export default Method;
+export default InterfaceMethod;
