@@ -27,7 +27,9 @@ let mergedCode: string = tsm.merge(baseContents, pathContents, patchOverrides);
 The merger allows merging of this node kinds:
 
 - ImportDeclaration
+- ExportDeclaration
 - ClassDeclaration
+- InterfaceDeclaration
 - Decorator
 - FunctionDeclaration
 - MethodDeclaration
@@ -128,4 +130,4 @@ class AnotherClass {}
 
 Next releases will include merge support for:
 
-- InterfaceDeclaration
+- Comments support
