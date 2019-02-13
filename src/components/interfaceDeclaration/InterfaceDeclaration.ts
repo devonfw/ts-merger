@@ -96,9 +96,6 @@ export class InterfaceDeclaration extends FileDeclaration {
 
   toString(): String {
     let interfaceDeclaration: String[] = [];
-    super.getModifiers().forEach((modifier) => {
-      interfaceDeclaration.push(modifier, ' ');
-    });
 
     if (this.comments.length > 0) {
       this.comments.forEach((comment) => {
@@ -107,6 +104,10 @@ export class InterfaceDeclaration extends FileDeclaration {
       });
     }
     interfaceDeclaration.push('\n');
+
+    super.getModifiers().forEach((modifier) => {
+      interfaceDeclaration.push(modifier, ' ');
+    });
 
     interfaceDeclaration.push('interface ', this.getIdentifier());
     super.getHeritages().forEach((heritage) => {

@@ -118,12 +118,6 @@ export class ClassDeclaration extends FileDeclaration {
 
   toString(): String {
     let classDeclaration: String[] = [];
-    this.decorators.forEach((decorator) => {
-      classDeclaration.push(decorator.toString(), '\n');
-    });
-    super.getModifiers().forEach((modifier) => {
-      classDeclaration.push(modifier, ' ');
-    });
 
     if (this.comments.length > 0) {
       this.comments.forEach((comment) => {
@@ -132,6 +126,13 @@ export class ClassDeclaration extends FileDeclaration {
       });
     }
     classDeclaration.push('\n');
+
+    this.decorators.forEach((decorator) => {
+      classDeclaration.push(decorator.toString(), '\n');
+    });
+    super.getModifiers().forEach((modifier) => {
+      classDeclaration.push(modifier, ' ');
+    });
 
     classDeclaration.push('class ', this.getIdentifier());
     super.getHeritages().forEach((heritage) => {
