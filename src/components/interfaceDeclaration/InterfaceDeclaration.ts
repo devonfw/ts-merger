@@ -75,10 +75,15 @@ export class InterfaceDeclaration extends FileDeclaration {
   }
 
   parseComments(fileInterface: ts.Node, sourceFile: ts.SourceFile) {
-    // getText() returns the first line without comments
-    let firstLine: string = sourceFile.getText();
-    // getFullText() returns also the comments, now I need the position of the declared class
-    let declarationPos: number = sourceFile.getFullText().indexOf(firstLine);
+    // Now I need the position of the declared class
+    let text: string = sourceFile.getFullText();
+    let regex: string = 'interface +(' + this.getIdentifier() + ')';
+
+    let match = text.match(regex);
+
+    if (match == null) return;
+
+    let declarationPos: number = text.indexOf(match[0]);
     forEachComment(
       fileInterface,
       (sourceFile, comment) => {
@@ -96,9 +101,6 @@ export class InterfaceDeclaration extends FileDeclaration {
 
   toString(): String {
     let interfaceDeclaration: String[] = [];
-    super.getModifiers().forEach((modifier) => {
-      interfaceDeclaration.push(modifier, ' ');
-    });
 
     if (this.comments.length > 0) {
       this.comments.forEach((comment) => {
@@ -107,6 +109,10 @@ export class InterfaceDeclaration extends FileDeclaration {
       });
     }
     interfaceDeclaration.push('\n');
+
+    super.getModifiers().forEach((modifier) => {
+      interfaceDeclaration.push(modifier, ' ');
+    });
 
     interfaceDeclaration.push('interface ', this.getIdentifier());
     super.getHeritages().forEach((heritage) => {

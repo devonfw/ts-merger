@@ -97,10 +97,15 @@ export class ClassDeclaration extends FileDeclaration {
   }
 
   parseComments(fileClass: ts.Node, sourceFile: ts.SourceFile) {
-    // getText() returns the first line without comments
-    let firstLine: string = sourceFile.getText();
-    // getFullText() returns also the comments, now I need the position of the declared class
-    let declarationPos: number = sourceFile.getFullText().indexOf(firstLine);
+    // Now I need the position of the declared class
+    let text: string = sourceFile.getFullText();
+    let regex: string = 'class +(' + this.getIdentifier() + ')';
+
+    let match = text.match(regex);
+
+    if (match == null) return;
+
+    let declarationPos: number = text.indexOf(match[0]);
     forEachComment(
       fileClass,
       (sourceFile, comment) => {
@@ -118,12 +123,6 @@ export class ClassDeclaration extends FileDeclaration {
 
   toString(): String {
     let classDeclaration: String[] = [];
-    this.decorators.forEach((decorator) => {
-      classDeclaration.push(decorator.toString(), '\n');
-    });
-    super.getModifiers().forEach((modifier) => {
-      classDeclaration.push(modifier, ' ');
-    });
 
     if (this.comments.length > 0) {
       this.comments.forEach((comment) => {
@@ -132,6 +131,13 @@ export class ClassDeclaration extends FileDeclaration {
       });
     }
     classDeclaration.push('\n');
+
+    this.decorators.forEach((decorator) => {
+      classDeclaration.push(decorator.toString(), '\n');
+    });
+    super.getModifiers().forEach((modifier) => {
+      classDeclaration.push(modifier, ' ');
+    });
 
     classDeclaration.push('class ', this.getIdentifier());
     super.getHeritages().forEach((heritage) => {
