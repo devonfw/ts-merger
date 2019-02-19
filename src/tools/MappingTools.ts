@@ -348,7 +348,6 @@ export function mapClass(
           break;
       }
     });
-    classTo.parseComments(fileClass, sourceFile);
   }
   return classTo;
 }
@@ -393,7 +392,6 @@ export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
           break;
       }
     });
-    interfaceTo.parseComments(fileInterface, sourceFile);
   }
   return interfaceTo;
 }

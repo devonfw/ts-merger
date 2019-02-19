@@ -155,41 +155,4 @@ describe('Merging class declarations', () => {
     });
   });
 
-  describe('comments on class definitions', () => {
-    const base = `/* Test this */
-      // Bla test
-      class a { }`,
-      patch = `/* Test that */
-      // Ble test
-      class a {}`;
-
-    it('should be accumulated.', () => {
-      const result: String[] = merge(base, patch, false)
-        .split('\n') // get each individual line
-        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
-        .filter((value) => value != ''); // remove empty lines
-      expect(result.indexOf('/* Test this */')).to.be.greaterThan(
-        -1,
-        'first base comment should be present in class a',
-      );
-      expect(result.indexOf('// Bla test')).to.be.greaterThan(
-        0,
-        'second base comment should be present in class a',
-      );
-    });
-    it('should accumulate patch comments with patchOverride.', () => {
-      const result: String[] = merge(base, patch, true)
-        .split('\n') // get each individual line
-        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
-        .filter((value) => value != ''); // remove empty lines
-      expect(result.indexOf('/* Test that */')).to.be.greaterThan(
-        -1,
-        'first patch comment should be present in class',
-      );
-      expect(result.indexOf('// Ble test')).to.be.greaterThan(
-        0,
-        'second patch comment should be present in class',
-      );
-    });
-  });
 });

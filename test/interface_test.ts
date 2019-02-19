@@ -71,7 +71,7 @@ describe('Merging interface declarations', () => {
       let regex = /\s*interface\s+[ab]\s*\{\}\s*interface\s+[ab].*/;
       expect(regex.test(result.toString())).true;
     });
-    it('should be accumulated with patchOverride (should not make a difference).', () => {
+    it('should be accumulated with patchOverride (should not make any difference).', () => {
       const result: String = merge(patch, base, false)
         .split('\n')
         .map((value) => value.trim())
@@ -97,7 +97,7 @@ describe('Merging interface declarations', () => {
         ).length,
       ).to.be.equal(1, 'misformed class declaration');
     });
-    it('should be accumulated with patchOverride (should not make a difference).', () => {
+    it('should be accumulated with patchOverride (should not make any difference).', () => {
       const result: String[] = merge(base, patch, true)
         .split('\n') // get each individual line
         .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
@@ -107,44 +107,6 @@ describe('Merging interface declarations', () => {
           /interface\s*a\s*extends\s*\w\s*,\s*\w.*/.test(value.toString()),
         ).length,
       ).to.be.equal(1, 'misformed class declaration');
-    });
-  });
-
-  describe('multiple comments on interface definitions', () => {
-    const base = `/* Test this */
-      // Bla test
-      interface a { }`,
-      patch = `/* Test that */
-      // Ble test
-      interface a {}`;
-
-    it('should be accumulated.', () => {
-      const result: String[] = merge(base, patch, false)
-        .split('\n') // get each individual line
-        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
-        .filter((value) => value != ''); // remove empty lines
-      expect(result.indexOf('/* Test this */')).to.be.greaterThan(
-        -1,
-        'first base comment should be present in interface a',
-      );
-      expect(result.indexOf('// Bla test')).to.be.greaterThan(
-        0,
-        'second base comment should be present in interface a',
-      );
-    });
-    it('should be accumulated with patchOverride (should not make a difference).', () => {
-      const result: String[] = merge(base, patch, true)
-        .split('\n') // get each individual line
-        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
-        .filter((value) => value != ''); // remove empty lines
-      expect(result.indexOf('/* Test that */')).to.be.greaterThan(
-        -1,
-        'first patch comment should be present in interface',
-      );
-      expect(result.indexOf('// Ble test')).to.be.greaterThan(
-        0,
-        'second patch comment should be present in interface',
-      );
     });
   });
 });
