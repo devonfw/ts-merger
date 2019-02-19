@@ -106,7 +106,7 @@ export class ExportDeclaration {
   toString(): String {
     let clause: String[] = [];
     if (!this.spaceBinding) {
-      clause.push("export '", this.module, "';\n");
+      clause.push("export * from '", this.module, "';\n");
     } else {
       clause.push('export ');
       if (this.named.length !== 0) {

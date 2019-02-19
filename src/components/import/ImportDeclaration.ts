@@ -106,7 +106,7 @@ export class ImportDeclaration {
   toString(): String {
     let clause: String[] = [];
     if (!this.spaceBinding) {
-      clause.push("import '", this.module, "';\n");
+      clause.push("import * from '", this.module, "';\n");
     } else {
       clause.push('import ');
       if (this.named.length !== 0) {

@@ -204,7 +204,7 @@ describe('Merging exports', () => {
         ).equal(1);
       });
 
-      it('with patchOverride is set (should not make a difference).', () => {
+      it('when patchOverride is set (should not make a difference).', () => {
         const result: String[] = merge(base, patch, true)
           .split('\n')
           .filter((r) => {
@@ -215,6 +215,67 @@ describe('Merging exports', () => {
           result.filter((value) => exportRegex.test(value.toString())).length,
         ).equal(1);
       });
+    });
+  });
+
+  describe('Should merge exports with *', () => {
+    const base = `export * from 'b';`,
+      patch = `export * from 'b';
+      export * from 'd';`;
+
+    it('by default.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      let exportRegex = /export\s*\*\s*from\s*'b'\s*[;]?/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+      exportRegex = /export\s*\*\s*from\s*'d'\s*[;]?/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+    });
+
+    it('when patchOverride is set (should not make a difference).', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      let exportRegex = /export\s*\*\s*from\s*'b'\s*[;]?/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+      exportRegex = /export\s*\*\s*from\s*'d'\s*[;]?/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+    });
+  });
+
+  describe('Should remove invalid exports', () => {
+    const base = `export 'b';`,
+      patch = `export 'c';`;
+
+    it('by default.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      expect(result.length).equal(0);
+    });
+
+    it('when patchOverride is set (should not make a difference).', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      expect(result.length).equal(0);
     });
   });
 
