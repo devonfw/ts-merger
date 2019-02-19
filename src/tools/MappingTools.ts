@@ -262,6 +262,9 @@ export function mapExportKeyword(fileExport) {
   });
   // statements => modules
   fileExport.parent.statements.forEach((module) => {
+    if (!module.expression) {
+      return;
+    }
     let moduleText = module.expression.text;
     let notExistsInArray: boolean = true;
     // We don't want duplicated exports
@@ -277,6 +280,10 @@ export function mapExportKeyword(fileExport) {
   moduleAttributes.forEach((module) => {
     let exportElement: ExportDeclaration = new ExportDeclaration();
     exportElement.setModule(module);
+    // If it does not contain name of the class to export, we don't want it.
+    if (namedAttributes.length <= 0) {
+      return;
+    }
     for (let index = 0; index < namedAttributes.length; index++) {
       const named = namedAttributes[index];
       if (named === 'from') {
@@ -288,6 +295,7 @@ export function mapExportKeyword(fileExport) {
         index = index - 1;
       }
     }
+
     exportElements.push(exportElement);
   });
 
