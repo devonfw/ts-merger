@@ -34,21 +34,6 @@ export function mapFile(sourceFile: ts.SourceFile) {
         case ts.SyntaxKind.ExportDeclaration:
           file.addExport(mapExport(<ts.ExportDeclaration>child));
           break;
-        case ts.SyntaxKind.ExportKeyword:
-          // This case arises when the export statement does not contain brackets
-          mapExportKeyword(child, sourceFile).forEach((module) => {
-            let notExistsInArray: boolean = true;
-            file.getExports().forEach((fileModule) => {
-              if (
-                fileModule.getNamed().toString() ===
-                module.getNamed().toString()
-              ) {
-                notExistsInArray = false;
-              }
-            });
-            if (notExistsInArray) file.addExport(module);
-          });
-          break;
         case ts.SyntaxKind.ClassDeclaration:
           file.addClass(mapClass(<ts.ClassDeclaration>child, sourceFile));
           break;
@@ -245,63 +230,6 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
     exportElement.setSpaceBinding(false);
   }
   return exportElement;
-}
-
-export function mapExportKeyword(fileExport, sourceFile: ts.SourceFile) {
-  // We are going to retrieve all the export declarations without brackets
-  let exportElements: ExportDeclaration[] = [];
-  // export a from b;
-  // 'a' is a named attribute
-  let namedAttributes: string[] = [];
-  // 'b' is a module attribute
-  let moduleAttributes: string[] = [];
-
-  // We get the line where the export is located
-  let lineNumber: number = sourceFile.getLineAndCharacterOfPosition(
-    fileExport.end,
-  ).line;
-  let lineText: string = sourceFile.getText().split('\n')[lineNumber];
-
-  let exports: string[] = lineText.split(';');
-  let regex: RegExp = /(?<=export\s)(.*)(?=\sfrom)\s*from\s*([^\s]+)\s*/;
-  exports.forEach((exportStatement) => {
-    let match: RegExpMatchArray = exportStatement.match(regex);
-    if (match && match.length >= 3) {
-      // The named attributes may be in form: a, b, c
-      let nmdAttributes = match[1].split(',');
-      namedAttributes = namedAttributes.concat(nmdAttributes);
-      // We need to remove any special character like ' and ", at least two times
-      let moduleAttribute: string = match[2]
-        .replace(/(["']+)/, '')
-        .replace(/(["']+)/, '');
-      moduleAttributes.push(moduleAttribute);
-    }
-  });
-
-  // Now let's create and store the export declarations
-  moduleAttributes.forEach((module) => {
-    let exportElement: ExportDeclaration = new ExportDeclaration();
-    exportElement.setModule(module);
-    // If it does not contain name of the class to export, we don't want it.
-    if (namedAttributes.length <= 0) {
-      return;
-    }
-    for (let index = 0; index < namedAttributes.length; index++) {
-      const named = namedAttributes[index];
-      if (named === 'from') {
-        namedAttributes.splice(index, 1);
-        break;
-      } else {
-        exportElement.addNamed(named);
-        namedAttributes.splice(index, 1);
-        index = index - 1;
-      }
-    }
-
-    exportElements.push(exportElement);
-  });
-
-  return exportElements;
 }
 
 export function mapClass(
