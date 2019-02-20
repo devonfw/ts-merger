@@ -279,6 +279,40 @@ describe('Merging exports', () => {
     });
   });
 
+  describe('Should not mix imports and exports', () => {
+    const base = `import { O } from 'OS';
+    import { N } from 'NS';
+    export 'OC';
+    export const APIS = [ O, N ];`,
+      patch = `import { G } from 'GS';
+      export a, b from 'bla'
+      export const APIS = [G];`;
+
+    it('by default.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      let exportRegex = /export\s*{\s*\w,\s*\w\s*}\s*from\s*'bla';/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+    });
+
+    it('when patchOverride is set (should not make a difference).', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+      let exportRegex = /export\s*{\s*\w,\s*\w\s*}\s*from\s*'bla';/;
+      expect(
+        result.filter((value) => exportRegex.test(value.toString())).length,
+      ).equal(1);
+    });
+  });
+
   describe('in case of conflicts of the export name', () => {
     const base = `export { a as b } from 'c';`,
       patch = `export { a as d } from 'c';`;
