@@ -1,6 +1,6 @@
 {
   "name": "@devonfw/ts-merger",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "description": "2-way TypeScript Merger",
   "author": {
     "name": "Capgemini",
@@ -41,7 +41,9 @@
     "typescript": "^2.2.1",
     "webpack": "^3.4.1"
   },
-  "dependencies": {},
+  "dependencies": {
+    "ts-node": "^8.0.2"
+  },
   "directories": {
     "test": "test"
   },

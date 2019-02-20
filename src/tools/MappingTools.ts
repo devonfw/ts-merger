@@ -36,7 +36,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
           break;
         case ts.SyntaxKind.ExportKeyword:
           // This case arises when the export statement does not contain brackets
-          mapExportKeyword(child).forEach((module) => {
+          mapExportKeyword(child, sourceFile).forEach((module) => {
             let notExistsInArray: boolean = true;
             file.getExports().forEach((fileModule) => {
               if (
@@ -247,7 +247,7 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
   return exportElement;
 }
 
-export function mapExportKeyword(fileExport) {
+export function mapExportKeyword(fileExport, sourceFile: ts.SourceFile) {
   // We are going to retrieve all the export declarations without brackets
   let exportElements: ExportDeclaration[] = [];
   // export a from b;
@@ -256,24 +256,26 @@ export function mapExportKeyword(fileExport) {
   // 'b' is a module attribute
   let moduleAttributes: string[] = [];
 
-  // identifiers => named
-  fileExport.parent.identifiers.forEach((named) => {
-    namedAttributes.push(named);
-  });
-  // statements => modules
-  fileExport.parent.statements.forEach((module) => {
-    if (!module.expression) {
-      return;
-    }
-    let moduleText = module.expression.text;
-    let notExistsInArray: boolean = true;
-    // We don't want duplicated exports
-    namedAttributes.forEach((named) => {
-      if (moduleText === named) notExistsInArray = false;
-    });
+  // We get the line where the export is located
+  let lineNumber: number = sourceFile.getLineAndCharacterOfPosition(
+    fileExport.end,
+  ).line;
+  let lineText: string = sourceFile.getText().split('\n')[lineNumber];
 
-    if (moduleText !== 'from' && notExistsInArray)
-      moduleAttributes.push(moduleText);
+  let exports: string[] = lineText.split(';');
+  let regex: RegExp = /(?<=export\s)(.*)(?=\sfrom)\s*from\s*([^\s]+)\s*/;
+  exports.forEach((exportStatement) => {
+    let match: RegExpMatchArray = exportStatement.match(regex);
+    if (match && match.length >= 3) {
+      // The named attributes may be in form: a, b, c
+      let nmdAttributes = match[1].split(',');
+      namedAttributes = namedAttributes.concat(nmdAttributes);
+      // We need to remove any special character like ' and ", at least two times
+      let moduleAttribute: string = match[2]
+        .replace(/(["']+)/, '')
+        .replace(/(["']+)/, '');
+      moduleAttributes.push(moduleAttribute);
+    }
   });
 
   // Now let's create and store the export declarations
