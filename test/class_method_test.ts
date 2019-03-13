@@ -165,7 +165,7 @@ describe('Merging class methods', () => {
           result.reduce((prev, curr) => prev.toString() + curr.toString(), '')
       );
       expect(
-        result.filter(res => /dialog\.present\(\)?/.test(res.toString()))
+        result.filter(res => /^(\s*)dialog\.present\(\)?/.test(res.toString()))
       ).length.to.be.greaterThan(
         0,
         'dialog.present() should have modifier from patch but was ' +
