@@ -5,10 +5,20 @@ import * as mergeTools from '../../tools/MergerTools';
 
 export class VariableStatement extends PropertyDeclaration {
   private const: boolean;
+  private async: boolean;
 
   constructor() {
     super();
     this.const = false;
+    this.async = false;
+  }
+
+  setIsAsync(isAsync: boolean) {
+    this.async = isAsync;
+  }
+
+  isAsync(): boolean {
+    return this.async;
   }
 
   setIsConst(isConst: boolean) {
@@ -51,10 +61,10 @@ export class VariableStatement extends PropertyDeclaration {
   }
   toString() {
     let result: String[] = [];
-    this.getDecorators().forEach((decorator) => {
+    this.getDecorators().forEach(decorator => {
       result.push(decorator.toString());
     });
-    this.getModifiers().forEach((modifier) => {
+    this.getModifiers().forEach(modifier => {
       result.push(modifier, ' ');
     });
     if (this.isConst()) {
@@ -66,10 +76,16 @@ export class VariableStatement extends PropertyDeclaration {
     if (this.getType() != '') {
       result.push(': ', this.getType());
     }
+
     if (this.getInitializer()) {
       result.push(' = ', this.getInitializer().toString());
     }
-    result.push(';\n');
+
+    if (this.isAsync()) {
+      result.push(' ');
+    } else {
+      result.push(';\n');
+    }
 
     return result.join('');
   }
