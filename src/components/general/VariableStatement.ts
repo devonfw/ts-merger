@@ -61,10 +61,10 @@ export class VariableStatement extends PropertyDeclaration {
   }
   toString() {
     let result: String[] = [];
-    this.getDecorators().forEach(decorator => {
+    this.getDecorators().forEach((decorator) => {
       result.push(decorator.toString());
     });
-    this.getModifiers().forEach(modifier => {
+    this.getModifiers().forEach((modifier) => {
       result.push(modifier, ' ');
     });
     if (this.isConst()) {
@@ -81,9 +81,7 @@ export class VariableStatement extends PropertyDeclaration {
       result.push(' = ', this.getInitializer().toString());
     }
 
-    if (this.isAsync()) {
-      result.push(' ');
-    } else {
+    if (!this.isAsync()) {
       result.push(';\n');
     }
 
