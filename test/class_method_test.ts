@@ -12,7 +12,6 @@ describe("Merging class methods", () => {
      * OpenAPI spec version: 1.0
      */
     class a {
-      // this should not be removed
                       private b(b:any):void{
                           // Do Something
                       }
