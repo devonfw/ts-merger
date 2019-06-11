@@ -1,11 +1,12 @@
-import { FunctionDeclaration } from './general/FunctionDeclaration';
-import { VariableStatement } from './general/VariableStatement';
-import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
-import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaration';
-import { ImportDeclaration } from './import/ImportDeclaration';
-import { ExportDeclaration } from './export/ExportDeclaration';
-import * as mergeTools from '../tools/MergerTools';
-import * as ts from 'typescript/lib/typescript';
+import { FunctionDeclaration } from "./general/FunctionDeclaration";
+import { VariableStatement } from "./general/VariableStatement";
+import { ClassDeclaration } from "./classDeclaration/ClassDeclaration";
+import { InterfaceDeclaration } from "./interfaceDeclaration/InterfaceDeclaration";
+import { ImportDeclaration } from "./import/ImportDeclaration";
+import { ExportDeclaration } from "./export/ExportDeclaration";
+import * as mergeTools from "../tools/MergerTools";
+import * as ts from "typescript/lib/typescript";
+import { EnumDeclaration } from "./general/EnumDeclaration";
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];
@@ -14,6 +15,7 @@ export class TSFile {
   private interfaces: InterfaceDeclaration[];
   private variables: VariableStatement[];
   private functions: FunctionDeclaration[];
+  private enums: EnumDeclaration[];
 
   constructor() {
     this.importDeclarations = [];
@@ -22,6 +24,7 @@ export class TSFile {
     this.interfaces = [];
     this.variables = [];
     this.functions = [];
+    this.enums = [];
   }
 
   addImport(importDeclaration: ImportDeclaration) {
@@ -46,6 +49,10 @@ export class TSFile {
 
   addClass(classToAdd: ClassDeclaration) {
     this.classes.push(classToAdd);
+  }
+
+  addEnum(enumToAdd: EnumDeclaration) {
+    this.enums.push(enumToAdd);
   }
 
   // setClass(classDeclaration: ClassDeclaration){
@@ -89,9 +96,9 @@ export class TSFile {
 
   checkAndMergeClasses(patchFile: TSFile, patchOverrides: boolean) {
     let exists: boolean = false;
-    patchFile.getClasses().forEach((patchClass) => {
+    patchFile.getClasses().forEach(patchClass => {
       exists = false;
-      this.getClasses().forEach((baseClass) => {
+      this.getClasses().forEach(baseClass => {
         if (patchClass.getIdentifier() === baseClass.getIdentifier()) {
           exists = true;
           mergeTools.mergeClass(baseClass, patchClass, patchOverrides);
@@ -108,22 +115,22 @@ export class TSFile {
       mergeTools.mergeFunctions(
         this.functions,
         patchFile.getFunctions(),
-        patchOverrides,
+        patchOverrides
       );
     }
   }
 
   checkAndMergeInterfaces(patchFile: TSFile, patchOverrides: boolean) {
     let exists: boolean = false;
-    patchFile.getInterfaces().forEach((patchInterface) => {
+    patchFile.getInterfaces().forEach(patchInterface => {
       exists = false;
-      this.getInterfaces().forEach((baseInterface) => {
+      this.getInterfaces().forEach(baseInterface => {
         if (patchInterface.getIdentifier() === baseInterface.getIdentifier()) {
           exists = true;
           mergeTools.mergeInterface(
             baseInterface,
             patchInterface,
-            patchOverrides,
+            patchOverrides
           );
         }
       });
@@ -138,33 +145,36 @@ export class TSFile {
       mergeTools.mergeFunctions(
         this.functions,
         patchFile.getFunctions(),
-        patchOverrides,
+        patchOverrides
       );
     }
   }
 
   toString() {
     let file: String[] = [];
-    this.importDeclarations.forEach((importDeclaration) => {
+    this.importDeclarations.forEach(importDeclaration => {
       file.push(importDeclaration.toString());
     });
-    this.exportDeclarations.forEach((exportDeclaration) => {
+    this.exportDeclarations.forEach(exportDeclaration => {
       file.push(exportDeclaration.toString());
     });
-    file.push('\n');
+    file.push("\n");
 
-    this.functions.forEach((func) => {
+    this.functions.forEach(func => {
       file.push(func.toString());
     });
-    this.variables.forEach((variable) => {
+    this.variables.forEach(variable => {
       file.push(variable.toString());
     });
-    this.classes.forEach((classToPrint) => {
+    this.classes.forEach(classToPrint => {
       file.push(classToPrint.toString());
     });
-    this.interfaces.forEach((interfaceToPrint) => {
+    this.interfaces.forEach(interfaceToPrint => {
       file.push(interfaceToPrint.toString());
     });
-    return file.join('');
+    this.enums.forEach(enumToPrint => {
+      file.push(enumToPrint.toString());
+    });
+    return file.join("");
   }
 }
