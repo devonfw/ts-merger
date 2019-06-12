@@ -1,27 +1,27 @@
-import { FunctionDeclaration } from "../components/general/FunctionDeclaration";
-import { VariableStatement } from "../components/general/VariableStatement";
-import { Decorator } from "../components/decorator/Decorator";
-import { Constructor } from "../components/classDeclaration/members/constructor/Constructor";
-import { PropertyDeclaration } from "../components/classDeclaration/members/property/PropertyDeclaration";
-import { Method } from "../components/classDeclaration/members/method/Method";
-import { ClassDeclaration } from "../components/classDeclaration/ClassDeclaration";
-import { InterfaceDeclaration } from "../components/interfaceDeclaration/InterfaceDeclaration";
-import { InterfaceMethod } from "../components/interfaceDeclaration/members/method/InterfaceMethod";
-import { TSFile } from "../components/TSFile";
-import * as ts from "typescript";
-import { InterfaceProperty } from "../components/interfaceDeclaration/members/InterfaceProperty";
+import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
+import { VariableStatement } from '../components/general/VariableStatement';
+import { Decorator } from '../components/decorator/Decorator';
+import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
+import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
+import { Method } from '../components/classDeclaration/members/method/Method';
+import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
+import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
+import { TSFile } from '../components/TSFile';
+import * as ts from 'typescript';
+import { InterfaceProperty } from '../components/interfaceDeclaration/members/InterfaceProperty';
 
 export function mergeImports(baseFile: TSFile, patchFile: TSFile) {
   let exists: boolean;
 
   if (baseFile.getImports().length === 0) {
-    patchFile.getImports().forEach(patchImportClause => {
+    patchFile.getImports().forEach((patchImportClause) => {
       baseFile.addImport(patchImportClause);
     });
   } else {
-    patchFile.getImports().forEach(patchImportClause => {
+    patchFile.getImports().forEach((patchImportClause) => {
       exists = false;
-      baseFile.getImports().forEach(importClause => {
+      baseFile.getImports().forEach((importClause) => {
         if (importClause.getModule() === patchImportClause.getModule()) {
           importClause.merge(patchImportClause);
           exists = true;
@@ -38,13 +38,13 @@ export function mergeExports(baseFile: TSFile, patchFile: TSFile) {
   let exists: boolean;
 
   if (baseFile.getExports().length === 0) {
-    patchFile.getExports().forEach(patchExportClause => {
+    patchFile.getExports().forEach((patchExportClause) => {
       baseFile.addExport(patchExportClause);
     });
   } else {
-    patchFile.getExports().forEach(patchExportClause => {
+    patchFile.getExports().forEach((patchExportClause) => {
       exists = false;
-      baseFile.getExports().forEach(importClause => {
+      baseFile.getExports().forEach((importClause) => {
         if (importClause.getModule() === patchExportClause.getModule()) {
           importClause.merge(patchExportClause);
           exists = true;
@@ -60,7 +60,7 @@ export function mergeExports(baseFile: TSFile, patchFile: TSFile) {
 export function mergeClass(
   baseClass: ClassDeclaration,
   patchClass: ClassDeclaration,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
@@ -71,29 +71,29 @@ export function mergeClass(
   mergeHeritages(
     baseClass.getHeritages(),
     patchClass.getHeritages(),
-    patchOverrides
+    patchOverrides,
   );
 
   mergeComments(
     baseClass.getComments(),
     patchClass.getComments(),
-    patchOverrides
+    patchOverrides,
   );
 
   mergeDecorators(
     baseClass.getDecorators(),
     patchClass.getDecorators(),
-    patchOverrides
+    patchOverrides,
   );
   mergeProperties(
     baseClass.getProperties(),
     patchClass.getProperties(),
-    patchOverrides
+    patchOverrides,
   );
   mergeConstructor(
     baseClass.getConstructor(),
     patchClass.getConstructor(),
-    patchOverrides
+    patchOverrides,
   );
   mergeMethods(baseClass.getMethods(), patchClass.getMethods(), patchOverrides);
 }
@@ -101,7 +101,7 @@ export function mergeClass(
 export function mergeInterface(
   baseInterface: InterfaceDeclaration,
   patchInterface: InterfaceDeclaration,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
@@ -111,44 +111,44 @@ export function mergeInterface(
   mergeHeritages(
     baseInterface.getHeritages(),
     patchInterface.getHeritages(),
-    patchOverrides
+    patchOverrides,
   );
 
   mergeComments(
     baseInterface.getComments(),
     patchInterface.getComments(),
-    patchOverrides
+    patchOverrides,
   );
 
   mergeInterfaceProperties(
     baseInterface.getProperties(),
     patchInterface.getProperties(),
-    patchOverrides
+    patchOverrides,
   );
   mergeInterfaceMethods(
     baseInterface.getMethods(),
     patchInterface.getMethods(),
-    patchOverrides
+    patchOverrides,
   );
   baseInterface.setIndex(
     mergeIndexSignature(
       baseInterface.getIndex(),
       patchInterface.getIndex(),
-      patchOverrides
-    )
+      patchOverrides,
+    ),
   );
 }
 
 export function mergeDecorators(
   baseDecorators: Decorator[],
   patchDecorators: Decorator[],
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
-  patchDecorators.forEach(patchDecorator => {
+  patchDecorators.forEach((patchDecorator) => {
     exists = false;
-    baseDecorators.forEach(decorator => {
+    baseDecorators.forEach((decorator) => {
       if (patchDecorator.getIdentifier() === decorator.getIdentifier()) {
         exists = true;
         decorator.merge(patchDecorator, patchOverrides);
@@ -163,13 +163,13 @@ export function mergeDecorators(
 export function mergeProperties(
   baseProperties: PropertyDeclaration[],
   patchProperties: PropertyDeclaration[],
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
-  patchProperties.forEach(patchProperty => {
+  patchProperties.forEach((patchProperty) => {
     exists = false;
-    baseProperties.forEach(property => {
+    baseProperties.forEach((property) => {
       if (patchProperty.getIdentifier() === property.getIdentifier()) {
         exists = true;
         property.merge(patchProperty, patchOverrides);
@@ -184,7 +184,7 @@ export function mergeProperties(
 export function mergeConstructor(
   baseConstructor: Constructor,
   patchConstructor: Constructor,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   mergeMethod(baseConstructor, patchConstructor, patchOverrides);
 }
@@ -192,13 +192,13 @@ export function mergeConstructor(
 export function mergeMethods(
   baseMethods: Method[],
   patchMethods: Method[],
-  patchOverrides
+  patchOverrides,
 ) {
   let exists: boolean;
 
-  patchMethods.forEach(patchMethod => {
+  patchMethods.forEach((patchMethod) => {
     exists = false;
-    baseMethods.forEach(method => {
+    baseMethods.forEach((method) => {
       if (patchMethod.getIdentifier() === method.getIdentifier()) {
         exists = true;
         mergeMethod(method, patchMethod, patchOverrides);
@@ -213,7 +213,7 @@ export function mergeMethods(
 export function mergeIndexSignature(
   baseIndex: string,
   patchIndex: string,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ): string {
   if (patchOverrides) {
     baseIndex = patchIndex;
@@ -224,7 +224,7 @@ export function mergeIndexSignature(
 export function mergeHeritages(
   baseHeritages: String[],
   patchHeritages: String[],
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
@@ -240,15 +240,15 @@ export function mergeHeritages(
       let inheritanceValue: String = baseHeritage.match(/\s*([\w\-]+)/)[0];
 
       // We only need the interfaces names: extends a,b,c (let's remove "extends")
-      patchHeritage = patchHeritage.trim().replace(/\s*([\w\-]+)/, "");
-      baseHeritage = baseHeritage.trim().replace(/\s*([\w\-]+)/, "");
+      patchHeritage = patchHeritage.trim().replace(/\s*([\w\-]+)/, '');
+      baseHeritage = baseHeritage.trim().replace(/\s*([\w\-]+)/, '');
       // split by comma to get the different interfaces
-      let patchHeritageNames: String[] = patchHeritage.split(",");
-      let baseHeritageNames: String[] = baseHeritage.split(",");
+      let patchHeritageNames: String[] = patchHeritage.split(',');
+      let baseHeritageNames: String[] = baseHeritage.split(',');
 
-      patchHeritageNames.forEach(patchHeritageName => {
+      patchHeritageNames.forEach((patchHeritageName) => {
         exists = false;
-        baseHeritageNames.forEach(baseHeritageName => {
+        baseHeritageNames.forEach((baseHeritageName) => {
           if (baseHeritageName === patchHeritageName) {
             exists = true;
             if (patchOverrides) {
@@ -261,7 +261,7 @@ export function mergeHeritages(
         }
       });
 
-      baseHeritages[0] = inheritanceValue + " " + baseHeritageNames.join(",");
+      baseHeritages[0] = inheritanceValue + ' ' + baseHeritageNames.join(',');
     }
   }
 }
@@ -269,13 +269,13 @@ export function mergeHeritages(
 export function mergeComments(
   baseComments: string[],
   patchComments: string[],
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
   patchComments.forEach((patchComment, index) => {
     let isNotRemoved: boolean = true;
-    baseComments.forEach(baseComment => {
+    baseComments.forEach((baseComment) => {
       if (patchOverrides) {
         if (isNotRemoved) {
           baseComments.splice(index, 1, patchComment);
@@ -289,13 +289,13 @@ export function mergeComments(
 export function mergeInterfaceProperties(
   baseProperties: InterfaceProperty[],
   patchProperties: InterfaceProperty[],
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
 
-  patchProperties.forEach(patchProperty => {
+  patchProperties.forEach((patchProperty) => {
     exists = false;
-    baseProperties.forEach(property => {
+    baseProperties.forEach((property) => {
       if (patchProperty.id === property.id) {
         exists = true;
         if (patchOverrides) {
@@ -312,13 +312,13 @@ export function mergeInterfaceProperties(
 export function mergeInterfaceMethods(
   baseMethods: InterfaceMethod[],
   patchMethods: InterfaceMethod[],
-  patchOverrides
+  patchOverrides,
 ) {
   let exists: boolean;
 
-  patchMethods.forEach(patchMethod => {
+  patchMethods.forEach((patchMethod) => {
     exists = false;
-    baseMethods.forEach(method => {
+    baseMethods.forEach((method) => {
       if (patchMethod.getIdentifier() === method.getIdentifier()) {
         exists = true;
         mergeInterfaceMethod(method, patchMethod, patchOverrides);
@@ -333,7 +333,7 @@ export function mergeInterfaceMethods(
 export function mergeMethod(
   baseMethod: Method,
   patchMethod: Method,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   baseMethod.merge(patchMethod, patchOverrides);
 }
@@ -341,7 +341,7 @@ export function mergeMethod(
 export function mergeInterfaceMethod(
   baseMethod: InterfaceMethod,
   patchMethod: InterfaceMethod,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   baseMethod.merge(patchMethod, patchOverrides);
 }
@@ -349,12 +349,12 @@ export function mergeInterfaceMethod(
 export function mergeVariables(
   baseFile: TSFile,
   patchFile: TSFile,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   let exists: boolean;
-  patchFile.getVariables().forEach(patchVariable => {
+  patchFile.getVariables().forEach((patchVariable) => {
     exists = false;
-    baseFile.getVariables().forEach(variable => {
+    baseFile.getVariables().forEach((variable) => {
       if (patchVariable.getIdentifier() === variable.getIdentifier()) {
         exists = true;
         variable.merge(patchVariable, patchOverrides);
@@ -369,13 +369,13 @@ export function mergeVariables(
 export function mergeFunctions(
   baseFunctions: FunctionDeclaration[],
   patchFunctions: FunctionDeclaration[],
-  patchOverrides
+  patchOverrides,
 ) {
   let exists: boolean;
 
-  patchFunctions.forEach(patchFunction => {
+  patchFunctions.forEach((patchFunction) => {
     exists = false;
-    baseFunctions.forEach(func => {
+    baseFunctions.forEach((func) => {
       if (patchFunction.getIdentifier() === func.getIdentifier()) {
         exists = true;
         mergeFunction(func, patchFunction, patchOverrides);
@@ -390,7 +390,7 @@ export function mergeFunctions(
 export function mergeFunction(
   baseFunction: FunctionDeclaration,
   patchFunction: FunctionDeclaration,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ) {
   baseFunction.merge(patchFunction, patchOverrides);
 }
