@@ -1,13 +1,12 @@
-import { GeneralInterface } from "./GeneralInterface";
-import { ObjectLiteralExpression } from "./ObjectLiteralExpression";
-import { EnumElement } from "./EnumElement";
+import { ObjectLiteralExpression } from './ObjectLiteralExpression';
+import { EnumElement } from './EnumElement';
 
 export class EnumDeclaration {
   private name: String;
   private elements: any[];
 
   constructor() {
-    this.name = "";
+    this.name = '';
     this.elements = [];
   }
 
@@ -31,36 +30,36 @@ export class EnumDeclaration {
     this.elements = args;
   }
 
-  merge(patchCallExpr: EnumDeclaration, patchOverrides) {
-    if (patchOverrides) {
-      this.setName(patchCallExpr.getName());
-    }
-
-    patchCallExpr.getElements().forEach(patchElement => {
-      this.getElements().forEach(element => {
-        if (
-          patchElement instanceof ObjectLiteralExpression &&
-          element instanceof ObjectLiteralExpression
-        ) {
-          (<ObjectLiteralExpression>element).merge(
-            <ObjectLiteralExpression>patchElement,
-            patchOverrides
-          );
-        } else if (patchOverrides) {
-          this.setElements(patchCallExpr.getElements());
+  merge(
+    baseEnum: EnumDeclaration,
+    patchEnum: EnumDeclaration,
+    patchOverrides: boolean,
+  ) {
+    let exists: boolean;
+    patchEnum.getElements().forEach(patchElement => {
+      exists = false;
+      baseEnum.getElements().forEach(element => {
+        if (patchElement.getName() === element.getName()) {
+          exists = true;
+          if (patchOverrides) {
+            element.setInitializer(patchElement.getInitializer());
+          }
         }
       });
+      if (!exists) {
+        baseEnum.addElement(patchElement);
+      }
     });
   }
 
   toString() {
     let result: String[] = [];
 
-    result.push("enum ", this.getName(), "{");
-    this.elements.forEach(argument => {
-      result.push(argument.toString());
+    result.push('enum ', this.getName(), ' {');
+    this.elements.forEach(element => {
+      result.push(element.toString());
     });
-    result.push("}");
-    return result.join("");
+    result.push('}');
+    return result.join('');
   }
 }

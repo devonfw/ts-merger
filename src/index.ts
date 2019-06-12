@@ -1,6 +1,6 @@
-import { TSFile } from "./components/TSFile";
-import * as ts from "typescript";
-import * as mapTools from "./tools/MappingTools";
+import { TSFile } from './components/TSFile';
+import * as ts from 'typescript';
+import * as mapTools from './tools/MappingTools';
 
 /**
  * Performs a merge of a patch and base file depending on the merge strategy
@@ -14,27 +14,25 @@ import * as mapTools from "./tools/MappingTools";
 export function merge(
   baseContents: string,
   patchContents: string,
-  patchOverrides: boolean
+  patchOverrides: boolean,
 ): string {
   let sourceFilePatch: ts.SourceFile = ts.createSourceFile(
-    "filePatch",
+    'filePatch',
     patchContents,
     ts.ScriptTarget.ES2016,
-    false
+    false,
   );
   let sourceFile: ts.SourceFile = ts.createSourceFile(
-    "fileBase",
+    'fileBase',
     baseContents,
     ts.ScriptTarget.ES2016,
-    false
+    false,
   );
 
   let baseFile: TSFile = mapTools.mapFile(sourceFile);
   let patchFile: TSFile = mapTools.mapFile(sourceFilePatch);
 
   baseFile.merge(patchFile, patchOverrides);
-
-  let test: String = baseFile.toString();
 
   return baseFile.toString();
 }

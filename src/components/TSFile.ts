@@ -1,12 +1,11 @@
-import { FunctionDeclaration } from "./general/FunctionDeclaration";
-import { VariableStatement } from "./general/VariableStatement";
-import { ClassDeclaration } from "./classDeclaration/ClassDeclaration";
-import { InterfaceDeclaration } from "./interfaceDeclaration/InterfaceDeclaration";
-import { ImportDeclaration } from "./import/ImportDeclaration";
-import { ExportDeclaration } from "./export/ExportDeclaration";
-import * as mergeTools from "../tools/MergerTools";
-import * as ts from "typescript/lib/typescript";
-import { EnumDeclaration } from "./general/EnumDeclaration";
+import { FunctionDeclaration } from './general/FunctionDeclaration';
+import { VariableStatement } from './general/VariableStatement';
+import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaration';
+import { ImportDeclaration } from './import/ImportDeclaration';
+import { ExportDeclaration } from './export/ExportDeclaration';
+import * as mergeTools from '../tools/MergerTools';
+import { EnumDeclaration } from './general/EnumDeclaration';
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];
@@ -55,6 +54,10 @@ export class TSFile {
     this.enums.push(enumToAdd);
   }
 
+  getEnums() {
+    return this.enums;
+  }
+
   // setClass(classDeclaration: ClassDeclaration){
   //     this.class = classDeclaration;
   // }
@@ -92,6 +95,23 @@ export class TSFile {
     mergeTools.mergeExports(this, patchFile);
     this.checkAndMergeClasses(patchFile, patchOverrides);
     this.checkAndMergeInterfaces(patchFile, patchOverrides);
+    this.checkAndMergeEnums(patchFile, patchOverrides);
+  }
+
+  checkAndMergeEnums(patchFile: TSFile, patchOverrides: boolean) {
+    let exists: boolean = false;
+    patchFile.getEnums().forEach(patchEnum => {
+      exists = false;
+      this.getEnums().forEach(baseEnum => {
+        if (patchEnum.getName() === baseEnum.getName()) {
+          exists = true;
+          patchEnum.merge(baseEnum, patchEnum, patchOverrides);
+        }
+      });
+      if (!exists) {
+        this.enums.push(patchEnum);
+      }
+    });
   }
 
   checkAndMergeClasses(patchFile: TSFile, patchOverrides: boolean) {
@@ -115,7 +135,7 @@ export class TSFile {
       mergeTools.mergeFunctions(
         this.functions,
         patchFile.getFunctions(),
-        patchOverrides
+        patchOverrides,
       );
     }
   }
@@ -130,7 +150,7 @@ export class TSFile {
           mergeTools.mergeInterface(
             baseInterface,
             patchInterface,
-            patchOverrides
+            patchOverrides,
           );
         }
       });
@@ -145,7 +165,7 @@ export class TSFile {
       mergeTools.mergeFunctions(
         this.functions,
         patchFile.getFunctions(),
-        patchOverrides
+        patchOverrides,
       );
     }
   }
@@ -158,7 +178,7 @@ export class TSFile {
     this.exportDeclarations.forEach(exportDeclaration => {
       file.push(exportDeclaration.toString());
     });
-    file.push("\n");
+    file.push('\n');
 
     this.functions.forEach(func => {
       file.push(func.toString());
@@ -175,6 +195,6 @@ export class TSFile {
     this.enums.forEach(enumToPrint => {
       file.push(enumToPrint.toString());
     });
-    return file.join("");
+    return file.join('');
   }
 }
