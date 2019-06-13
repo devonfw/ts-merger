@@ -237,6 +237,7 @@ export function mapClass(
   sourceFile: ts.SourceFile,
 ) {
   let classTo: ClassDeclaration = new ClassDeclaration();
+  classTo.parseComments(fileClass, sourceFile);
   classTo.setIdentifier(fileClass.name.text);
   if (fileClass.decorators) {
     fileClass.decorators.forEach((decorator) => {
@@ -292,6 +293,7 @@ export function mapClass(
 
 export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
   let interfaceTo: InterfaceDeclaration = new InterfaceDeclaration();
+  interfaceTo.parseComments(fileInterface, sourceFile);
   interfaceTo.setIdentifier(fileInterface.name.text);
   if (fileInterface.modifiers) {
     fileInterface.modifiers.forEach((modifier) => {

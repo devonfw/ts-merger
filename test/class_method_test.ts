@@ -4,7 +4,14 @@ import 'mocha';
 
 describe('Merging class methods', () => {
   describe('should add the method from', () => {
-    const base = `class a {
+    const base = `
+    /**
+     * Should format correctly this line
+     * Api Documentation
+     *
+     * OpenAPI spec version: 1.0
+     */
+    class a {
                       private b(b:any):void{
                           // Do Something
                       }
@@ -44,12 +51,26 @@ describe('Merging class methods', () => {
   });
 
   describe('should use the method body from', () => {
-    const base = `class a {
+    const base = `
+    /**
+     * Should format correctly this line
+     * Api Documentation
+     *
+     * OpenAPI spec version: 1.0
+     */
+    class a {
                       private b(a:any):void{
                           let c = 5;
                       }
                   }`,
-      patch = `class a {
+      patch = `
+      /**
+       * Should format correctly this line
+       * Api Documentation
+       *
+       * OpenAPI spec version: 2.0
+       */
+      class a {
                   private b(a:any):void{
                       let d = 6;
                   }
