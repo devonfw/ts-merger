@@ -1,6 +1,8 @@
 import { FileDeclaration } from '../general/FileDeclaration';
 import { InterfaceProperty } from './members/InterfaceProperty';
 import { InterfaceMethod } from './members/method/InterfaceMethod';
+import { forEachComment } from 'tsutils/util';
+import * as ts from 'typescript/lib/typescript';
 /**
  * Defines the structure of interface objects
  *
@@ -10,12 +12,14 @@ import { InterfaceMethod } from './members/method/InterfaceMethod';
 export class InterfaceDeclaration extends FileDeclaration {
   private methods: InterfaceMethod[];
   private properties: InterfaceProperty[];
+  private comments: string[];
   private index: string;
 
   constructor() {
     super();
     this.methods = [];
     this.properties = [];
+    this.comments = [];
   }
 
   getIndex() {
@@ -58,8 +62,53 @@ export class InterfaceDeclaration extends FileDeclaration {
     this.methods = methods;
   }
 
+  addComment(comment: string) {
+    this.comments.push(comment);
+  }
+
+  getComments() {
+    return this.comments;
+  }
+
+  setComments(comments: string[]) {
+    this.comments = comments;
+  }
+
+  parseComments(fileInterface: ts.Node, sourceFile: ts.SourceFile) {
+    // Now I need the position of the declared class
+    let text: string = sourceFile.getFullText();
+    let regex: string = 'interface +(' + this.getIdentifier() + ')';
+
+    let match = text.match(regex);
+
+    if (match == null) return;
+
+    let declarationPos: number = text.indexOf(match[0]);
+    forEachComment(
+      fileInterface,
+      (sourceFile, comment) => {
+        if (comment.end < declarationPos) {
+          let commentText: string = sourceFile.substring(
+            comment.pos,
+            comment.end,
+          );
+          this.comments.push(commentText);
+        }
+      },
+      sourceFile,
+    );
+  }
+
   toString(): String {
     let interfaceDeclaration: String[] = [];
+
+    if (this.comments.length > 0) {
+      this.comments.forEach((comment) => {
+        interfaceDeclaration.push(comment);
+        interfaceDeclaration.push('\n');
+      });
+    }
+    interfaceDeclaration.push('\n');
 
     super.getModifiers().forEach((modifier) => {
       interfaceDeclaration.push(modifier, ' ');
