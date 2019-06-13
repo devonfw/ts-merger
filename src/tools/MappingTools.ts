@@ -28,7 +28,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
   sourceFile
     .getChildAt(0)
     .getChildren()
-    .forEach(child => {
+    .forEach((child) => {
       switch (child.kind) {
         case ts.SyntaxKind.ImportDeclaration:
           file.addImport(mapImport(<ts.ImportDeclaration>child));
@@ -68,7 +68,7 @@ export function mapEnums(
   let enumOb: EnumDeclaration = new EnumDeclaration();
   enumOb.setName(enumfromFile.name.text);
 
-  enumfromFile.members.forEach(member => {
+  enumfromFile.members.forEach((member) => {
     let enumElement: EnumElement = new EnumElement();
     let memberFromFile = <ts.EnumDeclaration>(<unknown>member);
     enumElement.setName(memberFromFile.name.text);
@@ -84,7 +84,7 @@ export function mapObjectLiteral(
   sourceFile: ts.SourceFile,
 ) {
   let objLiteral: ObjectLiteralExpression = new ObjectLiteralExpression();
-  objectFromFile.properties.forEach(property => {
+  objectFromFile.properties.forEach((property) => {
     let propertyFromFile = <ts.PropertyAssignment>property;
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
     propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
@@ -150,7 +150,7 @@ export function mapCallExpression(
   }
   expression.setName((<ts.Identifier>propExpr.name).text);
   if (node.arguments) {
-    node.arguments.forEach(argument => {
+    node.arguments.forEach((argument) => {
       switch (argument.kind) {
         case ts.SyntaxKind.ObjectLiteralExpression:
           expression.addArgument(
@@ -174,7 +174,7 @@ export function mapArrayLiteral(
   sourceFile: ts.SourceFile,
 ) {
   let array: ArrayLiteralExpression = new ArrayLiteralExpression();
-  elements.forEach(element => {
+  elements.forEach((element) => {
     switch (element.kind) {
       case ts.SyntaxKind.ObjectLiteralExpression:
         array.addElement(
@@ -210,7 +210,7 @@ export function mapImport(fileImport: ts.ImportDeclaration) {
       ) {
         (<ts.NamedImports>(
           fileImport.importClause.namedBindings
-        )).elements.forEach(named => {
+        )).elements.forEach((named) => {
           if (named.propertyName) {
             importElement.addNamed(
               named.propertyName.text + ' as ' + <string>named.name.text,
@@ -239,7 +239,7 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
   let exportElement: ExportDeclaration = new ExportDeclaration();
   exportElement.setModule((<ts.Identifier>fileExport.moduleSpecifier).text);
   if (fileExport.exportClause) {
-    fileExport.exportClause.elements.forEach(named => {
+    fileExport.exportClause.elements.forEach((named) => {
       if (named.propertyName) {
         exportElement.addNamed(
           named.propertyName.text + ' as ' + <string>named.name.text,
@@ -262,23 +262,23 @@ export function mapClass(
   let classTo: ClassDeclaration = new ClassDeclaration();
   classTo.setIdentifier(fileClass.name.text);
   if (fileClass.decorators) {
-    fileClass.decorators.forEach(decorator => {
+    fileClass.decorators.forEach((decorator) => {
       classTo.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileClass.modifiers) {
-    fileClass.modifiers.forEach(modifier => {
+    fileClass.modifiers.forEach((modifier) => {
       classTo.addModifier(mapModifier(modifier));
     });
   }
   if (fileClass.heritageClauses) {
-    fileClass.heritageClauses.forEach(heritage => {
+    fileClass.heritageClauses.forEach((heritage) => {
       classTo.addHeritage(heritage.getFullText(sourceFile));
     });
   }
 
   if (fileClass.members) {
-    fileClass.members.forEach(member => {
+    fileClass.members.forEach((member) => {
       switch (member.kind) {
         case ts.SyntaxKind.PropertyDeclaration:
           classTo.addProperty(
@@ -317,18 +317,18 @@ export function mapInterface(fileInterface: any, sourceFile: ts.SourceFile) {
   let interfaceTo: InterfaceDeclaration = new InterfaceDeclaration();
   interfaceTo.setIdentifier(fileInterface.name.text);
   if (fileInterface.modifiers) {
-    fileInterface.modifiers.forEach(modifier => {
+    fileInterface.modifiers.forEach((modifier) => {
       interfaceTo.addModifier(mapModifier(modifier));
     });
   }
   if (fileInterface.heritageClauses) {
-    fileInterface.heritageClauses.forEach(heritage => {
+    fileInterface.heritageClauses.forEach((heritage) => {
       interfaceTo.addHeritage(heritage.getFullText(sourceFile));
     });
   }
 
   if (fileInterface.members) {
-    fileInterface.members.forEach(member => {
+    fileInterface.members.forEach((member) => {
       switch (member.kind) {
         case ts.SyntaxKind.PropertySignature:
           let propertyInterface: InterfaceProperty = mapInterfaceProperty(
@@ -368,13 +368,13 @@ export function mapPropertyDeclaration(
   }
 
   if (property.modifiers) {
-    property.modifiers.forEach(modifier => {
+    property.modifiers.forEach((modifier) => {
       prop.addModifier(mapModifier(modifier));
     });
   }
 
   if (property.decorators) {
-    property.decorators.forEach(decorator => {
+    property.decorators.forEach((decorator) => {
       prop.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
@@ -452,7 +452,7 @@ export function mapTypes(type: ts.Node) {
       );
       if ((<ts.TypeReferenceNode>type).typeArguments) {
         typeToReturn.push('<');
-        (<ts.TypeReferenceNode>type).typeArguments.forEach(arg => {
+        (<ts.TypeReferenceNode>type).typeArguments.forEach((arg) => {
           if (<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName) {
             typeToReturn.push(
               (<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName).text,
@@ -474,7 +474,7 @@ export function mapTypes(type: ts.Node) {
       let tuple: String[] = [];
       tuple.push('[');
       let elementTypes = (<ts.TupleTypeNode>type).elementTypes;
-      elementTypes.forEach(elementType => {
+      elementTypes.forEach((elementType) => {
         tuple.push(mapTypes(<ts.TypeNode>elementType));
         if (elementTypes.indexOf(elementType) < elementTypes.length - 1) {
           tuple.push(', ');
@@ -496,13 +496,13 @@ export function mapConstructor(
   let ctr: Constructor = new Constructor();
 
   if (fileCtr.decorators) {
-    fileCtr.decorators.forEach(decorator => {
+    fileCtr.decorators.forEach((decorator) => {
       ctr.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   ctr.setIdentifier('constructor');
   if (fileCtr.parameters) {
-    fileCtr.parameters.forEach(parameter => {
+    fileCtr.parameters.forEach((parameter) => {
       ctr.addParameter(mapParameter(parameter, sourceFile));
     });
   }
@@ -516,12 +516,12 @@ export function mapParameter(
 ) {
   let param: Parameter = new Parameter();
   if (parameter.decorators) {
-    parameter.decorators.forEach(decorator => {
+    parameter.decorators.forEach((decorator) => {
       param.addDecorators(mapDecorator(decorator, sourceFile));
     });
   }
   if (parameter.modifiers) {
-    parameter.modifiers.forEach(modifier => {
+    parameter.modifiers.forEach((modifier) => {
       param.addModifier(mapModifier(modifier));
     });
   }
@@ -543,17 +543,17 @@ export function mapMethod(
   }
 
   if (fileMethod.decorators) {
-    fileMethod.decorators.forEach(decorator => {
+    fileMethod.decorators.forEach((decorator) => {
       method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileMethod.modifiers) {
-    fileMethod.modifiers.forEach(modifier => {
+    fileMethod.modifiers.forEach((modifier) => {
       method.addModifier(mapModifier(modifier));
     });
   }
   if (fileMethod.parameters) {
-    fileMethod.parameters.forEach(parameter => {
+    fileMethod.parameters.forEach((parameter) => {
       method.addParameter(mapParameter(parameter, sourceFile));
     });
   }
@@ -574,12 +574,12 @@ export function mapCallSignature(
   }
 
   if (fileMethod.decorators) {
-    fileMethod.decorators.forEach(decorator => {
+    fileMethod.decorators.forEach((decorator) => {
       method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileMethod.parameters) {
-    fileMethod.parameters.forEach(parameter => {
+    fileMethod.parameters.forEach((parameter) => {
       method.addParameter(mapParameter(parameter, sourceFile));
     });
   }
@@ -600,12 +600,12 @@ export function mapInterfaceMethod(
   }
 
   if (fileMethod.decorators) {
-    fileMethod.decorators.forEach(decorator => {
+    fileMethod.decorators.forEach((decorator) => {
       method.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileMethod.parameters) {
-    fileMethod.parameters.forEach(parameter => {
+    fileMethod.parameters.forEach((parameter) => {
       method.addParameter(mapParameter(parameter, sourceFile));
     });
   }
@@ -642,7 +642,7 @@ export function mapDecorator(
       );
       let argumentsArray = (<ts.CallExpression>decorator.expression).arguments;
       if (argumentsArray) {
-        argumentsArray.forEach(argument => {
+        argumentsArray.forEach((argument) => {
           switch (argument.kind) {
             case ts.SyntaxKind.ObjectLiteralExpression:
               decoratorElement.addArgument(
@@ -693,9 +693,9 @@ export function mapBodyMethod(body: String) {
   bodySource
     .getChildAt(0)
     .getChildren()
-    .forEach(child => {
+    .forEach((child) => {
       if ((<ts.Block>child).statements) {
-        (<ts.Block>child).statements.forEach(statement => {
+        (<ts.Block>child).statements.forEach((statement) => {
           switch (statement.kind) {
             case ts.SyntaxKind.VariableStatement:
               bodyMethod.addStatement(
@@ -735,12 +735,12 @@ export function mapVariableStatement(
   }
 
   if (fileVariable.modifiers) {
-    fileVariable.modifiers.forEach(modifier => {
+    fileVariable.modifiers.forEach((modifier) => {
       variable.addModifier(mapModifier(modifier));
     });
   }
   if (fileVariable.decorators) {
-    fileVariable.decorators.forEach(decorator => {
+    fileVariable.decorators.forEach((decorator) => {
       variable.addDecorators(mapDecorator(decorator, source));
     });
   }
@@ -826,17 +826,17 @@ export function mapFunction(
   }
 
   if (fileFunction.decorators) {
-    fileFunction.decorators.forEach(decorator => {
+    fileFunction.decorators.forEach((decorator) => {
       func.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
   if (fileFunction.modifiers) {
-    fileFunction.modifiers.forEach(modifier => {
+    fileFunction.modifiers.forEach((modifier) => {
       func.addModifier(mapModifier(modifier));
     });
   }
   if (fileFunction.parameters) {
-    fileFunction.parameters.forEach(parameter => {
+    fileFunction.parameters.forEach((parameter) => {
       func.addParameter(mapParameter(parameter, sourceFile));
     });
   }

@@ -1,12 +1,12 @@
-import { GeneralInterface } from "./GeneralInterface";
+import { GeneralInterface } from './GeneralInterface';
 
 export class EnumElement {
   private initializer: String;
   private name: String;
 
   constructor() {
-    this.initializer = "";
-    this.name = "";
+    this.initializer = '';
+    this.name = '';
   }
 
   setInitializer(initializer: String) {
@@ -30,8 +30,8 @@ export class EnumElement {
   }
 
   toString() {
-    let result: String = "";
-    result = this.getName() + " = " + this.getInitializer() + ", ";
+    let result: String = '';
+    result = this.getName() + ' = ' + this.getInitializer() + ', ';
     return result;
   }
 }

@@ -3,7 +3,7 @@ import { EnumElement } from './EnumElement';
 
 export class EnumDeclaration {
   private name: String;
-  private elements: any[];
+  private elements: EnumElement[];
 
   constructor() {
     this.name = '';
@@ -36,9 +36,9 @@ export class EnumDeclaration {
     patchOverrides: boolean,
   ) {
     let exists: boolean;
-    patchEnum.getElements().forEach(patchElement => {
+    patchEnum.getElements().forEach((patchElement) => {
       exists = false;
-      baseEnum.getElements().forEach(element => {
+      baseEnum.getElements().forEach((element) => {
         if (patchElement.getName() === element.getName()) {
           exists = true;
           if (patchOverrides) {
@@ -56,7 +56,7 @@ export class EnumDeclaration {
     let result: String[] = [];
 
     result.push('enum ', this.getName(), ' {');
-    this.elements.forEach(element => {
+    this.elements.forEach((element) => {
       result.push(element.toString());
     });
     result.push('}');
