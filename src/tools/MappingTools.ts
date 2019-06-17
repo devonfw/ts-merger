@@ -19,6 +19,8 @@ import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpr
 import * as ts from 'typescript';
 import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
 import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
+import { EnumDeclaration } from '../components/general/EnumDeclaration';
+import { EnumElement } from '../components/general/EnumElement';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -51,9 +53,33 @@ export function mapFile(sourceFile: ts.SourceFile) {
           file.addFunction(
             mapFunction(<ts.FunctionDeclaration>child, sourceFile),
           );
+          break;
+        case ts.SyntaxKind.EnumDeclaration:
+          file.addEnum(mapEnums(<ts.EnumDeclaration>child, sourceFile));
       }
     });
   return file;
+}
+
+export function mapEnums(
+  enumfromFile: ts.EnumDeclaration,
+  sourceFile: ts.SourceFile,
+) {
+  let enumOb: EnumDeclaration = new EnumDeclaration();
+  enumOb.setName(enumfromFile.name.text);
+
+  enumfromFile.members.forEach((member) => {
+    let enumElement: EnumElement = new EnumElement();
+    if (member.name != null) {
+      enumElement.setName((<ts.Identifier>member.name).text);
+    }
+    if (member.initializer != null) {
+      enumElement.setInitializer((<ts.Identifier>member.initializer).text);
+    }
+    enumOb.addElement(enumElement);
+  });
+
+  return enumOb;
 }
 
 export function mapObjectLiteral(

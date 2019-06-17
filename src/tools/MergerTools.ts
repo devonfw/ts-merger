@@ -8,7 +8,6 @@ import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaratio
 import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
 import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
 import { TSFile } from '../components/TSFile';
-import * as ts from 'typescript';
 import { InterfaceProperty } from '../components/interfaceDeclaration/members/InterfaceProperty';
 
 export function mergeImports(baseFile: TSFile, patchFile: TSFile) {

@@ -5,7 +5,7 @@ import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaratio
 import { ImportDeclaration } from './import/ImportDeclaration';
 import { ExportDeclaration } from './export/ExportDeclaration';
 import * as mergeTools from '../tools/MergerTools';
-import * as ts from 'typescript/lib/typescript';
+import { EnumDeclaration } from './general/EnumDeclaration';
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];
@@ -14,6 +14,7 @@ export class TSFile {
   private interfaces: InterfaceDeclaration[];
   private variables: VariableStatement[];
   private functions: FunctionDeclaration[];
+  private enums: EnumDeclaration[];
 
   constructor() {
     this.importDeclarations = [];
@@ -22,6 +23,7 @@ export class TSFile {
     this.interfaces = [];
     this.variables = [];
     this.functions = [];
+    this.enums = [];
   }
 
   addImport(importDeclaration: ImportDeclaration) {
@@ -46,6 +48,14 @@ export class TSFile {
 
   addClass(classToAdd: ClassDeclaration) {
     this.classes.push(classToAdd);
+  }
+
+  addEnum(enumToAdd: EnumDeclaration) {
+    this.enums.push(enumToAdd);
+  }
+
+  getEnums() {
+    return this.enums;
   }
 
   // setClass(classDeclaration: ClassDeclaration){
@@ -85,6 +95,23 @@ export class TSFile {
     mergeTools.mergeExports(this, patchFile);
     this.checkAndMergeClasses(patchFile, patchOverrides);
     this.checkAndMergeInterfaces(patchFile, patchOverrides);
+    this.checkAndMergeEnums(patchFile, patchOverrides);
+  }
+
+  checkAndMergeEnums(patchFile: TSFile, patchOverrides: boolean) {
+    let exists: boolean = false;
+    patchFile.getEnums().forEach((patchEnum) => {
+      exists = false;
+      this.getEnums().forEach((baseEnum) => {
+        if (patchEnum.getName() === baseEnum.getName()) {
+          exists = true;
+          patchEnum.merge(baseEnum, patchEnum, patchOverrides);
+        }
+      });
+      if (!exists) {
+        this.enums.push(patchEnum);
+      }
+    });
   }
 
   checkAndMergeClasses(patchFile: TSFile, patchOverrides: boolean) {
@@ -164,6 +191,9 @@ export class TSFile {
     });
     this.interfaces.forEach((interfaceToPrint) => {
       file.push(interfaceToPrint.toString());
+    });
+    this.enums.forEach((enumToPrint) => {
+      file.push(enumToPrint.toString());
     });
     return file.join('');
   }
