@@ -70,12 +70,11 @@ export function mapEnums(
 
   enumfromFile.members.forEach((member) => {
     let enumElement: EnumElement = new EnumElement();
-    let memberFromFile = <ts.EnumDeclaration>(<unknown>member);
-    if (memberFromFile.name != null) {
-      enumElement.setName(memberFromFile.name.text);
+    if (member.name != null) {
+      enumElement.setName((<ts.Identifier>member.name).text);
     }
     if (member.initializer != null) {
-      enumElement.setInitializer(member.initializer.text);
+      enumElement.setInitializer((<ts.Identifier>member.initializer).text);
     }
     enumOb.addElement(enumElement);
   });
