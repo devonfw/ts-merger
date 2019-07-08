@@ -206,4 +206,35 @@ describe('Merging class methods', () => {
       );
     });
   });
+
+  describe('should merge destructuring arrays', () => {
+    const base = `class a {
+      openConfirm(): void {
+        const payload: any = {
+          id: this.selectedRow.id,
+          searchTerms: { ...this.bla },
+        };
+      }
+    }`,
+      patch = `class a {
+        openConfirm(): void {
+          const payload: any = {
+            searchTerms: { ...this.searchTerms },
+          };
+        }`;
+    it('having two destructuring array values.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .map((value) => value.trim())
+        .filter((value) => value != '');
+      expect(
+        result.filter((res) => /bla\s*:\s*...this.bla,/.test(res.toString())),
+      ).length.to.be.greaterThan(0, 'f should have modifier from base');
+      expect(
+        result.filter((res) =>
+          /searchTerms\s*:\s*...this.searchTerms/.test(res.toString()),
+        ),
+      ).length.to.be.greaterThan(0, 'f should have modifier from base');
+    });
+  });
 });

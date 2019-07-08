@@ -12,7 +12,6 @@ import { Decorator } from '../components/decorator/Decorator';
 import { Method } from '../components/classDeclaration/members/method/Method';
 import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
 import { CallExpression } from '../components/general/CallExpression';
-import { GeneralInterface } from '../components/general/GeneralInterface';
 import { ArrayLiteralExpression } from '../components/general/ArrayLiteralExpression';
 import { PropertyAssignment } from '../components/general/PropertyAssignment';
 import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
@@ -58,18 +57,22 @@ export function mapFile(sourceFile: ts.SourceFile) {
           );
           break;
         case ts.SyntaxKind.EnumDeclaration:
-          file.addEnum(mapEnums(<ts.EnumDeclaration>child, sourceFile));
+          file.addEnum(mapEnums(<ts.EnumDeclaration>child));
       }
     });
   return file;
 }
 
-export function mapEnums(
-  enumfromFile: ts.EnumDeclaration,
-  sourceFile: ts.SourceFile,
-) {
+export function mapEnums(enumfromFile: ts.EnumDeclaration) {
   let enumOb: EnumDeclaration = new EnumDeclaration();
   enumOb.setName(enumfromFile.name.text);
+
+  // export enum
+  if (enumfromFile.modifiers) {
+    enumfromFile.modifiers.forEach((modifier) => {
+      enumOb.addModifier(mapModifier(modifier));
+    });
+  }
 
   enumfromFile.members.forEach((member) => {
     let enumElement: EnumElement = new EnumElement();
@@ -93,7 +96,18 @@ export function mapObjectLiteral(
   objectFromFile.properties.forEach((property) => {
     let propertyFromFile = <ts.PropertyAssignment>property;
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
-    propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
+    // The following lines are needed for destructuring arrays (bla = {...this.bla})
+    let propertyText = undefined;
+    let nodeObject: any = property;
+    if (nodeObject.expression !== undefined) {
+      propertyText = nodeObject.expression.name.text;
+      propertyAssignment.setIdentifier(propertyText);
+      propertyAssignment.setGeneral('...this.' + propertyText);
+      objLiteral.addProperty(propertyAssignment);
+      return;
+    }
+    propertyText = (<ts.Identifier>property.name).text;
+    propertyAssignment.setIdentifier(propertyText);
     if (propertyFromFile.initializer) {
       setExtractedObjectValues(propertyFromFile, propertyAssignment, sourceFile);
     }

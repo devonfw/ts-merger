@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import 'mocha';
 
 describe('should merge enums', () => {
-  const base = `enum Direction {
+  const base = `export enum Direction {
                   Up = 1,
                   Down = 2,
               }`,
@@ -20,7 +20,7 @@ describe('should merge enums', () => {
       .filter((value) => value != '');
     expect(
       result.filter((res) =>
-        /enum\s+Direction\s*\{\s*Up\s*=\s*1,\s*Down\s*=\s*2,\s*Left\s*=\s*3,\s*Right\s*=\s*4,\s*}/.test(
+        /export\s*enum\s+Direction\s*\{\s*Up\s*=\s*1,\s*Down\s*=\s*2,\s*Left\s*=\s*3,\s*Right\s*=\s*4,\s*}/.test(
           res.toString(),
         ),
       ),
