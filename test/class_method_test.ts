@@ -12,10 +12,10 @@ describe('Merging class methods', () => {
      * OpenAPI spec version: 1.0
      */
     class a {
-                      private b(b:any):void{
-                          // Do Something
-                      }
-                  }`,
+              private b(b:any):void{
+                  // Do Something
+              }
+            }`,
       patch = `class a {
                   private c(b:any):number{
                       return 1;
@@ -59,10 +59,10 @@ describe('Merging class methods', () => {
      * OpenAPI spec version: 1.0
      */
     class a {
-                      private b(a:any):void{
-                          let c = 5;
-                      }
-                  }`,
+              private b(a:any):void{
+                let c = 5;
+                }
+              }`,
       patch = `
       /**
        * Should format correctly this line
@@ -71,9 +71,9 @@ describe('Merging class methods', () => {
        * OpenAPI spec version: 2.0
        */
       class a {
-                  private b(a:any):void{
-                      let d = 6;
-                  }
+                private b(a:any):void{
+                    let d = 6;
+                }
               }`;
 
     it('the base if method is present in base and patch.', () => {

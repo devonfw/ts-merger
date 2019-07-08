@@ -404,6 +404,11 @@ export function mapPropertyDeclaration(
       prop.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
+
+  if (property.questionToken) {
+    prop.setIsOptional(true);
+  }
+
   if (property.initializer) {
     switch (property.initializer.kind) {
       case ts.SyntaxKind.ObjectLiteralExpression:
