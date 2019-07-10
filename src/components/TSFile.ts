@@ -4,8 +4,9 @@ import { ClassDeclaration } from './classDeclaration/ClassDeclaration';
 import { InterfaceDeclaration } from './interfaceDeclaration/InterfaceDeclaration';
 import { ImportDeclaration } from './import/ImportDeclaration';
 import { ExportDeclaration } from './export/ExportDeclaration';
-import * as mergeTools from '../tools/MergerTools';
 import { EnumDeclaration } from './general/EnumDeclaration';
+import { ExpressionDeclaration } from './general/ExpressionDeclaration';
+import * as mergeTools from '../tools/MergerTools';
 
 export class TSFile {
   private importDeclarations: ImportDeclaration[];
@@ -15,6 +16,7 @@ export class TSFile {
   private variables: VariableStatement[];
   private functions: FunctionDeclaration[];
   private enums: EnumDeclaration[];
+  private expressions: ExpressionDeclaration[];
 
   constructor() {
     this.importDeclarations = [];
@@ -24,6 +26,7 @@ export class TSFile {
     this.variables = [];
     this.functions = [];
     this.enums = [];
+    this.expressions = [];
   }
 
   addImport(importDeclaration: ImportDeclaration) {
@@ -56,6 +59,14 @@ export class TSFile {
 
   getEnums() {
     return this.enums;
+  }
+
+  addExpression(expressionToAdd: ExpressionDeclaration) {
+    this.expressions.push(expressionToAdd);
+  }
+
+  getExpressions() {
+    return this.expressions;
   }
 
   // setClass(classDeclaration: ClassDeclaration){
@@ -93,6 +104,7 @@ export class TSFile {
   merge(patchFile: TSFile, patchOverrides: boolean) {
     mergeTools.mergeImports(this, patchFile);
     mergeTools.mergeExports(this, patchFile);
+    mergeTools.mergeExpressions(this, patchFile, patchOverrides);
     this.checkAndMergeClasses(patchFile, patchOverrides);
     this.checkAndMergeInterfaces(patchFile, patchOverrides);
     this.checkAndMergeEnums(patchFile, patchOverrides);
@@ -182,6 +194,9 @@ export class TSFile {
 
     this.functions.forEach((func) => {
       file.push(func.toString());
+    });
+    this.expressions.forEach((expr) => {
+      file.push(expr.toString());
     });
     this.variables.forEach((variable) => {
       file.push(variable.toString());

@@ -1,10 +1,13 @@
 import { VariableStatement } from '../../../../general/VariableStatement';
+import { ExpressionDeclaration } from '../../../../general/ExpressionDeclaration';
 
 export class BodyMethod {
   private statements: any[];
+  private isArrowFunction: boolean;
 
   constructor() {
     this.statements = [];
+    this.isArrowFunction = false;
   }
 
   addStatement(statement: any) {
@@ -17,6 +20,14 @@ export class BodyMethod {
 
   setStatements(statements: any[]) {
     this.statements = statements;
+  }
+
+  setIsArrowFunction(isArrowFunction: boolean) {
+    this.isArrowFunction = isArrowFunction;
+  }
+
+  getIsArrowFunction() {
+    return this.isArrowFunction;
   }
 
   merge(patchBody: BodyMethod, patchOverrides: boolean) {
@@ -35,6 +46,13 @@ export class BodyMethod {
               patchOverrides,
             );
           }
+        } else if (
+          patchStatement instanceof ExpressionDeclaration &&
+          statement instanceof ExpressionDeclaration
+        ) {
+          if (statement.getName() === patchStatement.getName()) {
+            statement.merge(patchStatement, patchOverrides);
+          }
         }
       });
     });
@@ -42,6 +60,10 @@ export class BodyMethod {
 
   toString() {
     let result: String[] = [];
+
+    if (this.isArrowFunction) {
+      result.push('() => ');
+    }
     result.push('{ \n');
     this.statements.forEach((statement) => {
       result.push(statement.toString());

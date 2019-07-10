@@ -20,9 +20,7 @@ import { BodyMethod } from '../components/classDeclaration/members/method/body/B
 import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
 import { EnumDeclaration } from '../components/general/EnumDeclaration';
 import { EnumElement } from '../components/general/EnumElement';
-import { SyntaxKind } from 'typescript';
-
-
+import { ExpressionDeclaration } from '../components/general/ExpressionDeclaration';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -58,6 +56,12 @@ export function mapFile(sourceFile: ts.SourceFile) {
           break;
         case ts.SyntaxKind.EnumDeclaration:
           file.addEnum(mapEnums(<ts.EnumDeclaration>child));
+          break;
+        case ts.SyntaxKind.ExpressionStatement:
+          file.addExpression(
+            mapExpressions(<ts.ExpressionStatement>child, sourceFile),
+          );
+          break;
       }
     });
   return file;
@@ -86,6 +90,37 @@ export function mapEnums(enumfromFile: ts.EnumDeclaration) {
   });
 
   return enumOb;
+}
+
+export function mapExpressions(
+  expressionfromFile: ts.ExpressionStatement,
+  sourceFile: ts.SourceFile,
+) {
+  let expressionOb: ExpressionDeclaration = new ExpressionDeclaration();
+
+  let innerExpression: any = expressionfromFile.expression;
+  if (innerExpression) {
+    if (innerExpression.text) {
+      expressionOb.setName(innerExpression.text);
+    } else {
+      let text = (<ts.Identifier>innerExpression.expression).text;
+      if (text) {
+        expressionOb.setName(text);
+      } else {
+        // When we have a expression like TestBed.configureTestingModule({...})
+        text =
+          innerExpression.expression.expression.text +
+          '.' +
+          innerExpression.expression.name.text;
+        expressionOb.setName(text);
+      }
+      expressionOb.addArguments(
+        mapArguments(innerExpression.arguments, sourceFile),
+      );
+    }
+  }
+
+  return expressionOb;
 }
 
 export function mapObjectLiteral(
@@ -174,23 +209,48 @@ export function mapCallExpression(
   }
   expression.setName((<ts.Identifier>propExpr.name).text);
   if (node.arguments) {
-    node.arguments.forEach((argument) => {
-      switch (argument.kind) {
-        case ts.SyntaxKind.ObjectLiteralExpression:
-          expression.addArgument(
-            mapObjectLiteral(<ts.ObjectLiteralExpression>argument, sourceFile),
-          );
-          break;
-        case ts.SyntaxKind.StringLiteral:
-          expression.addArgument("'" + (<ts.StringLiteral>argument).text + "'");
-          break;
-        case ts.SyntaxKind.Identifier:
-          expression.addArgument((<ts.Identifier>argument).text);
-          break;
-      }
+    mapArguments(node.arguments, sourceFile).forEach((arg) => {
+      expression.addArgument(arg);
     });
   }
   return expression;
+}
+
+export function mapArguments(
+  argumentsVar: ts.NodeArray<ts.Expression>,
+  sourceFile: ts.SourceFile,
+) {
+  let argumentsArray: any[] = [];
+
+  argumentsVar.forEach((argument) => {
+    switch (argument.kind) {
+      case ts.SyntaxKind.ObjectLiteralExpression:
+        argumentsArray.push(
+          mapObjectLiteral(<ts.ObjectLiteralExpression>argument, sourceFile),
+        );
+        break;
+      case ts.SyntaxKind.StringLiteral:
+        argumentsArray.push("'" + (<ts.StringLiteral>argument).text + "'");
+        break;
+      case ts.SyntaxKind.Identifier:
+        argumentsArray.push((<ts.Identifier>argument).text);
+        break;
+      case ts.SyntaxKind.ArrowFunction:
+        let functionBody: ts.ConciseBody = (<ts.ArrowFunction>argument).body;
+
+        if (functionBody) {
+          let bodyMethod = mapBodyMethod(
+            functionBody.getFullText(sourceFile),
+            true,
+          );
+          bodyMethod.setIsArrowFunction(true);
+          argumentsArray.push(bodyMethod);
+        }
+        break;
+    }
+  });
+
+  return argumentsArray;
 }
 
 export function mapArrayLiteral(
@@ -316,7 +376,9 @@ export function mapClass(
           );
           let ctr: Constructor = mapConstructor(fileCtr, sourceFile);
           if (fileCtr.body) {
-            ctr.setBody(mapBodyMethod(fileCtr.body.getFullText(sourceFile)));
+            ctr.setBody(
+              mapBodyMethod(fileCtr.body.getFullText(sourceFile), false),
+            );
           }
           classTo.setConstructor(ctr);
 
@@ -327,7 +389,7 @@ export function mapClass(
 
           if (fileMethod.body) {
             method.setBody(
-              mapBodyMethod(fileMethod.body.getFullText(sourceFile)),
+              mapBodyMethod(fileMethod.body.getFullText(sourceFile), false),
             );
           }
           classTo.addMethod(method);
@@ -718,7 +780,7 @@ export function mapDecorator(
   return decorators;
 }
 
-export function mapBodyMethod(body: String) {
+export function mapBodyMethod(body: String, isScriptFunction: boolean) {
   let bodySource: ts.SourceFile = ts.createSourceFile(
     'body',
     <string>body,
@@ -740,6 +802,15 @@ export function mapBodyMethod(body: String) {
                   bodySource,
                 ),
               );
+              break;
+            case ts.SyntaxKind.ExpressionStatement:
+              if (isScriptFunction) {
+                bodyMethod.addStatement(
+                  mapExpressions(<ts.ExpressionStatement>statement, bodySource),
+                );
+              } else {
+                bodyMethod.addStatement(statement.getFullText(bodySource));
+              }
               break;
             default:
               bodyMethod.addStatement(statement.getFullText(bodySource));
@@ -764,7 +835,7 @@ export function mapVariableStatement(
   let bindingElements = statement.declarationList.declarations[0].name['elements'];
   if (bindingElements) {
     bindingElements.forEach(bindingElement => {
-      if (bindingElement.kind == SyntaxKind.BindingElement) {
+      if (bindingElement.kind == ts.SyntaxKind.BindingElement) {
         properties.push(bindingElement.name['escapedText'])
       }
     });
@@ -889,7 +960,9 @@ export function mapFunction(
   }
 
   if (fileFunction.body) {
-    func.setBody(mapBodyMethod(fileFunction.body.getFullText(sourceFile)));
+    func.setBody(
+      mapBodyMethod(fileFunction.body.getFullText(sourceFile), false),
+    );
   }
 
   return func;
