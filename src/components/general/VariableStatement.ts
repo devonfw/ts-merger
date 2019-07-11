@@ -6,11 +6,21 @@ import * as mergeTools from '../../tools/MergerTools';
 export class VariableStatement extends PropertyDeclaration {
   private const: boolean;
   private async: boolean;
+  private properties: String[];
 
   constructor() {
     super();
     this.const = false;
     this.async = false;
+    this.properties = [];
+  }
+
+  setProperties(properties: String[]) {
+    this.properties = properties;
+  }
+
+  getProperties() {
+    return this.properties;
   }
 
   setIsAsync(isAsync: boolean) {
@@ -75,6 +85,14 @@ export class VariableStatement extends PropertyDeclaration {
     result.push(this.getIdentifier());
     if (this.getType() != '') {
       result.push(': ', this.getType());
+    }
+
+    if (this.properties.length > 0) {
+      result.push(' {\n');
+      this.properties.forEach(property => {
+        result.push(' ', property, ',\n');
+      });
+      result.push('}');
     }
 
     if (this.getInitializer()) {
