@@ -63,6 +63,11 @@ export class VariableStatement extends PropertyDeclaration {
     } else if (patchOverrides) {
       this.setInitializer(patchVariable.getInitializer());
     }
+    mergeTools.mergeVariableProperties(
+      this.getProperties(),
+      patchVariable.getProperties(),
+      patchOverrides)
+
     mergeTools.mergeDecorators(
       this.getDecorators(),
       patchVariable.getDecorators(),
