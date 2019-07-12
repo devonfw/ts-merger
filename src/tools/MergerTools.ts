@@ -158,6 +158,21 @@ export function mergeDecorators(
     }
   });
 }
+export function mergeVariableProperties(
+  baseVariableProperties: String[],
+  patchVariableProperties: String[],
+  patchOverrides: boolean
+) {
+  if (patchOverrides) {
+    return patchVariableProperties;
+  }
+
+  patchVariableProperties.forEach(property => {
+    if (baseVariableProperties.indexOf(property) == -1) {
+      baseVariableProperties.push(property);
+    }
+  });
+}
 
 export function mergeProperties(
   baseProperties: PropertyDeclaration[],

@@ -59,6 +59,12 @@ export class CallExpression extends GeneralInterface {
     result.push(this.getIdentifier(), '.', this.getName(), '(');
     this.arguments.forEach((argument) => {
       result.push(argument.toString());
+      if (
+        this.getArguments().indexOf(argument) <
+        this.getArguments().length - 1
+      ) {
+        result.push(',');
+      }
     });
     result.push(')');
     return result.join('');

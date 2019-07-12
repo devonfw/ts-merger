@@ -21,6 +21,7 @@ import { BodyMethod } from '../components/classDeclaration/members/method/body/B
 import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
 import { EnumDeclaration } from '../components/general/EnumDeclaration';
 import { EnumElement } from '../components/general/EnumElement';
+import { SyntaxKind } from 'typescript';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -729,6 +730,17 @@ export function mapVariableStatement(
     variable.setIsConst(true);
   }
 
+  let properties = [];
+  let bindingElements = statement.declarationList.declarations[0].name['elements'];
+  if (bindingElements) {
+    bindingElements.forEach(bindingElement => {
+      if (bindingElement.kind == SyntaxKind.BindingElement) {
+        properties.push(bindingElement.name['escapedText'])
+      }
+    });
+    variable.setProperties(properties);
+  }
+
   let text = fileVariable.getFullText(source);
   let index = text.indexOf('await');
   if (index !== -1) {
@@ -762,8 +774,8 @@ export function mapVariableStatement(
       .initializer
   ) {
     switch (
-      (<ts.VariableStatement>statement).declarationList.declarations[0]
-        .initializer.kind
+    (<ts.VariableStatement>statement).declarationList.declarations[0]
+      .initializer.kind
     ) {
       case ts.SyntaxKind.ObjectLiteralExpression:
         variable.setInitializer(
@@ -788,10 +800,10 @@ export function mapVariableStatement(
       case ts.SyntaxKind.StringLiteral:
         variable.setInitializer(
           "'" +
-            (<ts.StringLiteral>(
-              fileVariable.declarationList.declarations[0].initializer
-            )).text +
-            "'",
+          (<ts.StringLiteral>(
+            fileVariable.declarationList.declarations[0].initializer
+          )).text +
+          "'",
         );
         break;
       case ts.SyntaxKind.TrueKeyword:
