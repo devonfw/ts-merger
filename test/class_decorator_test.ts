@@ -191,3 +191,36 @@ describe('Merging class decorators', () => {
     });
   });
 });
+describe('Property without initialized value', () => {
+  const base = `  
+  @NgModule({
+    declarations: [AppComponent],
+    imports: [
+      StoreModule.forRoot(reducers, {
+        metaReducers,
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: true,
+        },
+      }),
+    ],
+    providers: [],
+    bootstrap: [],
+  })
+  export class AppModule {}
+    `,
+    patch = ``;
+
+  it('should be preserved from base.', () => {
+    const result: String[] = merge(base, patch, false)
+      .split('\n')
+      .map((value) => value.trim())
+      .filter((value) => value != '');
+
+    expect(result.length).equal(20);
+    expect(result[6]).to.be.equal(
+      'metaReducers,',
+      'metaReducers should not have an initial value as in base'
+    )
+  });
+});
