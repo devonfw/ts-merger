@@ -92,8 +92,7 @@ export function mapObjectLiteral(
     let propertyFromFile = <ts.PropertyAssignment>property;
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
     propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
-    let initializer = propertyFromFile.initializer;
-    if (initializer) {
+    if (propertyFromFile.initializer) {
       switch (propertyFromFile.initializer.kind) {
         case ts.SyntaxKind.ArrayLiteralExpression:
           propertyAssignment.setGeneral(
