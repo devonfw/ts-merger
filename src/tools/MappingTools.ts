@@ -535,6 +535,49 @@ export function mapParameter(
   }
   param.setIdentifier((<ts.Identifier>parameter.name).text);
   if (parameter.type) param.setType(mapTypes(parameter.type));
+  if (parameter.initializer) {
+    switch (parameter.initializer.kind) {
+      case ts.SyntaxKind.Identifier:
+        param.setInitialValue((<ts.Identifier>parameter.initializer).text);
+        break;
+      case ts.SyntaxKind.ArrayLiteralExpression:
+        param.setInitialValue(
+          mapArrayLiteral(
+            (<ts.ArrayLiteralExpression>parameter.initializer).elements,
+            sourceFile,
+          ),
+        );
+        break;
+      case ts.SyntaxKind.ObjectLiteralExpression:
+        param.setInitialValue(
+          mapObjectLiteral(
+            <ts.ObjectLiteralExpression>parameter.initializer,
+            sourceFile,
+          ),
+        );
+        break;
+      case ts.SyntaxKind.StringLiteral:
+        param.setInitialValue(
+          "'" + (<ts.StringLiteral>parameter.initializer).text + "'",
+        );
+        break;
+      case ts.SyntaxKind.NullKeyword:
+        param.setInitialValue('null');
+        break;
+      case ts.SyntaxKind.CallExpression:
+        param.setInitialValue(
+          mapCallExpression(
+            <ts.CallExpression>parameter.initializer,
+            sourceFile,
+          ),
+        );
+        break;
+      default:
+        param.setInitialValue(
+          parameter.initializer.getFullText(sourceFile),
+        );
+    }
+  }
   return param;
 }
 
