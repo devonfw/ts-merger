@@ -92,48 +92,51 @@ export function mapObjectLiteral(
     let propertyFromFile = <ts.PropertyAssignment>property;
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
     propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
-    switch (propertyFromFile.initializer.kind) {
-      case ts.SyntaxKind.ArrayLiteralExpression:
-        propertyAssignment.setGeneral(
-          mapArrayLiteral(
-            (<ts.ArrayLiteralExpression>propertyFromFile.initializer).elements,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.ObjectLiteralExpression:
-        propertyAssignment.setGeneral(
-          mapObjectLiteral(
-            <ts.ObjectLiteralExpression>propertyFromFile.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.Identifier:
-        propertyAssignment.setGeneral(
-          (<ts.Identifier>propertyFromFile.initializer).text,
-        );
-        break;
-      case ts.SyntaxKind.StringLiteral:
-        propertyAssignment.setGeneral(
-          "'" + (<ts.StringLiteral>propertyFromFile.initializer).text + "'",
-        );
-        break;
-      case ts.SyntaxKind.NullKeyword:
-        propertyAssignment.setGeneral('null');
-        break;
-      case ts.SyntaxKind.CallExpression:
-        propertyAssignment.setGeneral(
-          mapCallExpression(
-            <ts.CallExpression>propertyFromFile.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      default:
-        propertyAssignment.setGeneral(
-          propertyFromFile.initializer.getFullText(sourceFile),
-        );
+    let initializer = propertyFromFile.initializer;
+    if (initializer) {
+      switch (propertyFromFile.initializer.kind) {
+        case ts.SyntaxKind.ArrayLiteralExpression:
+          propertyAssignment.setGeneral(
+            mapArrayLiteral(
+              (<ts.ArrayLiteralExpression>propertyFromFile.initializer).elements,
+              sourceFile,
+            ),
+          );
+          break;
+        case ts.SyntaxKind.ObjectLiteralExpression:
+          propertyAssignment.setGeneral(
+            mapObjectLiteral(
+              <ts.ObjectLiteralExpression>propertyFromFile.initializer,
+              sourceFile,
+            ),
+          );
+          break;
+        case ts.SyntaxKind.Identifier:
+          propertyAssignment.setGeneral(
+            (<ts.Identifier>propertyFromFile.initializer).text,
+          );
+          break;
+        case ts.SyntaxKind.StringLiteral:
+          propertyAssignment.setGeneral(
+            "'" + (<ts.StringLiteral>propertyFromFile.initializer).text + "'",
+          );
+          break;
+        case ts.SyntaxKind.NullKeyword:
+          propertyAssignment.setGeneral('null');
+          break;
+        case ts.SyntaxKind.CallExpression:
+          propertyAssignment.setGeneral(
+            mapCallExpression(
+              <ts.CallExpression>propertyFromFile.initializer,
+              sourceFile,
+            ),
+          );
+          break;
+        default:
+          propertyAssignment.setGeneral(
+            propertyFromFile.initializer.getFullText(sourceFile),
+          );
+      }
     }
     objLiteral.addProperty(propertyAssignment);
   });

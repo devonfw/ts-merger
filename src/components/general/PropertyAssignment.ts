@@ -49,7 +49,11 @@ export class PropertyAssignment extends GeneralInterface {
   }
 
   toString() {
-    return this.getIdentifier() + ': ' + this.getGeneral().toString();
+    let general = "";
+    if (this.getGeneral()) {
+      general = ': ' + this.getGeneral().toString();
+    }
+    return this.getIdentifier() + general;
   }
 }
 
