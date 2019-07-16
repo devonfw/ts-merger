@@ -2,7 +2,7 @@ import merge from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 
-describe('should use the modifier from', () => {
+describe('Initial parameter values ', () => {
   const base = `
  export function reducer(
    state: SampleDataState = initialState,
@@ -20,7 +20,7 @@ describe('should use the modifier from', () => {
    }
     `;
 
-  it('Should  preserve initial value of the state parameter', () => {
+  it('should be preserved from the base', () => {
     const result: String[] = merge(base, patch, false)
       .split('\n')
       .map((value) => value.trim())
@@ -31,7 +31,7 @@ describe('should use the modifier from', () => {
       'reducer should have parameter from base',
     );
   });
-  it('Initial parameter values should be overwritten when patchOverride is true.', () => {
+  it('should be removed when patchOverride is true.', () => {
     const result: String[] = merge(base, patch, true)
       .split('\n')
       .map((value) => value.trim())
