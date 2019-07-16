@@ -59,6 +59,7 @@ export class Parameter extends GeneralInterface {
     if (patchOverrides) {
       this.setType(patchParameter.getType());
       this.setModifiers(patchParameter.getModifiers());
+      this.setInitialValue(patchParameter.getInitialValue());
     }
   }
 
