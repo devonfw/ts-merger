@@ -23,6 +23,51 @@ import { EnumDeclaration } from '../components/general/EnumDeclaration';
 import { EnumElement } from '../components/general/EnumElement';
 import { SyntaxKind } from 'typescript';
 
+
+function setExtractedObjectValues(readObject, extractedObject, sourceFile: ts.SourceFile): void {
+  switch (readObject.initializer.kind) {
+    case ts.SyntaxKind.Identifier:
+      extractedObject.setGeneral((<ts.Identifier>readObject.initializer).text);
+      break;
+    case ts.SyntaxKind.ArrayLiteralExpression:
+      extractedObject.setGeneral(
+        mapArrayLiteral(
+          (<ts.ArrayLiteralExpression>readObject.initializer).elements,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.ObjectLiteralExpression:
+      extractedObject.setGeneral(
+        mapObjectLiteral(
+          <ts.ObjectLiteralExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.StringLiteral:
+      extractedObject.setGeneral(
+        "'" + (<ts.StringLiteral>readObject.initializer).text + "'",
+      );
+      break;
+    case ts.SyntaxKind.NullKeyword:
+      extractedObject.setIGeneral('null');
+      break;
+    case ts.SyntaxKind.CallExpression:
+      extractedObject.setGeneral(
+        mapCallExpression(
+          <ts.CallExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    default:
+      extractedObject.setGeneral(
+        readObject.initializer.getFullText(sourceFile),
+      );
+  }
+}
+
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
 
@@ -93,49 +138,7 @@ export function mapObjectLiteral(
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
     propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
     if (propertyFromFile.initializer) {
-      switch (propertyFromFile.initializer.kind) {
-        case ts.SyntaxKind.ArrayLiteralExpression:
-          propertyAssignment.setGeneral(
-            mapArrayLiteral(
-              (<ts.ArrayLiteralExpression>propertyFromFile.initializer).elements,
-              sourceFile,
-            ),
-          );
-          break;
-        case ts.SyntaxKind.ObjectLiteralExpression:
-          propertyAssignment.setGeneral(
-            mapObjectLiteral(
-              <ts.ObjectLiteralExpression>propertyFromFile.initializer,
-              sourceFile,
-            ),
-          );
-          break;
-        case ts.SyntaxKind.Identifier:
-          propertyAssignment.setGeneral(
-            (<ts.Identifier>propertyFromFile.initializer).text,
-          );
-          break;
-        case ts.SyntaxKind.StringLiteral:
-          propertyAssignment.setGeneral(
-            "'" + (<ts.StringLiteral>propertyFromFile.initializer).text + "'",
-          );
-          break;
-        case ts.SyntaxKind.NullKeyword:
-          propertyAssignment.setGeneral('null');
-          break;
-        case ts.SyntaxKind.CallExpression:
-          propertyAssignment.setGeneral(
-            mapCallExpression(
-              <ts.CallExpression>propertyFromFile.initializer,
-              sourceFile,
-            ),
-          );
-          break;
-        default:
-          propertyAssignment.setGeneral(
-            propertyFromFile.initializer.getFullText(sourceFile),
-          );
-      }
+      setExtractedObjectValues(propertyFromFile, propertyAssignment, sourceFile);
     }
     objLiteral.addProperty(propertyAssignment);
   });
@@ -518,6 +521,8 @@ export function mapConstructor(
   return ctr;
 }
 
+
+
 export function mapParameter(
   parameter: ts.ParameterDeclaration,
   sourceFile: ts.SourceFile,
@@ -536,47 +541,7 @@ export function mapParameter(
   param.setIdentifier((<ts.Identifier>parameter.name).text);
   if (parameter.type) param.setType(mapTypes(parameter.type));
   if (parameter.initializer) {
-    switch (parameter.initializer.kind) {
-      case ts.SyntaxKind.Identifier:
-        param.setInitialValue((<ts.Identifier>parameter.initializer).text);
-        break;
-      case ts.SyntaxKind.ArrayLiteralExpression:
-        param.setInitialValue(
-          mapArrayLiteral(
-            (<ts.ArrayLiteralExpression>parameter.initializer).elements,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.ObjectLiteralExpression:
-        param.setInitialValue(
-          mapObjectLiteral(
-            <ts.ObjectLiteralExpression>parameter.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.StringLiteral:
-        param.setInitialValue(
-          "'" + (<ts.StringLiteral>parameter.initializer).text + "'",
-        );
-        break;
-      case ts.SyntaxKind.NullKeyword:
-        param.setInitialValue('null');
-        break;
-      case ts.SyntaxKind.CallExpression:
-        param.setInitialValue(
-          mapCallExpression(
-            <ts.CallExpression>parameter.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      default:
-        param.setInitialValue(
-          parameter.initializer.getFullText(sourceFile),
-        );
-    }
+    setExtractedObjectValues(parameter, param, sourceFile);
   }
   return param;
 }
