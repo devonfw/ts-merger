@@ -2,9 +2,11 @@ import { CallExpression } from './CallExpression';
 import { ArrayLiteralExpression } from './ArrayLiteralExpression';
 import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { GeneralInterface } from './GeneralInterface';
+import { SyntaxKind } from 'typescript';
 
 export class PropertyAssignment extends GeneralInterface {
   private general: any;
+  readonly kind: number = SyntaxKind.PropertyAssignment;
 
   constructor() {
     super();

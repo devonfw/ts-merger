@@ -1,9 +1,11 @@
 import { EnumElement } from './EnumElement';
+import { SyntaxKind } from 'typescript';
 
 export class EnumDeclaration {
   private name: String;
   private elements: EnumElement[];
   private modifiers: String[];
+  readonly kind: number = SyntaxKind.EnumDeclaration;
 
   constructor() {
     this.modifiers = [];

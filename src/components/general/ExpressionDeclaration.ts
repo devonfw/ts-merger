@@ -3,6 +3,7 @@ import ExportDeclaration from '../export/ExportDeclaration';
 import { BodyMethod } from '../classDeclaration/members/method/body/BodyMethod';
 import { createPartiallyEmittedExpression } from 'typescript';
 import { ObjectLiteralExpression } from './ObjectLiteralExpression';
+import { SyntaxKind } from 'typescript';
 
 /**
  * Defines the structure of script functions
@@ -13,6 +14,7 @@ import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 export class ExpressionDeclaration extends GeneralInterface {
   private arguments: any[];
   private name: string;
+  readonly kind = SyntaxKind.ExpressionStatement
 
   constructor() {
     super();
