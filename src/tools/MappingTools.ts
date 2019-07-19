@@ -24,49 +24,6 @@ import { EnumElement } from '../components/general/EnumElement';
 import { SyntaxKind } from 'typescript';
 
 
-function setExtractedObjectValues(readObject, extractedObject, sourceFile: ts.SourceFile): void {
-  switch (readObject.initializer.kind) {
-    case ts.SyntaxKind.Identifier:
-      extractedObject.setGeneral((<ts.Identifier>readObject.initializer).text);
-      break;
-    case ts.SyntaxKind.ArrayLiteralExpression:
-      extractedObject.setGeneral(
-        mapArrayLiteral(
-          (<ts.ArrayLiteralExpression>readObject.initializer).elements,
-          sourceFile,
-        ),
-      );
-      break;
-    case ts.SyntaxKind.ObjectLiteralExpression:
-      extractedObject.setGeneral(
-        mapObjectLiteral(
-          <ts.ObjectLiteralExpression>readObject.initializer,
-          sourceFile,
-        ),
-      );
-      break;
-    case ts.SyntaxKind.StringLiteral:
-      extractedObject.setGeneral(
-        "'" + (<ts.StringLiteral>readObject.initializer).text + "'",
-      );
-      break;
-    case ts.SyntaxKind.NullKeyword:
-      extractedObject.setIGeneral('null');
-      break;
-    case ts.SyntaxKind.CallExpression:
-      extractedObject.setGeneral(
-        mapCallExpression(
-          <ts.CallExpression>readObject.initializer,
-          sourceFile,
-        ),
-      );
-      break;
-    default:
-      extractedObject.setGeneral(
-        readObject.initializer.getFullText(sourceFile),
-      );
-  }
-}
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -144,6 +101,50 @@ export function mapObjectLiteral(
   });
 
   return objLiteral;
+}
+
+function setExtractedObjectValues(readObject, extractedObject, sourceFile: ts.SourceFile): void {
+  switch (readObject.initializer.kind) {
+    case ts.SyntaxKind.Identifier:
+      extractedObject.setGeneral((<ts.Identifier>readObject.initializer).text);
+      break;
+    case ts.SyntaxKind.ArrayLiteralExpression:
+      extractedObject.setGeneral(
+        mapArrayLiteral(
+          (<ts.ArrayLiteralExpression>readObject.initializer).elements,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.ObjectLiteralExpression:
+      extractedObject.setGeneral(
+        mapObjectLiteral(
+          <ts.ObjectLiteralExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.StringLiteral:
+      extractedObject.setGeneral(
+        "'" + (<ts.StringLiteral>readObject.initializer).text + "'",
+      );
+      break;
+    case ts.SyntaxKind.NullKeyword:
+      extractedObject.setIGeneral('null');
+      break;
+    case ts.SyntaxKind.CallExpression:
+      extractedObject.setGeneral(
+        mapCallExpression(
+          <ts.CallExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    default:
+      extractedObject.setGeneral(
+        readObject.initializer.getFullText(sourceFile),
+      );
+  }
 }
 
 export function mapCallExpression(
