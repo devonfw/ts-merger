@@ -79,4 +79,30 @@ describe('Merging class fields', () => {
       );
     });
   });
+
+  describe('should add the optional token', () => {
+    const base = `class a { b?: string; }`,
+      patch = `class a { b: string; }`;
+
+    it('from the base.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
+      expect(result.indexOf('b?: string;')).to.be.greaterThan(
+        0,
+        'optional token should be present in class a',
+      );
+    });
+    it('from the patch with patchOverride.', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .map((value) => value.trim())
+        .filter((value) => value != '');
+      expect(result.indexOf('b: string;')).to.be.greaterThan(
+        0,
+        'optional token should not be present in class a',
+      );
+    });
+  });
 });

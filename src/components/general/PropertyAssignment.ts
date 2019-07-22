@@ -2,9 +2,11 @@ import { CallExpression } from './CallExpression';
 import { ArrayLiteralExpression } from './ArrayLiteralExpression';
 import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { GeneralInterface } from './GeneralInterface';
+import { SyntaxKind } from 'typescript';
 
 export class PropertyAssignment extends GeneralInterface {
   private general: any;
+  readonly kind: number = SyntaxKind.PropertyAssignment;
 
   constructor() {
     super();
@@ -49,7 +51,11 @@ export class PropertyAssignment extends GeneralInterface {
   }
 
   toString() {
-    return this.getIdentifier() + ': ' + this.getGeneral().toString();
+    let general = "";
+    if (this.getGeneral()) {
+      general = ': ' + this.getGeneral().toString();
+    }
+    return this.getIdentifier() + general;
   }
 }
 

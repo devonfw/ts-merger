@@ -262,29 +262,6 @@ describe('Merging exports', () => {
     });
   });
 
-  describe('Should remove invalid exports', () => {
-    const base = `export 'b';`,
-      patch = `export 'c';`;
-
-    it('by default.', () => {
-      const result: String[] = merge(base, patch, false)
-        .split('\n')
-        .filter((r) => {
-          return r.trim() != '';
-        });
-      expect(result.length).equal(0);
-    });
-
-    it('when patchOverride is set (should not make a difference).', () => {
-      const result: String[] = merge(base, patch, true)
-        .split('\n')
-        .filter((r) => {
-          return r.trim() != '';
-        });
-      expect(result.length).equal(0);
-    });
-  });
-
   describe('Should not mix imports and exports', () => {
     const base = `import { O } from 'OS';
     import { N } from 'NS';

@@ -9,11 +9,13 @@ export class PropertyDeclaration extends GeneralInterface {
   private modifiers: String[];
   private decorators: Decorator[];
   private initializer: any;
+  private isOptional: boolean;
 
   constructor() {
     super();
     this.modifiers = [];
     this.decorators = [];
+    this.isOptional = false;
   }
 
   addDecorator(decorator: Decorator) {
@@ -60,10 +62,19 @@ export class PropertyDeclaration extends GeneralInterface {
     return this.initializer;
   }
 
+  setIsOptional(isOptional: boolean) {
+    this.isOptional = isOptional;
+  }
+
+  getIsOptional() {
+    return this.isOptional;
+  }
+
   merge(patchProperty: PropertyDeclaration, patchOverrides: boolean) {
     if (patchOverrides) {
       this.setType(patchProperty.getType());
       this.setModifiers(patchProperty.getModifiers());
+      this.isOptional = patchProperty.getIsOptional();
     }
 
     mergeTools.mergeDecorators(
@@ -111,6 +122,11 @@ export class PropertyDeclaration extends GeneralInterface {
       result.push(modifier, ' ');
     });
     result.push(this.getIdentifier());
+
+    if (this.isOptional) {
+      result.push('?');
+    }
+
     if (this.getType() != '') {
       result.push(': ', this.getType());
     }

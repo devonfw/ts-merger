@@ -12,10 +12,10 @@ describe('Merging class methods', () => {
      * OpenAPI spec version: 1.0
      */
     class a {
-                      private b(b:any):void{
-                          // Do Something
-                      }
-                  }`,
+              private b(b:any):void{
+                  // Do Something
+              }
+            }`,
       patch = `class a {
                   private c(b:any):number{
                       return 1;
@@ -59,10 +59,10 @@ describe('Merging class methods', () => {
      * OpenAPI spec version: 1.0
      */
     class a {
-                      private b(a:any):void{
-                          let c = 5;
-                      }
-                  }`,
+              private b(a:any):void{
+                let c = 5;
+                }
+              }`,
       patch = `
       /**
        * Should format correctly this line
@@ -71,9 +71,9 @@ describe('Merging class methods', () => {
        * OpenAPI spec version: 2.0
        */
       class a {
-                  private b(a:any):void{
-                      let d = 6;
-                  }
+                private b(a:any):void{
+                    let d = 6;
+                }
               }`;
 
     it('the base if method is present in base and patch.', () => {
@@ -204,6 +204,37 @@ describe('Merging class methods', () => {
         'dialog.present() should have modifier from patch but was ' +
           result.reduce((prev, curr) => prev.toString() + curr.toString(), ''),
       );
+    });
+  });
+
+  describe('should merge destructuring arrays', () => {
+    const base = `class a {
+      openConfirm(): void {
+        const payload: any = {
+          id: this.selectedRow.id,
+          searchTerms: { ...this.bla },
+        };
+      }
+    }`,
+      patch = `class a {
+        openConfirm(): void {
+          const payload: any = {
+            searchTerms: { ...this.searchTerms },
+          };
+        }`;
+    it('having two destructuring array values.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .map((value) => value.trim())
+        .filter((value) => value != '');
+      expect(
+        result.filter((res) => /bla\s*:\s*...this.bla,/.test(res.toString())),
+      ).length.to.be.greaterThan(0, 'f should have modifier from base');
+      expect(
+        result.filter((res) =>
+          /searchTerms\s*:\s*...this.searchTerms/.test(res.toString()),
+        ),
+      ).length.to.be.greaterThan(0, 'f should have modifier from base');
     });
   });
 });

@@ -56,6 +56,35 @@ export function mergeExports(baseFile: TSFile, patchFile: TSFile) {
   }
 }
 
+export function mergeExpressions(
+  baseFile: TSFile,
+  patchFile: TSFile,
+  patchOverrides,
+) {
+  let exists: boolean;
+
+  if (baseFile.getExpressions().length === 0) {
+    patchFile.getExpressions().forEach((patchExpressionStatement) => {
+      baseFile.addExpression(patchExpressionStatement);
+    });
+  } else {
+    patchFile.getExpressions().forEach((patchExpressionStatement) => {
+      exists = false;
+      baseFile.getExpressions().forEach((expressionStatement) => {
+        if (
+          expressionStatement.getName() === patchExpressionStatement.getName()
+        ) {
+          expressionStatement.merge(patchExpressionStatement, patchOverrides);
+          exists = true;
+        }
+      });
+      if (!exists) {
+        baseFile.addExpression(patchExpressionStatement);
+      }
+    });
+  }
+}
+
 export function mergeClass(
   baseClass: ClassDeclaration,
   patchClass: ClassDeclaration,

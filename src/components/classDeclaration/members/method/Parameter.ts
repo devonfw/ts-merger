@@ -10,6 +10,8 @@ import { GeneralInterface } from '../../../general/GeneralInterface';
 export class Parameter extends GeneralInterface {
   private decorators: Decorator[];
   private modifiers: String[];
+  // initial value
+  private general: any;
 
   constructor() {
     super();
@@ -17,6 +19,13 @@ export class Parameter extends GeneralInterface {
     this.modifiers = [];
   }
 
+  getGeneral() {
+    return this.general;
+  }
+
+  setGeneral(general) {
+    this.general = general;
+  }
   addModifier(modifier: String) {
     this.modifiers.push(modifier);
   }
@@ -51,6 +60,7 @@ export class Parameter extends GeneralInterface {
     if (patchOverrides) {
       this.setType(patchParameter.getType());
       this.setModifiers(patchParameter.getModifiers());
+      this.setGeneral(patchParameter.getGeneral());
     }
   }
 
@@ -67,6 +77,7 @@ export class Parameter extends GeneralInterface {
       result.push(this.getIdentifier() + ': ' + this.getType());
     else result.push(this.getIdentifier());
 
+    if (this.getGeneral()) result.push(' = ', this.getGeneral().toString());
     return result.join('');
   }
 }

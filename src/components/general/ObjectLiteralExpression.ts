@@ -1,8 +1,10 @@
 import { PropertyAssignment } from './PropertyAssignment';
 import { GeneralInterface } from './GeneralInterface';
+import { SyntaxKind } from 'typescript';
 
 export class ObjectLiteralExpression {
   private properties: PropertyAssignment[];
+  readonly kind: number = SyntaxKind.ObjectLiteralExpression;
 
   constructor() {
     this.properties = [];

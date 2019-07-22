@@ -1,9 +1,11 @@
 import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { GeneralInterface } from './GeneralInterface';
+import { SyntaxKind } from 'typescript';
 
 export class CallExpression extends GeneralInterface {
   private name: String;
   private arguments: any[];
+  readonly kind: number = SyntaxKind.CallExpression;
 
   constructor() {
     super();

@@ -191,3 +191,64 @@ describe('Merging class decorators', () => {
     });
   });
 });
+
+describe('Property without initialized value', () => {
+  const base = `  
+  @NgModule({
+    declarations: [AppComponent],
+    imports: [
+      StoreModule.forRoot(reducers, {
+        metaReducers,
+        runtimeChecks: {
+          strictStateImmutability: true,
+          strictActionImmutability: true,
+        },
+      }),
+    ],
+    providers: [],
+    bootstrap: [],
+  })
+  export class AppModule {}
+    `,
+    patch = `
+    @NgModule({
+      declarations: [AppComponent],
+      imports: [
+        StoreModule.forRoot(reducers, {
+          blaBla,
+          runtimeChecks: {
+            strictStateImmutability: true,
+            strictActionImmutability: true,
+          },
+        }),
+      ],
+      providers: [],
+      bootstrap: [],
+    })
+    export class AppModule {}
+    `;
+  const patchDecoratorRegex = /.*blaBla,.*/;
+  const baseDecoratorRegex = /.*metaReducers,.*/;
+
+  it('should be preserved from base.', () => {
+    const result: String = merge(base, patch, false)
+      .split('\n')
+      .map((value) => value.trim())
+      .filter((value) => value != '')
+      .reduce((prev, curr) => prev.toString() + curr.toString(), "");;
+
+
+    expect(baseDecoratorRegex.test(result.toString()), 'metaReducers of the base should be present').to.be.true;
+    expect(patchDecoratorRegex.test(result.toString()), 'blaBla of the patch should not be present').to.be.false;
+  });
+
+  it('should be overwritten by patch.', () => {
+    const result: String = merge(base, patch, true)
+      .split('\n')
+      .map((value) => value.trim())
+      .filter((value) => value != '')
+      .reduce((prev, curr) => prev.toString() + curr.toString(), "");;
+    expect(baseDecoratorRegex.test(result.toString()), 'metaReducers of the base not should be present').to.be.false;
+    expect(patchDecoratorRegex.test(result.toString()), 'blaBla of the patch should be present').to.be.true;
+  });
+});

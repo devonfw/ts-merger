@@ -1,11 +1,14 @@
-import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { EnumElement } from './EnumElement';
+import { SyntaxKind } from 'typescript';
 
 export class EnumDeclaration {
   private name: String;
   private elements: EnumElement[];
+  private modifiers: String[];
+  readonly kind: number = SyntaxKind.EnumDeclaration;
 
   constructor() {
+    this.modifiers = [];
     this.name = '';
     this.elements = [];
   }
@@ -30,11 +33,33 @@ export class EnumDeclaration {
     this.elements = args;
   }
 
+  addModifier(modifier: String) {
+    this.modifiers.push(modifier);
+  }
+
+  addModifiers(modifiers: String[]) {
+    modifiers.forEach((modifier) => {
+      this.modifiers.push(modifier);
+    });
+  }
+
+  getModifiers() {
+    return this.modifiers;
+  }
+
+  setModifiers(modifiers: String[]) {
+    this.modifiers = modifiers;
+  }
+
   merge(
     baseEnum: EnumDeclaration,
     patchEnum: EnumDeclaration,
     patchOverrides: boolean,
   ) {
+    if (patchOverrides) {
+      this.setModifiers(patchEnum.getModifiers());
+    }
+
     let exists: boolean;
     patchEnum.getElements().forEach((patchElement) => {
       exists = false;
@@ -54,6 +79,10 @@ export class EnumDeclaration {
 
   toString() {
     let result: String[] = [];
+
+    this.modifiers.forEach((modifier) => {
+      result.push(modifier, ' ');
+    });
 
     result.push('enum ', this.getName(), ' {');
     this.elements.forEach((element) => {

@@ -2,11 +2,13 @@ import { ArrayLiteralExpression } from './ArrayLiteralExpression';
 import { ObjectLiteralExpression } from './ObjectLiteralExpression';
 import { PropertyDeclaration } from '../classDeclaration/members/property/PropertyDeclaration';
 import * as mergeTools from '../../tools/MergerTools';
+import { SyntaxKind } from 'typescript';
 
 export class VariableStatement extends PropertyDeclaration {
   private const: boolean;
   private async: boolean;
   private properties: String[];
+  readonly kind = SyntaxKind.VariableStatement;
 
   constructor() {
     super();

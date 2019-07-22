@@ -12,7 +12,6 @@ import { Decorator } from '../components/decorator/Decorator';
 import { Method } from '../components/classDeclaration/members/method/Method';
 import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
 import { CallExpression } from '../components/general/CallExpression';
-import { GeneralInterface } from '../components/general/GeneralInterface';
 import { ArrayLiteralExpression } from '../components/general/ArrayLiteralExpression';
 import { PropertyAssignment } from '../components/general/PropertyAssignment';
 import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
@@ -21,7 +20,7 @@ import { BodyMethod } from '../components/classDeclaration/members/method/body/B
 import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
 import { EnumDeclaration } from '../components/general/EnumDeclaration';
 import { EnumElement } from '../components/general/EnumElement';
-import { SyntaxKind } from 'typescript';
+import { ExpressionDeclaration } from '../components/general/ExpressionDeclaration';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -56,18 +55,28 @@ export function mapFile(sourceFile: ts.SourceFile) {
           );
           break;
         case ts.SyntaxKind.EnumDeclaration:
-          file.addEnum(mapEnums(<ts.EnumDeclaration>child, sourceFile));
+          file.addEnum(mapEnums(<ts.EnumDeclaration>child));
+          break;
+        case ts.SyntaxKind.ExpressionStatement:
+          file.addExpression(
+            mapExpressions(<ts.ExpressionStatement>child, sourceFile),
+          );
+          break;
       }
     });
   return file;
 }
 
-export function mapEnums(
-  enumfromFile: ts.EnumDeclaration,
-  sourceFile: ts.SourceFile,
-) {
+export function mapEnums(enumfromFile: ts.EnumDeclaration) {
   let enumOb: EnumDeclaration = new EnumDeclaration();
   enumOb.setName(enumfromFile.name.text);
+
+  // export enum
+  if (enumfromFile.modifiers) {
+    enumfromFile.modifiers.forEach((modifier) => {
+      enumOb.addModifier(mapModifier(modifier));
+    });
+  }
 
   enumfromFile.members.forEach((member) => {
     let enumElement: EnumElement = new EnumElement();
@@ -83,6 +92,37 @@ export function mapEnums(
   return enumOb;
 }
 
+export function mapExpressions(
+  expressionfromFile: ts.ExpressionStatement,
+  sourceFile: ts.SourceFile,
+) {
+  let expressionOb: ExpressionDeclaration = new ExpressionDeclaration();
+
+  let innerExpression: any = expressionfromFile.expression;
+  if (innerExpression) {
+    if (innerExpression.text) {
+      expressionOb.setName(innerExpression.text);
+    } else {
+      let text = (<ts.Identifier>innerExpression.expression).text;
+      if (text) {
+        expressionOb.setName(text);
+      } else {
+        // When we have a expression like TestBed.configureTestingModule({...})
+        text =
+          innerExpression.expression.expression.text +
+          '.' +
+          innerExpression.expression.name.text;
+        expressionOb.setName(text);
+      }
+      expressionOb.addArguments(
+        mapArguments(innerExpression.arguments, sourceFile),
+      );
+    }
+  }
+
+  return expressionOb;
+}
+
 export function mapObjectLiteral(
   objectFromFile: ts.ObjectLiteralExpression,
   sourceFile: ts.SourceFile,
@@ -91,54 +131,69 @@ export function mapObjectLiteral(
   objectFromFile.properties.forEach((property) => {
     let propertyFromFile = <ts.PropertyAssignment>property;
     let propertyAssignment: PropertyAssignment = new PropertyAssignment();
-    propertyAssignment.setIdentifier((<ts.Identifier>property.name).text);
-    switch (propertyFromFile.initializer.kind) {
-      case ts.SyntaxKind.ArrayLiteralExpression:
-        propertyAssignment.setGeneral(
-          mapArrayLiteral(
-            (<ts.ArrayLiteralExpression>propertyFromFile.initializer).elements,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.ObjectLiteralExpression:
-        propertyAssignment.setGeneral(
-          mapObjectLiteral(
-            <ts.ObjectLiteralExpression>propertyFromFile.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      case ts.SyntaxKind.Identifier:
-        propertyAssignment.setGeneral(
-          (<ts.Identifier>propertyFromFile.initializer).text,
-        );
-        break;
-      case ts.SyntaxKind.StringLiteral:
-        propertyAssignment.setGeneral(
-          "'" + (<ts.StringLiteral>propertyFromFile.initializer).text + "'",
-        );
-        break;
-      case ts.SyntaxKind.NullKeyword:
-        propertyAssignment.setGeneral('null');
-        break;
-      case ts.SyntaxKind.CallExpression:
-        propertyAssignment.setGeneral(
-          mapCallExpression(
-            <ts.CallExpression>propertyFromFile.initializer,
-            sourceFile,
-          ),
-        );
-        break;
-      default:
-        propertyAssignment.setGeneral(
-          propertyFromFile.initializer.getFullText(sourceFile),
-        );
+    // The following lines are needed for destructuring arrays (bla = {...this.bla})
+    let propertyText = undefined;
+    let nodeObject: any = property;
+    if (nodeObject.expression !== undefined) {
+      propertyText = nodeObject.expression.name.text;
+      propertyAssignment.setIdentifier(propertyText);
+      propertyAssignment.setGeneral('...this.' + propertyText);
+      objLiteral.addProperty(propertyAssignment);
+      return;
+    }
+    propertyText = (<ts.Identifier>property.name).text;
+    propertyAssignment.setIdentifier(propertyText);
+    if (propertyFromFile.initializer) {
+      setExtractedObjectValues(propertyFromFile, propertyAssignment, sourceFile);
     }
     objLiteral.addProperty(propertyAssignment);
   });
 
   return objLiteral;
+}
+
+function setExtractedObjectValues(readObject, extractedObject, sourceFile: ts.SourceFile): void {
+  switch (readObject.initializer.kind) {
+    case ts.SyntaxKind.Identifier:
+      extractedObject.setGeneral((<ts.Identifier>readObject.initializer).text);
+      break;
+    case ts.SyntaxKind.ArrayLiteralExpression:
+      extractedObject.setGeneral(
+        mapArrayLiteral(
+          (<ts.ArrayLiteralExpression>readObject.initializer).elements,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.ObjectLiteralExpression:
+      extractedObject.setGeneral(
+        mapObjectLiteral(
+          <ts.ObjectLiteralExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    case ts.SyntaxKind.StringLiteral:
+      extractedObject.setGeneral(
+        "'" + (<ts.StringLiteral>readObject.initializer).text + "'",
+      );
+      break;
+    case ts.SyntaxKind.NullKeyword:
+      extractedObject.setIGeneral('null');
+      break;
+    case ts.SyntaxKind.CallExpression:
+      extractedObject.setGeneral(
+        mapCallExpression(
+          <ts.CallExpression>readObject.initializer,
+          sourceFile,
+        ),
+      );
+      break;
+    default:
+      extractedObject.setGeneral(
+        readObject.initializer.getFullText(sourceFile),
+      );
+  }
 }
 
 export function mapCallExpression(
@@ -154,23 +209,48 @@ export function mapCallExpression(
   }
   expression.setName((<ts.Identifier>propExpr.name).text);
   if (node.arguments) {
-    node.arguments.forEach((argument) => {
-      switch (argument.kind) {
-        case ts.SyntaxKind.ObjectLiteralExpression:
-          expression.addArgument(
-            mapObjectLiteral(<ts.ObjectLiteralExpression>argument, sourceFile),
-          );
-          break;
-        case ts.SyntaxKind.StringLiteral:
-          expression.addArgument("'" + (<ts.StringLiteral>argument).text + "'");
-          break;
-        case ts.SyntaxKind.Identifier:
-          expression.addArgument((<ts.Identifier>argument).text);
-          break;
-      }
+    mapArguments(node.arguments, sourceFile).forEach((arg) => {
+      expression.addArgument(arg);
     });
   }
   return expression;
+}
+
+export function mapArguments(
+  argumentsVar: ts.NodeArray<ts.Expression>,
+  sourceFile: ts.SourceFile,
+) {
+  let argumentsArray: any[] = [];
+
+  argumentsVar.forEach((argument) => {
+    switch (argument.kind) {
+      case ts.SyntaxKind.ObjectLiteralExpression:
+        argumentsArray.push(
+          mapObjectLiteral(<ts.ObjectLiteralExpression>argument, sourceFile),
+        );
+        break;
+      case ts.SyntaxKind.StringLiteral:
+        argumentsArray.push("'" + (<ts.StringLiteral>argument).text + "'");
+        break;
+      case ts.SyntaxKind.Identifier:
+        argumentsArray.push((<ts.Identifier>argument).text);
+        break;
+      case ts.SyntaxKind.ArrowFunction:
+        let functionBody: ts.ConciseBody = (<ts.ArrowFunction>argument).body;
+
+        if (functionBody) {
+          let bodyMethod = mapBodyMethod(
+            functionBody.getFullText(sourceFile),
+            true,
+          );
+          bodyMethod.setIsArrowFunction(true);
+          argumentsArray.push(bodyMethod);
+        }
+        break;
+    }
+  });
+
+  return argumentsArray;
 }
 
 export function mapArrayLiteral(
@@ -296,7 +376,9 @@ export function mapClass(
           );
           let ctr: Constructor = mapConstructor(fileCtr, sourceFile);
           if (fileCtr.body) {
-            ctr.setBody(mapBodyMethod(fileCtr.body.getFullText(sourceFile)));
+            ctr.setBody(
+              mapBodyMethod(fileCtr.body.getFullText(sourceFile), false),
+            );
           }
           classTo.setConstructor(ctr);
 
@@ -307,7 +389,7 @@ export function mapClass(
 
           if (fileMethod.body) {
             method.setBody(
-              mapBodyMethod(fileMethod.body.getFullText(sourceFile)),
+              mapBodyMethod(fileMethod.body.getFullText(sourceFile), false),
             );
           }
           classTo.addMethod(method);
@@ -384,6 +466,11 @@ export function mapPropertyDeclaration(
       prop.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
+
+  if (property.questionToken) {
+    prop.setIsOptional(true);
+  }
+
   if (property.initializer) {
     switch (property.initializer.kind) {
       case ts.SyntaxKind.ObjectLiteralExpression:
@@ -516,6 +603,8 @@ export function mapConstructor(
   return ctr;
 }
 
+
+
 export function mapParameter(
   parameter: ts.ParameterDeclaration,
   sourceFile: ts.SourceFile,
@@ -533,6 +622,9 @@ export function mapParameter(
   }
   param.setIdentifier((<ts.Identifier>parameter.name).text);
   if (parameter.type) param.setType(mapTypes(parameter.type));
+  if (parameter.initializer) {
+    setExtractedObjectValues(parameter, param, sourceFile);
+  }
   return param;
 }
 
@@ -688,7 +780,7 @@ export function mapDecorator(
   return decorators;
 }
 
-export function mapBodyMethod(body: String) {
+export function mapBodyMethod(body: String, isScriptFunction: boolean) {
   let bodySource: ts.SourceFile = ts.createSourceFile(
     'body',
     <string>body,
@@ -710,6 +802,15 @@ export function mapBodyMethod(body: String) {
                   bodySource,
                 ),
               );
+              break;
+            case ts.SyntaxKind.ExpressionStatement:
+              if (isScriptFunction) {
+                bodyMethod.addStatement(
+                  mapExpressions(<ts.ExpressionStatement>statement, bodySource),
+                );
+              } else {
+                bodyMethod.addStatement(statement.getFullText(bodySource));
+              }
               break;
             default:
               bodyMethod.addStatement(statement.getFullText(bodySource));
@@ -734,7 +835,7 @@ export function mapVariableStatement(
   let bindingElements = statement.declarationList.declarations[0].name['elements'];
   if (bindingElements) {
     bindingElements.forEach(bindingElement => {
-      if (bindingElement.kind == SyntaxKind.BindingElement) {
+      if (bindingElement.kind == ts.SyntaxKind.BindingElement) {
         properties.push(bindingElement.name['escapedText'])
       }
     });
@@ -859,7 +960,9 @@ export function mapFunction(
   }
 
   if (fileFunction.body) {
-    func.setBody(mapBodyMethod(fileFunction.body.getFullText(sourceFile)));
+    func.setBody(
+      mapBodyMethod(fileFunction.body.getFullText(sourceFile), false),
+    );
   }
 
   return func;
