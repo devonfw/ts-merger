@@ -18,7 +18,7 @@ export function merge(
 ): string {
 
   let baseFile: TSFile = readFile(baseContents, 'fileBase');
-  let patchFile: TSFile = readFile(baseContents, 'filePatch');
+  let patchFile: TSFile = readFile(patchContents, 'filePatch');
 
   baseFile.merge(patchFile, patchOverrides);
 
