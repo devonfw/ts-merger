@@ -36,5 +36,27 @@ export function merge(
 
   return baseFile.toString();
 }
-
 export default merge;
+
+/**
+ * Converts a typescript string to an AST
+ *
+ * @export
+ * @param {string} fileBase
+ * @returns {string} the result of the merge
+ */
+export function readFile(
+  content: string,
+): TSFile {
+
+  let sourceFile: ts.SourceFile = ts.createSourceFile(
+    'fileName',
+    content,
+    ts.ScriptTarget.ES2016,
+    false,
+  );
+
+  let parsedFile: TSFile = mapTools.mapFile(sourceFile);
+
+  return parsedFile;
+}
