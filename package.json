@@ -9,7 +9,8 @@
   "contributors": [
     "Ruben Diaz Martinez <ruben.diaz-martinez@capgemini.com>",
     "Malte Brunnlieb <malte.brunnlieb@capgemini.com>",
-    "Steffen Holzer <steffen.holzer@capgemini.com>"
+    "Steffen Holzer <steffen.holzer@capgemini.com>",
+    "Mohamed Ghanmi <mohamed.ghanmi@capgemini.com>"
   ],
   "main": "build/index.js",
   "scripts": {
