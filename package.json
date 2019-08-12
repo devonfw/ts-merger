@@ -1,6 +1,6 @@
 {
   "name": "@devonfw/ts-merger",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "2-way TypeScript Merger",
   "author": {
     "name": "Capgemini",
