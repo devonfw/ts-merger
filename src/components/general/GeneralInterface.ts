@@ -1,5 +1,5 @@
 export class GeneralInterface {
-  private identifier: String;
+  private identifier: any;
   private type: String;
 
   constructor() {
@@ -7,7 +7,7 @@ export class GeneralInterface {
     this.type = '';
   }
 
-  setIdentifier(identifier: String) {
+  setIdentifier(identifier: any) {
     this.identifier = identifier;
   }
 
