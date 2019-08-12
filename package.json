@@ -1,6 +1,6 @@
 {
   "name": "@devonfw/ts-merger",
-  "version": "2.2.7",
+  "version": "2.2.8",
   "description": "2-way TypeScript Merger",
   "author": {
     "name": "Capgemini",
@@ -9,7 +9,8 @@
   "contributors": [
     "Ruben Diaz Martinez <ruben.diaz-martinez@capgemini.com>",
     "Malte Brunnlieb <malte.brunnlieb@capgemini.com>",
-    "Steffen Holzer <steffen.holzer@capgemini.com>"
+    "Steffen Holzer <steffen.holzer@capgemini.com>",
+    "Mohamed Ghanmi <mohamed.ghanmi@capgemini.com>"
   ],
   "main": "build/index.js",
   "scripts": {

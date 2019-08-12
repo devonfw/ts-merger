@@ -1,13 +1,13 @@
 export class GeneralInterface {
-  private identifier: String;
-  private type: String;
+  private identifier: any;
+  private type: any;
 
   constructor() {
     this.identifier = '';
     this.type = '';
   }
 
-  setIdentifier(identifier: String) {
+  setIdentifier(identifier: any) {
     this.identifier = identifier;
   }
 
@@ -15,7 +15,7 @@ export class GeneralInterface {
     return this.identifier;
   }
 
-  setType(type: String) {
+  setType(type: any) {
     this.type = type;
   }
 

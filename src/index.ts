@@ -16,25 +16,41 @@ export function merge(
   patchContents: string,
   patchOverrides: boolean,
 ): string {
-  let sourceFilePatch: ts.SourceFile = ts.createSourceFile(
-    'filePatch',
-    patchContents,
-    ts.ScriptTarget.ES2016,
-    false,
-  );
-  let sourceFile: ts.SourceFile = ts.createSourceFile(
-    'fileBase',
-    baseContents,
-    ts.ScriptTarget.ES2016,
-    false,
-  );
 
-  let baseFile: TSFile = mapTools.mapFile(sourceFile);
-  let patchFile: TSFile = mapTools.mapFile(sourceFilePatch);
+  let baseFile: TSFile = readFile(baseContents, 'fileBase');
+  let patchFile: TSFile = readFile(patchContents, 'filePatch');
 
   baseFile.merge(patchFile, patchOverrides);
 
   return baseFile.toString();
 }
-
 export default merge;
+
+/**
+ * Converts a typescript string to an AST
+ *
+ * @export
+ * @param {string} fileBase
+ * @returns {string} the result of the merge
+ */
+export function readFile(
+  content: string,
+  name?: string
+): TSFile {
+
+  var fileName = 'fileName';
+  if (name) {
+    fileName = name;
+  }
+
+  let sourceFile: ts.SourceFile = ts.createSourceFile(
+    fileName,
+    content,
+    ts.ScriptTarget.ES2016,
+    false,
+  );
+
+  let parsedFile: TSFile = mapTools.mapFile(sourceFile);
+
+  return parsedFile;
+}
