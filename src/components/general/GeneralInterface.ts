@@ -1,6 +1,6 @@
 export class GeneralInterface {
   private identifier: any;
-  private type: String;
+  private type: any;
 
   constructor() {
     this.identifier = '';
@@ -15,7 +15,7 @@ export class GeneralInterface {
     return this.identifier;
   }
 
-  setType(type: String) {
+  setType(type: any) {
     this.type = type;
   }
 
