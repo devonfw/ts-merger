@@ -7,8 +7,18 @@
     "outDir": "build",
     "moduleResolution": "node",
     "declaration": true,
-    "plugins": [{ "name": "tslint-language-service" }]
+    "skipLibCheck": true,
+    "plugins": [
+      {
+        "name": "tslint-language-service"
+      }
+    ]
   },
-  "exclude": ["node_modules", "test"],
-  "files": ["src/index.ts"]
+  "exclude": [
+    "node_modules",
+    "test"
+  ],
+  "files": [
+    "src/index.ts"
+  ]
 }
