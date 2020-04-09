@@ -105,4 +105,56 @@ describe('Merging class fields', () => {
       );
     });
   });
+
+  describe('should merge null types', () => {
+    const base = `class a { b: null; }`,
+      patch = `class a { b: null; }`;
+
+    it('from the base.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
+      expect(result.indexOf('b: null;')).to.be.greaterThan(
+        0,
+        'null token should be present in class a',
+      );
+    });
+    it('from the patch with patchOverride.', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .map((value) => value.trim())
+        .filter((value) => value != '');
+      expect(result.indexOf('b: null;')).to.be.greaterThan(
+        0,
+        'null token should be present in class a',
+      );
+    });
+  });
+
+  describe('should merge undefined types', () => {
+    const base = `class a { b: undefined; }`,
+      patch = `class a { b: undefined; }`;
+
+    it('from the base.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n') // get each individual line
+        .map((value) => value.trim()) // trim all lines (no white spaces at the beginning and end of a line)
+        .filter((value) => value != ''); // remove empty lines
+      expect(result.indexOf('b: undefined;')).to.be.greaterThan(
+        0,
+        'undefined token should be present in class a',
+      );
+    });
+    it('from the patch with patchOverride.', () => {
+      const result: String[] = merge(base, patch, true)
+        .split('\n')
+        .map((value) => value.trim())
+        .filter((value) => value != '');
+      expect(result.indexOf('b: undefined;')).to.be.greaterThan(
+        0,
+        'undefined token should be present in class a',
+      );
+    });
+  });
 });

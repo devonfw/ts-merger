@@ -179,7 +179,7 @@ function setExtractedObjectValues(readObject, extractedObject, sourceFile: ts.So
       );
       break;
     case ts.SyntaxKind.NullKeyword:
-      extractedObject.setIGeneral('null');
+      extractedObject.setGeneral('null');
       break;
     case ts.SyntaxKind.CallExpression:
       extractedObject.setGeneral(
@@ -539,6 +539,10 @@ export function mapTypes(type: ts.Node) {
       return 'string';
     case ts.SyntaxKind.BooleanKeyword:
       return 'boolean';
+    case ts.SyntaxKind.NullKeyword:
+      return 'null';
+    case ts.SyntaxKind.UndefinedKeyword:
+      return 'undefined';
     case ts.SyntaxKind.TypeReference:
       typeToReturn.push(
         (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text,
