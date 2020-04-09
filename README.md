@@ -1,8 +1,8 @@
 # TS-Merger
 Generic TypeScript Merger
 
-[![build status](https://travis-ci.com/devonfw/ts-merger.svg?branch=master)](https://travis-ci.org/devonfw/ts-merger)
-[![build status](https://travis-ci.com/devonfw/ts-merger.svg?branch=develop)](https://travis-ci.org/devonfw/ts-merger)
+[![build status](https://travis-ci.com/devonfw/ts-merger.svg?branch=master)](https://travis-ci.com/github/devonfw/ts-merger)
+[![build status](https://travis-ci.com/devonfw/ts-merger.svg?branch=develop)](https://travis-ci.com/github/devonfw/ts-merger)
 
 ## Usage
 
