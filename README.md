@@ -7,7 +7,7 @@ Generic TypeScript Merger
 ## Usage
 
 ```javascript
-let tsm = require('@oasp/ts-merger');
+let tsm = require('@devonfw/ts-merger');
 let mergedCode: string = tsm.merge(baseContents, pathContents, patchOverrides);
 ```
 
@@ -18,7 +18,7 @@ Being:
 
 ### Example
 ```javascript
-let tsm = require('@oasp/ts-merger');
+let tsm = require('@devonfw/ts-merger');
 let mergedCode: string = tsm.merge(baseContents, pathContents, patchOverrides);
 ```
 
