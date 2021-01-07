@@ -365,4 +365,24 @@ describe('Merging exports', () => {
       expect(exportRegex.test(result[0].toString())).to.be.true;
     });
   });
+
+  describe('check correct syntax after merge', () => {
+    const base = `export const test: { b: boolean; } = { b: false };`,
+      patch = `export const test = { b: true, c: false };`;
+
+    it('should merge with proper syntax.', () => {
+      const result: String[] = merge(base, patch, false)
+        .split('\n')
+        .filter((r) => {
+          return r.trim() != '';
+        });
+
+      expect(
+        result.filter((value) => value == "export const test = {").length,
+      ).to.equal(1);
+    });
+
+
+  });
+
 });
