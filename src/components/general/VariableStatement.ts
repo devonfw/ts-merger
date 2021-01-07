@@ -90,7 +90,7 @@ export class VariableStatement extends PropertyDeclaration {
       result.push('let ');
     }
     result.push(this.getIdentifier());
-    if (this.getType() != '') {
+    if (this.getType()) {
       result.push(': ', this.getType());
     }
 
