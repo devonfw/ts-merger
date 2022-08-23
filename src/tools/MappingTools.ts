@@ -24,6 +24,7 @@ import { ExpressionDeclaration } from "../components/general/ExpressionDeclarati
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
+  let counter = 0;
 
   sourceFile
     .getChildAt(0)
@@ -62,19 +63,20 @@ export function mapFile(sourceFile: ts.SourceFile) {
             mapExpressions(<ts.ExpressionStatement>child, sourceFile)
           );
           break;
+        case ts.SyntaxKind.ExportKeyword:
+          let lineText: string[] = sourceFile.getText().split("\n");
+
+          file.addExport(
+            mapExportKeyword(file, lineText[counter])
+          );
+          counter++;
+          break;
       }
     });
-  //Case for export declaration without brackets
-  let lineText: string[] = sourceFile.getText().split("\n");
-
-  lineText.forEach((exportExpression) => {
-    file.addExport(mapExportKeyword(file, exportExpression));
-  });
-
   return file;
 }
 
-export function mapExportKeyword(fileExport, exportExpression) {
+export function mapExportKeyword(fileExport: TSFile, exportExpression: String) {
   let exportElement: ExportDeclaration = new ExportDeclaration();
   let named: string[];
   let module: string;
@@ -919,8 +921,8 @@ export function mapVariableStatement(
       .initializer
   ) {
     switch (
-      (<ts.VariableStatement>statement).declarationList.declarations[0]
-        .initializer.kind
+    (<ts.VariableStatement>statement).declarationList.declarations[0]
+      .initializer.kind
     ) {
       case ts.SyntaxKind.ObjectLiteralExpression:
         variable.setInitializer(
@@ -945,10 +947,10 @@ export function mapVariableStatement(
       case ts.SyntaxKind.StringLiteral:
         variable.setInitializer(
           "'" +
-            (<ts.StringLiteral>(
-              fileVariable.declarationList.declarations[0].initializer
-            )).text +
-            "'"
+          (<ts.StringLiteral>(
+            fileVariable.declarationList.declarations[0].initializer
+          )).text +
+          "'"
         );
         break;
       case ts.SyntaxKind.TrueKeyword:
