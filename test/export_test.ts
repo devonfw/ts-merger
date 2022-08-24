@@ -192,7 +192,7 @@ describe('Merging exports', () => {
                   export c from 'd';`,
         patch = `export e from 'd';`;
 
-      describe('by default.', () => {
+      it('by default.', () => {
         const result: String[] = merge(base, patch, false)
           .split('\n')
           .filter((r) => {
@@ -204,7 +204,7 @@ describe('Merging exports', () => {
         ).equal(1);
       });
 
-      describe('when patchOverride is set (should not make a difference).', () => {
+      it('when patchOverride is set (should not make a difference).', () => {
         const result: String[] = merge(base, patch, true)
           .split('\n')
           .filter((r) => {
