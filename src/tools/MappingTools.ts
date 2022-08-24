@@ -1,26 +1,26 @@
-import { FunctionDeclaration } from "../components/general/FunctionDeclaration";
-import { VariableStatement } from "../components/general/VariableStatement";
-import { TSFile } from "../components/TSFile";
-import { ImportDeclaration } from "../components/import/ImportDeclaration";
-import { ExportDeclaration } from "../components/export/ExportDeclaration";
-import { ClassDeclaration } from "../components/classDeclaration/ClassDeclaration";
-import { InterfaceDeclaration } from "../components/interfaceDeclaration/InterfaceDeclaration";
-import { InterfaceMethod } from "../components/interfaceDeclaration/members/method/InterfaceMethod";
-import { Constructor } from "../components/classDeclaration/members/constructor/Constructor";
-import { Parameter } from "../components/classDeclaration/members/method/Parameter";
-import { Decorator } from "../components/decorator/Decorator";
-import { Method } from "../components/classDeclaration/members/method/Method";
-import { PropertyDeclaration } from "../components/classDeclaration/members/property/PropertyDeclaration";
-import { CallExpression } from "../components/general/CallExpression";
-import { ArrayLiteralExpression } from "../components/general/ArrayLiteralExpression";
-import { PropertyAssignment } from "../components/general/PropertyAssignment";
-import { ObjectLiteralExpression } from "../components/general/ObjectLiteralExpression";
-import * as ts from "typescript";
-import { BodyMethod } from "../components/classDeclaration/members/method/body/BodyMethod";
-import InterfaceProperty from "../components/interfaceDeclaration/members/InterfaceProperty";
-import { EnumDeclaration } from "../components/general/EnumDeclaration";
-import { EnumElement } from "../components/general/EnumElement";
-import { ExpressionDeclaration } from "../components/general/ExpressionDeclaration";
+import { FunctionDeclaration } from '../components/general/FunctionDeclaration';
+import { VariableStatement } from '../components/general/VariableStatement';
+import { TSFile } from '../components/TSFile';
+import { ImportDeclaration } from '../components/import/ImportDeclaration';
+import { ExportDeclaration } from '../components/export/ExportDeclaration';
+import { ClassDeclaration } from '../components/classDeclaration/ClassDeclaration';
+import { InterfaceDeclaration } from '../components/interfaceDeclaration/InterfaceDeclaration';
+import { InterfaceMethod } from '../components/interfaceDeclaration/members/method/InterfaceMethod';
+import { Constructor } from '../components/classDeclaration/members/constructor/Constructor';
+import { Parameter } from '../components/classDeclaration/members/method/Parameter';
+import { Decorator } from '../components/decorator/Decorator';
+import { Method } from '../components/classDeclaration/members/method/Method';
+import { PropertyDeclaration } from '../components/classDeclaration/members/property/PropertyDeclaration';
+import { CallExpression } from '../components/general/CallExpression';
+import { ArrayLiteralExpression } from '../components/general/ArrayLiteralExpression';
+import { PropertyAssignment } from '../components/general/PropertyAssignment';
+import { ObjectLiteralExpression } from '../components/general/ObjectLiteralExpression';
+import * as ts from 'typescript';
+import { BodyMethod } from '../components/classDeclaration/members/method/body/BodyMethod';
+import InterfaceProperty from '../components/interfaceDeclaration/members/InterfaceProperty';
+import { EnumDeclaration } from '../components/general/EnumDeclaration';
+import { EnumElement } from '../components/general/EnumElement';
+import { ExpressionDeclaration } from '../components/general/ExpressionDeclaration';
 
 export function mapFile(sourceFile: ts.SourceFile) {
   let file: TSFile = new TSFile();
@@ -64,7 +64,7 @@ export function mapFile(sourceFile: ts.SourceFile) {
           );
           break;
         case ts.SyntaxKind.ExportKeyword:
-          let lineText: string[] = sourceFile.getText().split("\n");
+          let lineText: string[] = sourceFile.getText().split('\n');
 
           file.addExport(
             mapExportKeyword(file, lineText[counter])
@@ -84,20 +84,20 @@ export function mapExportKeyword(fileExport: TSFile, exportExpression: String) {
   exportExpression = exportExpression.trim();
 
   // lastIndexOf gets the first index of the last occurance of from
-  let firstIndexFromKeyword = exportExpression.lastIndexOf("from");
+  let firstIndexFromKeyword = exportExpression.lastIndexOf('from');
 
   //Getting the exports
   named = exportExpression
     .substring(6, firstIndexFromKeyword)
     .trim()
-    .split(",");
+    .split(',');
 
   //Getting export origins
   module = exportExpression
     .substring(firstIndexFromKeyword + 4)
     .trim()
-    .replace(";", "")
-    .replace(/['"]+/g, "");
+    .replace(';', '')
+    .replace(/['"]+/g, '');
 
   named.forEach((name) => {
     exportElement.addNamed(name);
@@ -151,7 +151,7 @@ export function mapExpressions(
         // When we have a expression like TestBed.configureTestingModule({...})
         text =
           innerExpression.expression.expression.text +
-          "." +
+          '.' +
           innerExpression.expression.name.text;
         expressionOb.setName(text);
       }
@@ -178,7 +178,7 @@ export function mapObjectLiteral(
     if (nodeObject.expression !== undefined) {
       propertyText = nodeObject.expression.name.text;
       propertyAssignment.setIdentifier(propertyText);
-      propertyAssignment.setGeneral("...this." + propertyText);
+      propertyAssignment.setGeneral('...this.' + propertyText);
       objLiteral.addProperty(propertyAssignment);
       return;
     }
@@ -228,7 +228,7 @@ function setExtractedObjectValues(
       );
       break;
     case ts.SyntaxKind.NullKeyword:
-      extractedObject.setGeneral("null");
+      extractedObject.setGeneral('null');
       break;
     case ts.SyntaxKind.CallExpression:
       extractedObject.setGeneral(
@@ -249,7 +249,7 @@ export function mapCallExpression(
   let expression: CallExpression = new CallExpression();
   let propExpr = <ts.PropertyAccessExpression>node.expression;
   if (propExpr.expression.kind === ts.SyntaxKind.ThisKeyword) {
-    expression.setIdentifier("this");
+    expression.setIdentifier('this');
   } else {
     expression.setIdentifier((<ts.Identifier>propExpr.expression).text);
   }
@@ -343,7 +343,7 @@ export function mapImport(fileImport: ts.ImportDeclaration) {
         )).elements.forEach((named) => {
           if (named.propertyName) {
             importElement.addNamed(
-              named.propertyName.text + " as " + <string>named.name.text
+              named.propertyName.text + ' as ' + <string>named.name.text
             );
           } else {
             importElement.addNamed(<string>named.name.text);
@@ -372,7 +372,7 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
     fileExport.exportClause.elements.forEach((named) => {
       if (named.propertyName) {
         exportElement.addNamed(
-          named.propertyName.text + " as " + <string>named.name.text
+          named.propertyName.text + ' as ' + <string>named.name.text
         );
       } else {
         exportElement.addNamed(<string>named.name.text);
@@ -541,10 +541,10 @@ export function mapPropertyDeclaration(
         );
         break;
       case ts.SyntaxKind.TrueKeyword:
-        prop.setInitializer("true");
+        prop.setInitializer('true');
         break;
       case ts.SyntaxKind.FalseKeyword:
-        prop.setInitializer("false");
+        prop.setInitializer('false');
         break;
       case ts.SyntaxKind.Identifier:
         prop.setInitializer((<ts.Identifier>property.initializer).text);
@@ -575,23 +575,23 @@ export function mapTypes(type: ts.Node) {
   let typeToReturn: String[] = [];
   switch (type.kind) {
     case ts.SyntaxKind.AnyKeyword:
-      return "any";
+      return 'any';
     case ts.SyntaxKind.NumberKeyword:
-      return "number";
+      return 'number';
     case ts.SyntaxKind.StringKeyword:
-      return "string";
+      return 'string';
     case ts.SyntaxKind.BooleanKeyword:
-      return "boolean";
+      return 'boolean';
     case ts.SyntaxKind.NullKeyword:
-      return "null";
+      return 'null';
     case ts.SyntaxKind.UndefinedKeyword:
-      return "undefined";
+      return 'undefined';
     case ts.SyntaxKind.TypeReference:
       typeToReturn.push(
         (<ts.Identifier>(<ts.TypeReferenceNode>type).typeName).text
       );
       if ((<ts.TypeReferenceNode>type).typeArguments) {
-        typeToReturn.push("<");
+        typeToReturn.push('<');
         (<ts.TypeReferenceNode>type).typeArguments.forEach((arg) => {
           if (<ts.Identifier>(<ts.TypeReferenceNode>arg).typeName) {
             typeToReturn.push(
@@ -601,31 +601,31 @@ export function mapTypes(type: ts.Node) {
               (<ts.TypeReferenceNode>type).typeArguments.indexOf(arg) <
               (<ts.TypeReferenceNode>type).typeArguments.length - 1
             ) {
-              typeToReturn.push(", ");
+              typeToReturn.push(', ');
             }
           } else {
             typeToReturn.push(mapTypes(arg));
           }
         });
-        typeToReturn.push(">");
+        typeToReturn.push('>');
       }
-      return typeToReturn.join("");
+      return typeToReturn.join('');
     case ts.SyntaxKind.TupleType:
       let tuple: String[] = [];
-      tuple.push("[");
+      tuple.push('[');
       let elementTypes = (<ts.TupleTypeNode>type).elementTypes;
       elementTypes.forEach((elementType) => {
         tuple.push(mapTypes(<ts.TypeNode>elementType));
         if (elementTypes.indexOf(elementType) < elementTypes.length - 1) {
-          tuple.push(", ");
+          tuple.push(', ');
         }
       });
-      tuple.push("]");
-      return tuple.join("");
+      tuple.push(']');
+      return tuple.join('');
     case ts.SyntaxKind.ArrayType:
-      return mapTypes((<ts.ArrayTypeNode>type).elementType) + "[]";
+      return mapTypes((<ts.ArrayTypeNode>type).elementType) + '[]';
     case ts.SyntaxKind.VoidKeyword:
-      return "void";
+      return 'void';
   }
 }
 
@@ -640,7 +640,7 @@ export function mapConstructor(
       ctr.addDecorators(mapDecorator(<ts.Decorator>decorator, sourceFile));
     });
   }
-  ctr.setIdentifier("constructor");
+  ctr.setIdentifier('constructor');
   if (fileCtr.parameters) {
     fileCtr.parameters.forEach((parameter) => {
       ctr.addParameter(mapParameter(parameter, sourceFile));
@@ -759,13 +759,13 @@ export function mapInterfaceMethod(
 export function mapModifier(modifier: ts.Modifier) {
   switch (modifier.kind) {
     case ts.SyntaxKind.PrivateKeyword:
-      return "private";
+      return 'private';
     case ts.SyntaxKind.PublicKeyword:
-      return "public";
+      return 'public';
     case ts.SyntaxKind.ExportKeyword:
-      return "export";
+      return 'export';
     case ts.SyntaxKind.AsyncKeyword:
-      return "async";
+      return 'async';
   }
 }
 
@@ -827,7 +827,7 @@ export function mapDecorator(
 
 export function mapBodyMethod(body: String, isScriptFunction: boolean) {
   let bodySource: ts.SourceFile = ts.createSourceFile(
-    "body",
+    'body',
     <string>body,
     ts.ScriptTarget.ES2016,
     false
@@ -872,28 +872,28 @@ export function mapVariableStatement(
 ) {
   let variable: VariableStatement = new VariableStatement();
   let fileVariable: ts.VariableStatement = <ts.VariableStatement>statement;
-  if (fileVariable.getFullText(source).search("const ") > -1) {
+  if (fileVariable.getFullText(source).search('const ') > -1) {
     variable.setIsConst(true);
   }
 
   let properties = [];
   let bindingElements =
-    statement.declarationList.declarations[0].name["elements"];
+    statement.declarationList.declarations[0].name['elements'];
   if (bindingElements) {
     bindingElements.forEach((bindingElement) => {
       if (bindingElement.kind == ts.SyntaxKind.BindingElement) {
-        properties.push(bindingElement.name["escapedText"]);
+        properties.push(bindingElement.name['escapedText']);
       }
     });
     variable.setProperties(properties);
   }
 
   let text = fileVariable.getFullText(source);
-  let index = text.indexOf("await");
+  let index = text.indexOf('await');
   if (index !== -1) {
     let charBefore = text.substr(index - 1, 1);
 
-    if (charBefore === " " || charBefore === "=") {
+    if (charBefore === ' ' || charBefore === '=') {
       variable.setIsAsync(true);
     }
   }
@@ -954,10 +954,10 @@ export function mapVariableStatement(
         );
         break;
       case ts.SyntaxKind.TrueKeyword:
-        variable.setInitializer("true");
+        variable.setInitializer('true');
         break;
       case ts.SyntaxKind.FalseKeyword:
-        variable.setInitializer("false");
+        variable.setInitializer('false');
         break;
       case ts.SyntaxKind.Identifier:
         variable.setInitializer(
