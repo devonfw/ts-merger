@@ -65,12 +65,10 @@ export function mapFile(sourceFile: ts.SourceFile) {
           break;
         case ts.SyntaxKind.ExportKeyword:
           let lineText: string[] = sourceFile.getText().split('\n');
-
           file.addExport(
             mapExportKeyword(file, lineText[counter])
           );
           counter++;
-          break;
       }
     });
   return file;
