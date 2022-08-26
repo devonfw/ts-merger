@@ -64,9 +64,8 @@ export function mapFile(sourceFile: ts.SourceFile) {
           );
           break;
         case ts.SyntaxKind.ExportKeyword:
-          let lineText: string[] = sourceFile.getText().split('\n');
           file.addExport(
-            mapExportKeyword(file, lineText[counter])
+            mapExportKeyword(file, sourceFile, counter)
           );
           counter++;
       }
@@ -74,7 +73,9 @@ export function mapFile(sourceFile: ts.SourceFile) {
   return file;
 }
 
-export function mapExportKeyword(fileExport: TSFile, exportExpression: String) {
+export function mapExportKeyword(fileExport: TSFile, sourceFile: ts.SourceFile, counter: number) {
+  let lineText: string[] = sourceFile.getText().split('\n');
+  let exportExpression = lineText[counter];
   let exportElement: ExportDeclaration = new ExportDeclaration();
   let named: string[];
   let module: string;
