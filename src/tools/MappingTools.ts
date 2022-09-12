@@ -573,6 +573,8 @@ export function mapInterfaceProperty(id: string, text: string) {
 export function mapTypes(type: ts.Node) {
   let typeToReturn: String[] = [];
   switch (type.kind) {
+    case ts.SyntaxKind.TypeLiteral:
+      return '{}'
     case ts.SyntaxKind.AnyKeyword:
       return 'any';
     case ts.SyntaxKind.NumberKeyword:
