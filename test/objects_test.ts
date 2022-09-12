@@ -25,4 +25,23 @@ describe("Declaring an object", () => {
       );
     });
   });
-});
+  describe("while directly initializing it", () => {
+    const base = `export const environment: { 
+      production: boolean; 
+      restPathRoot: string; 
+      restServiceRoot: string; 
+      security: 'csrf' | 'jwt'; 
+    } = { 
+      production: false, 
+      restPathRoot: 'http://localhost:8081/', 
+      restServiceRoot: 'http://localhost:8081/services/rest/', 
+      security: 'jwt', };`,
+      patch = "";
+
+    it("should yield a valid object declaration.", () => {
+      const result: String = merge(base, patch, true).replace(/\n/g, " ");
+      expect(result).equal(
+        " export const environment: {} = { production:  false, restPathRoot: 'http://localhost:8081/', restServiceRoot: 'http://localhost:8081/services/rest/', security: 'jwt' };  "
+      );
+    });
+})});
