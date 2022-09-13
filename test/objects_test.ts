@@ -41,7 +41,7 @@ describe("Declaring an object", () => {
     it("should yield a valid object declaration.", () => {
       const result: String = merge(base, patch, true).replace(/\n/g, " ");
       expect(result).equal(
-        " export const environment: {} = { production:  false, restPathRoot: 'http://localhost:8081/', restServiceRoot: 'http://localhost:8081/services/rest/', security: 'jwt' };  "
+        " export const environment: {} = { production:  false, restPathRoot: 'http://localhost:8081/', restServiceRoot: 'http://localhost:8081/services/rest/', security: 'jwt' }; "
       );
     });
 })});
