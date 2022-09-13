@@ -46,5 +46,3 @@ describe("Declaring an object", () => {
       );
     });
 })});
-});
-
