@@ -25,6 +25,7 @@ describe("Declaring an object", () => {
       );
     });
   });
+
   describe("while directly initializing it", () => {
     const base = `export const environment: { 
       production: boolean; 
@@ -45,3 +46,5 @@ describe("Declaring an object", () => {
       );
     });
 })});
+});
+
