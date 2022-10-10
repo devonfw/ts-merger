@@ -30,7 +30,7 @@ describe("merging property without initialization its value", () => {
   it("Test", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
-      "import Observable from 'rxjs/observable';   class test { getSampleData(size: number, page: number): Observable<{ content: SampledataModel[] }> {  const searchCriteria: SearchCriteria = { pageable: { pageSize: size, pageNumber: page }, name:  searchTerms.name, surname:  searchTerms.surname };      return this.http.post<{ content: SampledataModel[] }>(       this.urlService + 'search',       searchCriteria,     ); }   } "
+      "import Observable from 'rxjs/observable';   class test { getSampleData(size: number, page: number): Observable<{}> {  const searchCriteria: SearchCriteria = { pageable: { pageSize: size, pageNumber: page }, name:  searchTerms.name, surname:  searchTerms.surname };      return this.http.post<{ content: SampledataModel[] }>(       this.urlService + 'search',       searchCriteria,     ); }   } "
     );
   });
 });
@@ -102,7 +102,7 @@ const searchCriteria: {
   it("Test", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
-      " const searchCriteria: { name: 'test', surname: 'test' }; "
+      " const searchCriteria: {}; "
     );
   });
 });
