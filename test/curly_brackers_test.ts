@@ -2,7 +2,7 @@ import merge from "../src/index";
 import { expect } from "chai";
 import "mocha";
 
-describe("merging property without initialization its value", () => {
+describe("Merging a property without initializing its value", () => {
   const base = `
   import Observable from 'rxjs/observable';
 
@@ -27,7 +27,7 @@ describe("merging property without initialization its value", () => {
   `,
         patch = "";
 
-  it("Test", () => {
+  it("does not yield a proper observable type.", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
       "import Observable from 'rxjs/observable';   class test { getSampleData(size: number, page: number): Observable<{}> {  const searchCriteria: SearchCriteria = { pageable: { pageSize: size, pageNumber: page }, name:  searchTerms.name, surname:  searchTerms.surname };      return this.http.post<{ content: SampledataModel[] }>(       this.urlService + 'search',       searchCriteria,     ); }   } "
@@ -35,7 +35,7 @@ describe("merging property without initialization its value", () => {
   });
 });
 
-describe("merging without curly brackets {}", () => {
+describe("Merging it with proper syntax", () => {
   const base = `
   import Observable from 'rxjs/observable';
 
@@ -60,7 +60,7 @@ describe("merging without curly brackets {}", () => {
   `,
         patch = "";
 
-  it("Test", () => {
+  it("yields a proper observable type", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
       "import Observable from 'rxjs/observable';   class test { getSampleData(size: number, page: number): Observable<SampledataModel[]> {  const searchCriteria: SearchCriteria = { pageable: { pageSize: size, pageNumber: page }, name:  searchTerms.name, surname:  searchTerms.surname };      return this.http.post<{ content: SampledataModel[] }>(       this.urlService + 'search',       searchCriteria,     ); }   } "
@@ -69,7 +69,7 @@ describe("merging without curly brackets {}", () => {
 });
 
 
-describe("Declaration curly brackets {} with type inizialisation", () => {
+describe("Declaring a variable with proper syntax", () => {
   const base = `
   const searchCriteria: any = {
     name: 'test',
@@ -78,7 +78,7 @@ describe("Declaration curly brackets {} with type inizialisation", () => {
   `,
         patch = "";
 
-  it("Test", () => {
+  it("yields a proper merged declaration", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
       " const searchCriteria: any = { name: 'test', surname: 'test' }; "
@@ -90,16 +90,17 @@ describe("Declaration curly brackets {} with type inizialisation", () => {
 //its value will not be read and thus not merged, because the compiler tries to use the value 
 //before it is assigned a specific value.
 
-describe("Declaration curly brackets {} without type inizialisation", () => {
+describe("Declaring a variable without proper syntax", () => {
   const base = `
 const searchCriteria: {
     name: 'test',
     surname: 'test',
   };
   `,
-        patch = "";
+   patch = "";
 
-  it("Test", () => {
+
+  it("does not yield a valid declaration", () => {
     const result: String = merge(base, patch, true).replace(/\n/g, " ");
     expect(result).equal(
       " const searchCriteria: {}; "
