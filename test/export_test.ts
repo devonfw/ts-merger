@@ -372,7 +372,7 @@ describe('Merging exports', () => {
         });
 
       expect(
-        result.filter((value) => value == "export const test: {} = {").length,
+        result.filter((value) => value == "export const test: { b: boolean; } = {").length,
       ).to.equal(1);
     });
 

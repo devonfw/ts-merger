@@ -575,7 +575,19 @@ export function mapTypes(type: ts.Node, sourceFile: ts.SourceFile) {
   switch (type.kind) {
     case ts.SyntaxKind.TypeLiteral:
       const typeLiteral = <ts.TypeLiteralNode>type
-      return typeLiteral.getFullText(sourceFile)
+      // if (typeLiteral.members) {
+      //   typeToReturn.push('{ ')
+      //   const properties = []
+      //   typeLiteral.members.forEach((member: any) => {
+      //     if (member.kind != ts.SyntaxKind.PropertySignature) {
+      //       console.log("Member of TypeLiteralNode shouldn't be any other type than PropertySignature")
+      //     } else {
+      //       const identifierName = <string>member.name.text
+      //     }
+      //   })
+      // typeToReturn.push(' }')
+      // }
+      return typeLiteral.getFullText(sourceFile).trim()
     case ts.SyntaxKind.AnyKeyword:
       return 'any';
     case ts.SyntaxKind.NumberKeyword:
