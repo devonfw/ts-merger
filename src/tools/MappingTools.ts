@@ -497,7 +497,7 @@ export function mapPropertyDeclaration(
   let prop: PropertyDeclaration = new PropertyDeclaration();
   prop.setIdentifier((<ts.Identifier>property.name).text);
   if (property.type) {
-    prop.setType(mapTypes(property.type));
+    prop.setType(mapTypes(property.type, sourceFile));
   }
 
   if (property.modifiers) {
@@ -570,11 +570,12 @@ export function mapInterfaceProperty(id: string, text: string) {
   return prop;
 }
 
-export function mapTypes(type: ts.Node) {
+export function mapTypes(type: ts.Node, sourceFile: ts.SourceFile) {
   let typeToReturn: String[] = [];
   switch (type.kind) {
     case ts.SyntaxKind.TypeLiteral:
-      return '{}'
+      const typeLiteral = <ts.TypeLiteralNode>type
+      return typeLiteral.getFullText(sourceFile)
     case ts.SyntaxKind.AnyKeyword:
       return 'any';
     case ts.SyntaxKind.NumberKeyword:
@@ -605,7 +606,7 @@ export function mapTypes(type: ts.Node) {
               typeToReturn.push(', ');
             }
           } else {
-            typeToReturn.push(mapTypes(arg));
+            typeToReturn.push(mapTypes(arg, sourceFile));
           }
         });
         typeToReturn.push('>');
@@ -616,7 +617,7 @@ export function mapTypes(type: ts.Node) {
       tuple.push('[');
       let elementTypes = (<ts.TupleTypeNode>type).elementTypes;
       elementTypes.forEach((elementType) => {
-        tuple.push(mapTypes(<ts.TypeNode>elementType));
+        tuple.push(mapTypes(<ts.TypeNode>elementType, sourceFile));
         if (elementTypes.indexOf(elementType) < elementTypes.length - 1) {
           tuple.push(', ');
         }
@@ -624,7 +625,7 @@ export function mapTypes(type: ts.Node) {
       tuple.push(']');
       return tuple.join('');
     case ts.SyntaxKind.ArrayType:
-      return mapTypes((<ts.ArrayTypeNode>type).elementType) + '[]';
+      return mapTypes((<ts.ArrayTypeNode>type).elementType, sourceFile) + '[]';
     case ts.SyntaxKind.VoidKeyword:
       return 'void';
   }
@@ -667,7 +668,7 @@ export function mapParameter(
     });
   }
   param.setIdentifier((<ts.Identifier>parameter.name).text);
-  if (parameter.type) param.setType(mapTypes(parameter.type));
+  if (parameter.type) param.setType(mapTypes(parameter.type, sourceFile));
   if (parameter.initializer) {
     setExtractedObjectValues(parameter, param, sourceFile);
   }
@@ -683,7 +684,7 @@ export function mapMethod(
     (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text
   );
   if (fileMethod.type) {
-    method.setType(mapTypes(fileMethod.type));
+    method.setType(mapTypes(fileMethod.type, sourceFile));
   }
 
   if (fileMethod.decorators) {
@@ -714,7 +715,7 @@ export function mapCallSignature(
     (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text
   );
   if (fileMethod.type) {
-    method.setType(mapTypes(fileMethod.type));
+    method.setType(mapTypes(fileMethod.type, sourceFile));
   }
 
   if (fileMethod.decorators) {
@@ -740,7 +741,7 @@ export function mapInterfaceMethod(
     (<ts.Identifier>(<ts.MethodDeclaration>fileMethod).name).text
   );
   if (fileMethod.type) {
-    method.setType(mapTypes(fileMethod.type));
+    method.setType(mapTypes(fileMethod.type, sourceFile));
   }
 
   if (fileMethod.decorators) {
@@ -869,11 +870,11 @@ export function mapBodyMethod(body: String, isScriptFunction: boolean) {
 
 export function mapVariableStatement(
   statement: ts.VariableStatement,
-  source: ts.SourceFile
+  sourceFile: ts.SourceFile
 ) {
   let variable: VariableStatement = new VariableStatement();
   let fileVariable: ts.VariableStatement = <ts.VariableStatement>statement;
-  if (fileVariable.getFullText(source).search('const ') > -1) {
+  if (fileVariable.getFullText(sourceFile).search('const ') > -1) {
     variable.setIsConst(true);
   }
 
@@ -889,7 +890,7 @@ export function mapVariableStatement(
     variable.setProperties(properties);
   }
 
-  let text = fileVariable.getFullText(source);
+  let text = fileVariable.getFullText(sourceFile);
   let index = text.indexOf('await');
   if (index !== -1) {
     let charBefore = text.substr(index - 1, 1);
@@ -906,7 +907,7 @@ export function mapVariableStatement(
   }
   if (fileVariable.decorators) {
     fileVariable.decorators.forEach((decorator) => {
-      variable.addDecorators(mapDecorator(decorator, source));
+      variable.addDecorators(mapDecorator(decorator, sourceFile));
     });
   }
   variable.setIdentifier(
@@ -914,7 +915,7 @@ export function mapVariableStatement(
   );
   if (fileVariable.declarationList.declarations[0].type) {
     variable.setType(
-      mapTypes(fileVariable.declarationList.declarations[0].type)
+      mapTypes(fileVariable.declarationList.declarations[0].type, sourceFile)
     );
   }
   if (
@@ -931,7 +932,7 @@ export function mapVariableStatement(
             <ts.ObjectLiteralExpression>(
               fileVariable.declarationList.declarations[0].initializer
             ),
-            source
+            sourceFile
           )
         );
         break;
@@ -941,7 +942,7 @@ export function mapVariableStatement(
             (<ts.ArrayLiteralExpression>(
               fileVariable.declarationList.declarations[0].initializer
             )).elements,
-            source
+            sourceFile
           )
         );
         break;
@@ -971,7 +972,7 @@ export function mapVariableStatement(
         variable.setInitializer(
           (<ts.VariableStatement>(
             statement
-          )).declarationList.declarations[0].initializer.getFullText(source)
+          )).declarationList.declarations[0].initializer.getFullText(sourceFile)
         );
     }
   }
@@ -987,7 +988,7 @@ export function mapFunction(
     (<ts.Identifier>(<ts.FunctionDeclaration>fileFunction).name).text
   );
   if (fileFunction.type) {
-    func.setType(mapTypes(fileFunction.type));
+    func.setType(mapTypes(fileFunction.type, sourceFile));
   }
 
   if (fileFunction.decorators) {
