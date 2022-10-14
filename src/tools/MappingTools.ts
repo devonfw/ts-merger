@@ -368,7 +368,8 @@ export function mapExport(fileExport: ts.ExportDeclaration) {
   let exportElement: ExportDeclaration = new ExportDeclaration();
   exportElement.setModule((<ts.Identifier>fileExport.moduleSpecifier).text);
   if (fileExport.exportClause) {
-    fileExport.exportClause.elements.forEach((named) => {
+    const exportClause = <ts.NamedExports>fileExport.exportClause
+    exportClause.elements.forEach((named) => {
       if (named.propertyName) {
         exportElement.addNamed(
           named.propertyName.text + ' as ' + <string>named.name.text
