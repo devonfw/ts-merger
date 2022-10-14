@@ -575,19 +575,25 @@ export function mapTypes(type: ts.Node, sourceFile: ts.SourceFile) {
   switch (type.kind) {
     case ts.SyntaxKind.TypeLiteral:
       const typeLiteral = <ts.TypeLiteralNode>type
-      // if (typeLiteral.members) {
-      //   typeToReturn.push('{ ')
-      //   const properties = []
-      //   typeLiteral.members.forEach((member: any) => {
-      //     if (member.kind != ts.SyntaxKind.PropertySignature) {
-      //       console.log("Member of TypeLiteralNode shouldn't be any other type than PropertySignature")
-      //     } else {
-      //       const identifierName = <string>member.name.text
-      //     }
-      //   })
-      // typeToReturn.push(' }')
-      // }
-      return typeLiteral.getFullText(sourceFile).trim()
+      typeToReturn.push('{')
+      if (typeLiteral.members.length > 0) {
+        typeToReturn.push(" ")
+        const properties = []
+        typeLiteral.members.forEach((member) => {
+          if (member.kind != ts.SyntaxKind.PropertySignature) {
+            console.log("Member of TypeLiteralNode shouldn't be any other type than PropertySignature")
+          } else {
+            const propertySignature = <ts.PropertySignature>member
+            const identifierName = propertySignature.name.getFullText(sourceFile).trim()
+            const identifierType = mapTypes(propertySignature.type, sourceFile)
+            properties.push(identifierName + ": " + identifierType)
+          }
+        })
+        typeToReturn.push(properties.join(', '))
+        typeToReturn.push(" ")
+      }
+      typeToReturn.push('}')
+      return typeToReturn.join('')
     case ts.SyntaxKind.AnyKeyword:
       return 'any';
     case ts.SyntaxKind.NumberKeyword:

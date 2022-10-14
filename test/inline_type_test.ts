@@ -2,11 +2,11 @@ import merge from '../src/index';
 import { expect } from 'chai';
 import 'mocha';
 
-function splitLines(s: string): string[] {
+function splitLines(s: string): String[] {
   return s.split('\n').filter(r => r.trim() != '')
 }
 
-function compareIgnoreSpace(s1: string, s2: string): boolean {
+function compareIgnoreSpace(s1: String, s2: String): boolean {
   return s1.replace(' ', '') === s2.replace(' ', '')
 }
 
@@ -53,11 +53,11 @@ describe('Merging inline interface type declarations with empty string', () => {
     }`
     const patch = ''
     it('Shouldn\'t change.', () => {
-      const result = splitLines(merge(base, patch, false))
-      const baseLines = splitLines(base)
+      const result: String[] = splitLines(merge(base, patch, false))
+      const baseLines: String[] = splitLines(base)
       expect(result.length).equal(baseLines.length)
       for (let i in result) {
-        expect(compareIgnoreSpace(result[i], baseLines[i]))
+        expect(result[i] == baseLines[i])
       }
     })
   })
