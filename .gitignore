@@ -4,3 +4,4 @@ dist
 .tmp
 *.log
 .vscode
+.idea
