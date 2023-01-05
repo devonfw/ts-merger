@@ -40,7 +40,7 @@
     "tslint": "^5.5.0",
     "tslint-language-service": "^0.9.6",
     "typescript": "^3.4.1",
-    "webpack": "^3.4.1"
+    "webpack": "^5.75.0"
   },
   "dependencies": {
     "global": "^4.4.0",
